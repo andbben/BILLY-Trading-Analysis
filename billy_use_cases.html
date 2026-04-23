@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Billy Bronco Market Analyst - Use Case Analysis</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f8fafc; padding: 24px 16px; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .header { background: linear-gradient(135deg,#1e3a5f,#2563eb); border-radius: 16px; padding: 24px 28px; margin-bottom: 24px; color: white; }
+    .header-subtitle { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.7; margin-bottom: 6px; }
+    .header h1 { margin: 0; font-size: 26px; font-weight: 800; }
+    .header p { margin: 6px 0 0; opacity: 0.85; font-size: 14px; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+    .tab { padding: 10px 22px; border-radius: 10px; border: none; cursor: pointer; font-weight: 700; font-size: 14px; transition: all 0.2s; }
+    .tab.active { background: #2563eb; color: white; box-shadow: 0 2px 10px #2563eb44; }
+    .tab.inactive { background: white; color: #374151; box-shadow: 0 1px 4px #0001; }
+    .tab:hover { transform: translateY(-1px); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .actor-card { border-radius: 12px; padding: 18px; cursor: pointer; transition: transform 0.2s; }
+    .actor-card:hover { transform: translateY(-2px); }
+    .actor-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .actor-icon { font-size: 26px; }
+    .actor-label { font-weight: 700; font-size: 15px; }
+    .actor-badge { margin-left: auto; color: white; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+    .actor-description { color: #475569; font-size: 13px; }
+    .actor-usecase-count { margin-top: 10px; font-size: 12px; font-weight: 600; }
+    .section-title { font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 4px; margin-top: 28px; }
+    .section-subtitle { color: #64748b; font-size: 13px; margin-bottom: 16px; }
+    .filter-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+    .filter-btn { padding: 7px 16px; border-radius: 20px; border: 2px solid; font-weight: 600; font-size: 12px; cursor: pointer; transition: all 0.2s; }
+    .usecase-section { margin-bottom: 24px; }
+    .usecase-header { border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; }
+    .usecase-header-content { display: flex; align-items: center; gap: 8px; }
+    .usecase-list { display: grid; gap: 8px; }
+    .usecase-card { background: white; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 12px 16px; cursor: pointer; box-shadow: 0 1px 4px #0001; transition: all 0.2s; }
+    .usecase-card:hover { box-shadow: 0 2px 8px #0002; }
+    .usecase-card-header { display: flex; align-items: center; gap: 10px; }
+    .usecase-number { color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+    .usecase-name { font-weight: 700; color: #1e293b; font-size: 14px; }
+    .usecase-toggle { margin-left: auto; color: #94a3b8; font-size: 16px; }
+    .usecase-desc { margin: 10px 0 0 32px; color: #475569; font-size: 13px; line-height: 1.6; display: none; }
+    .usecase-desc.visible { display: block; }
+    .diagram-info { background: white; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 16px 20px; margin-bottom: 16px; }
+    .diagram-info strong { color: #1e293b; }
+    .diagram-info p { margin: 0; font-size: 13px; color: #64748b; }
+    .diagram-container { background: white; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 12px; overflow-x: auto; }
+    .legend { display: flex; gap: 20px; margin-top: 14px; flex-wrap: wrap; }
+    .legend-group-title { font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .legend-items { display: flex; gap: 10px; flex-wrap: wrap; }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #374151; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="header-subtitle">CS 4800.03 · Cal Poly Pomona</div>
+      <h1>Billy Bronco Market Analyst</h1>
+      <p>High-Level Use Case Analysis — Actors, Use Cases & Diagram</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('actors')">① Actors</button>
+      <button class="tab inactive" onclick="switchTab('usecases')">② Use Cases</button>
+      <button class="tab inactive" onclick="switchTab('diagram')">③ Diagram</button>
+    </div>
+
+    <!-- ACTORS TAB -->
+    <div id="actors-tab" class="tab-content active">
+      <h2 class="section-title">Primary Actors</h2>
+      <p class="section-subtitle">Directly interact with the system to achieve goals.</p>
+      <div class="grid-2" id="primary-actors"></div>
+
+      <h2 class="section-title">Secondary Actors</h2>
+      <p class="section-subtitle">External systems and services that interact with the platform.</p>
+      <div class="grid-2" id="secondary-actors"></div>
+    </div>
+
+    <!-- USE CASES TAB -->
+    <div id="usecases-tab" class="tab-content">
+      <div class="filter-buttons" id="filter-buttons"></div>
+      <div id="usecases-content"></div>
+    </div>
+
+    <!-- DIAGRAM TAB -->
+    <div id="diagram-tab" class="tab-content">
+      <div class="diagram-info">
+        <p><strong>How to read:</strong> Stick figures are actors. Rounded rectangles are use cases inside the system boundary (dashed). Lines connect each actor to their use cases. Click an actor below to highlight their connections.</p>
+      </div>
+      <div class="filter-buttons" id="diagram-filters"></div>
+      <div class="diagram-container">
+        <svg id="diagram-svg" viewBox="0 0 960 980" width="100%" style="font-family: sans-serif;"></svg>
+      </div>
+      <div class="legend" id="legend"></div>
+    </div>
+  </div>
+
+  <script>
+    const actors = {
+      primary: [
+        { id: "retail", label: "Retail Investor", icon: "👤", color: "#2563eb", bg: "#eff6ff", border: "#bfdbfe", description: "Individual managing a personal investment portfolio", useCases: [
+          { id: "uc1", name: "Register / Login", desc: "Create an account and authenticate securely via OAuth 2.0." },
+          { id: "uc2", name: "Track Portfolio", desc: "View holdings, performance metrics, and risk analytics in real time." },
+          { id: "uc3", name: "View AI Predictions", desc: "Access AI-driven trend predictions and sentiment analysis." },
+          { id: "uc4", name: "Set Custom Alerts", desc: "Configure price movement, news, and indicator-based notifications." },
+          { id: "uc5", name: "Subscribe / Upgrade Plan", desc: "Select from tiered subscription tiers (free, premium, annual)." },
+          { id: "uc6", name: "View News Feed", desc: "Read aggregated, sentiment-scored financial news." }
+        ]},
+        { id: "trader", label: "Active Trader", icon: "📈", color: "#7c3aed", bg: "#f5f3ff", border: "#ddd6fe", description: "User requiring real-time insights and technical analysis tools", useCases: [
+          { id: "uc1", name: "Register / Login", desc: "Authenticate and access trader-tier features." },
+          { id: "uc7", name: "View Real-Time Data", desc: "Monitor live stock prices, indices, and ETF feeds." },
+          { id: "uc8", name: "Use Technical Indicators", desc: "Apply RSI, MACD, moving averages, and custom indicators." },
+          { id: "uc3", name: "View AI Predictions", desc: "Access volatility forecasting and price trend prediction models." },
+          { id: "uc4", name: "Set Custom Alerts", desc: "Create advanced alerts on technical triggers and news events." },
+          { id: "uc9", name: "Access Historical Data", desc: "Query and visualise historical price data for backtesting." }
+        ]},
+        { id: "learner", label: "Finance Enthusiast / Learner", icon: "🎓", color: "#059669", bg: "#ecfdf5", border: "#a7f3d0", description: "User seeking educational analytics and market literacy tools", useCases: [
+          { id: "uc1", name: "Register / Login", desc: "Create a free or trial account." },
+          { id: "uc6", name: "View News Feed", desc: "Explore sentiment-scored market news as a learning resource." },
+          { id: "uc3", name: "View AI Predictions", desc: "Understand market signals with explainable AI components." },
+          { id: "uc10", name: "Access Educational Content", desc: "Use platform onboarding and educational analytics features." },
+          { id: "uc5", name: "Subscribe / Upgrade Plan", desc: "Convert from freemium to premium after trial." }
+        ]},
+        { id: "fund", label: "Small Fund / Advisory Firm", icon: "🏦", color: "#d97706", bg: "#fffbeb", border: "#fde68a", description: "Institutional-lite user needing cost-effective analytics at scale", useCases: [
+          { id: "uc1", name: "Register / Login", desc: "Authenticate with institutional credentials." },
+          { id: "uc2", name: "Track Portfolio", desc: "Monitor multi-asset portfolios with risk and performance analytics." },
+          { id: "uc11", name: "Access API / Data Licensing", desc: "Integrate market data and analytics via API access." },
+          { id: "uc12", name: "Use White-Label Solution", desc: "Deploy a branded version of the platform for clients." },
+          { id: "uc13", name: "Verify AI Model Performance", desc: "Use blockchain-backed audit trails to verify AI signal accuracy." }
+        ]}
+      ],
+      secondary: [
+        { id: "mktdata", label: "Market Data Provider", icon: "🔌", color: "#6b7280", bg: "#f9fafb", border: "#e5e7eb", description: "External API supplying real-time and historical market data", useCases: [
+          { id: "uc7", name: "Supply Real-Time Data", desc: "Feed live stock, indices, and ETF data into the platform." },
+          { id: "uc9", name: "Supply Historical Data", desc: "Provide historical price data for ML model training and user queries." }
+        ]},
+        { id: "blockchain", label: "Blockchain Network", icon: "⛓️", color: "#6b7280", bg: "#f9fafb", border: "#e5e7eb", description: "Optional public or permissioned blockchain for transparency & audit", useCases: [
+          { id: "uc13", name: "Log Trading Signals", desc: "Immutably record AI predictions and trading signals on-chain." },
+          { id: "uc14", name: "Execute Smart Contracts", desc: "Automate premium subscription or data-access agreements." },
+          { id: "uc15", name: "Provide Audit Trails", desc: "Enable transparent identity verification and compliance records." }
+        ]},
+        { id: "fintech", label: "Fintech / Broker Partner", icon: "🤝", color: "#6b7280", bg: "#f9fafb", border: "#e5e7eb", description: "External platform integrating with Billy via white-label or API", useCases: [
+          { id: "uc11", name: "Consume Analytics API", desc: "Use licensed data and analytics in their own ecosystem." },
+          { id: "uc12", name: "Deploy White-Label", desc: "Offer branded Billy analytics to their own customer base." }
+        ]},
+        { id: "aiengine", label: "AI / ML Engine", icon: "🤖", color: "#6b7280", bg: "#f9fafb", border: "#e5e7eb", description: "Internal AI system powering predictions, NLP, and risk models", useCases: [
+          { id: "uc3", name: "Generate Predictions", desc: "Run price trend, volatility, and portfolio risk ML models." },
+          { id: "uc16", name: "Run Sentiment Analysis", desc: "Process news and social data via NLP to produce sentiment scores." },
+          { id: "uc17", name: "Retrain Models", desc: "Continuously ingest new data and retrain evaluation pipelines." }
+        ]}
+      ]
+    };
+
+    const diagramUCs = [
+      { id: "uc1", name: "Register / Login", x: 430, y: 60 },
+      { id: "uc2", name: "Track Portfolio", x: 430, y: 130 },
+      { id: "uc3", name: "View AI Predictions", x: 430, y: 200 },
+      { id: "uc4", name: "Set Custom Alerts", x: 430, y: 270 },
+      { id: "uc5", name: "Subscribe / Upgrade Plan", x: 430, y: 340 },
+      { id: "uc6", name: "View News Feed", x: 430, y: 410 },
+      { id: "uc7", name: "View Real-Time Data", x: 430, y: 480 },
+      { id: "uc8", name: "Use Technical Indicators", x: 430, y: 550 },
+      { id: "uc9", name: "Access Historical Data", x: 430, y: 620 },
+      { id: "uc10", name: "Access Educational Content", x: 430, y: 690 },
+      { id: "uc11", name: "Access API / Licensing", x: 430, y: 760 },
+      { id: "uc12", name: "Use White-Label Solution", x: 430, y: 830 },
+      { id: "uc13", name: "Verify AI Performance", x: 430, y: 900 }
+    ];
+
+    const diagramActors = [
+      { id: "retail", label: "Retail\nInvestor", x: 60, y: 155, ucs: ["uc1","uc2","uc3","uc4","uc5","uc6"] },
+      { id: "trader", label: "Active\nTrader", x: 60, y: 415, ucs: ["uc1","uc7","uc8","uc3","uc4","uc9"] },
+      { id: "learner", label: "Finance\nLearner", x: 60, y: 620, ucs: ["uc1","uc6","uc3","uc10","uc5"] },
+      { id: "fund", label: "Small Fund /\nAdvisory", x: 60, y: 820, ucs: ["uc1","uc2","uc11","uc12","uc13"] },
+      { id: "mktdata", label: "Market Data\nProvider", x: 830, y: 530, ucs: ["uc7","uc9"] },
+      { id: "blockchain", label: "Blockchain\nNetwork", x: 830, y: 900, ucs: ["uc13"] },
+      { id: "fintech", label: "Fintech /\nBroker", x: 830, y: 790, ucs: ["uc11","uc12"] },
+      { id: "aiengine", label: "AI / ML\nEngine", x: 830, y: 200, ucs: ["uc3","uc7","uc9"] }
+    ];
+
+    const actorColors = {
+      retail: "#2563eb", trader: "#7c3aed", learner: "#059669",
+      fund: "#d97706", mktdata: "#6b7280", blockchain: "#6b7280",
+      fintech: "#6b7280", aiengine: "#6b7280"
+    };
+
+    let currentTab = 'actors';
+    let selectedActor = null;
+    let diagramHighlight = null;
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.tab').forEach(t => {
+        t.classList.remove('active');
+        t.classList.add('inactive');
+      });
+      document.querySelector(`.tab:nth-child(${tab === 'actors' ? 1 : tab === 'usecases' ? 2 : 3})`).classList.add('active');
+      document.querySelector(`.tab:nth-child(${tab === 'actors' ? 1 : tab === 'usecases' ? 2 : 3})`).classList.remove('inactive');
+      
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.getElementById(`${tab}-tab`).classList.add('active');
+
+      if (tab === 'usecases') renderUseCases();
+      if (tab === 'diagram') renderDiagram();
+    }
+
+    function renderActors() {
+      const primaryContainer = document.getElementById('primary-actors');
+      const secondaryContainer = document.getElementById('secondary-actors');
+
+      actors.primary.forEach(a => {
+        const card = document.createElement('div');
+        card.className = 'actor-card';
+        card.style.background = a.bg;
+        card.style.border = `2px solid ${a.border}`;
+        card.onclick = () => { selectedActor = a.id; switchTab('usecases'); };
+        card.innerHTML = `
+          <div class="actor-card-header">
+            <span class="actor-icon">${a.icon}</span>
+            <span class="actor-label" style="color: ${a.color};">${a.label}</span>
+            <span class="actor-badge" style="background: ${a.color};">PRIMARY</span>
+          </div>
+          <p class="actor-description">${a.description}</p>
+          <div class="actor-usecase-count" style="color: ${a.color};">${a.useCases.length} use cases → click to explore</div>
+        `;
+        primaryContainer.appendChild(card);
+      });
+
+      actors.secondary.forEach(a => {
+        const card = document.createElement('div');
+        card.className = 'actor-card';
+        card.style.background = a.bg;
+        card.style.border = `1.5px solid ${a.border}`;
+        card.innerHTML = `
+          <div class="actor-card-header">
+            <span class="actor-icon" style="font-size: 22px;">${a.icon}</span>
+            <span class="actor-label" style="color: #374151; font-size: 14px;">${a.label}</span>
+            <span class="actor-badge" style="background: #9ca3af;">SECONDARY</span>
+          </div>
+          <p class="actor-description" style="font-size: 12px; color: #6b7280;">${a.description}</p>
+        `;
+        secondaryContainer.appendChild(card);
+      });
+    }
+
+    function renderUseCases() {
+      const allActors = [...actors.primary, ...actors.secondary];
+      const filterContainer = document.getElementById('filter-buttons');
+      const contentContainer = document.getElementById('usecases-content');
+
+      filterContainer.innerHTML = '';
+      contentContainer.innerHTML = '';
+
+      // Filter buttons
+      const allBtn = document.createElement('button');
+      allBtn.className = 'filter-btn';
+      allBtn.textContent = 'All Actors';
+      allBtn.style.borderColor = !selectedActor ? '#2563eb' : '#e2e8f0';
+      allBtn.style.background = !selectedActor ? '#2563eb' : 'white';
+      allBtn.style.color = !selectedActor ? 'white' : '#374151';
+      allBtn.onclick = () => { selectedActor = null; renderUseCases(); };
+      filterContainer.appendChild(allBtn);
+
+      allActors.forEach(a => {
+        const btn = document.createElement('button');
+        btn.className = 'filter-btn';
+        btn.textContent = `${a.icon} ${a.label}`;
+        btn.style.borderColor = selectedActor === a.id ? a.color : '#e2e8f0';
+        btn.style.background = selectedActor === a.id ? a.color : 'white';
+        btn.style.color = selectedActor === a.id ? 'white' : '#374151';
+        btn.onclick = () => { selectedActor = a.id; renderUseCases(); };
+        filterContainer.appendChild(btn);
+      });
+
+      // Use cases
+      const displayActors = selectedActor ? allActors.filter(a => a.id === selectedActor) : allActors;
+      displayActors.forEach(actor => {
+        const section = document.createElement('div');
+        section.className = 'usecase-section';
+        
+        const header = document.createElement('div');
+        header.className = 'usecase-header';
+        header.style.background = actor.bg;
+        header.style.border = `2px solid ${actor.border}`;
+        header.innerHTML = `
+          <div class="usecase-header-content">
+            <span style="font-size: 20px;">${actor.icon}</span>
+            <span style="font-weight: 800; color: ${actor.color}; font-size: 16px;">${actor.label}</span>
+            <span style="font-size: 12px; color: #64748b; margin-left: 4px;">— ${actor.description}</span>
+          </div>
+        `;
+        section.appendChild(header);
+
+        const list = document.createElement('div');
+        list.className = 'usecase-list';
+        actor.useCases.forEach((uc, i) => {
+          const card = document.createElement('div');
+          card.className = 'usecase-card';
+          card.style.borderLeft = `4px solid ${actor.color}`;
+          const cardId = `uc-${actor.id}-${uc.id}`;
+          card.innerHTML = `
+            <div class="usecase-card-header">
+              <span class="usecase-number" style="background: ${actor.color};">${i + 1}</span>
+              <span class="usecase-name">${uc.name}</span>
+              <span class="usecase-toggle" id="${cardId}-toggle">▼</span>
+            </div>
+            <div class="usecase-desc" id="${cardId}-desc">${uc.desc}</div>
+          `;
+          card.onclick = () => toggleUseCase(cardId);
+          list.appendChild(card);
+        });
+        section.appendChild(list);
+        contentContainer.appendChild(section);
+      });
+    }
+
+    function toggleUseCase(id) {
+      const desc = document.getElementById(`${id}-desc`);
+      const toggle = document.getElementById(`${id}-toggle`);
+      if (desc.classList.contains('visible')) {
+        desc.classList.remove('visible');
+        toggle.textContent = '▼';
+      } else {
+        desc.classList.add('visible');
+        toggle.textContent = '▲';
+      }
+    }
+
+    function renderDiagram() {
+      const svg = document.getElementById('diagram-svg');
+      const filterContainer = document.getElementById('diagram-filters');
+      const legendContainer = document.getElementById('legend');
+
+      svg.innerHTML = '';
+      filterContainer.innerHTML = '';
+      legendContainer.innerHTML = '';
+
+      // Filters
+      const allBtn = document.createElement('button');
+      allBtn.className = 'filter-btn';
+      allBtn.textContent = 'Show All';
+      allBtn.style.borderColor = !diagramHighlight ? '#2563eb' : '#e2e8f0';
+      allBtn.style.background = !diagramHighlight ? '#2563eb' : 'white';
+      allBtn.style.color = !diagramHighlight ? 'white' : '#374151';
+      allBtn.onclick = () => { diagramHighlight = null; renderDiagram(); };
+      filterContainer.appendChild(allBtn);
+
+      [...actors.primary, ...actors.secondary].forEach(a => {
+        const btn = document.createElement('button');
+        btn.className = 'filter-btn';
+        btn.textContent = `${a.icon} ${a.label}`;
+        btn.style.borderColor = diagramHighlight === a.id ? a.color : '#e2e8f0';
+        btn.style.background = diagramHighlight === a.id ? a.color : 'white';
+        btn.style.color = diagramHighlight === a.id ? 'white' : '#374151';
+        btn.onclick = () => { diagramHighlight = diagramHighlight === a.id ? null : a.id; renderDiagram(); };
+        filterContainer.appendChild(btn);
+      });
+
+      // Draw diagram
+      drawDiagram(svg, diagramHighlight);
+
+      // Legend
+      [
+        { label: 'Primary Actors', items: actors.primary },
+        { label: 'Secondary Actors', items: actors.secondary }
+      ].forEach(group => {
+        const div = document.createElement('div');
+        div.innerHTML = `<div class="legend-group-title">${group.label}</div>`;
+        const items = document.createElement('div');
+        items.className = 'legend-items';
+        group.items.forEach(a => {
+          const item = document.createElement('div');
+          item.className = 'legend-item';
+          item.innerHTML = `<div class="legend-dot" style="background: ${a.color};"></div>${a.label}`;
+          items.appendChild(item);
+        });
+        div.appendChild(items);
+        legendContainer.appendChild(div);
+      });
+    }
+
+    function drawDiagram(svg, highlight) {
+      const ucW = 220, ucH = 36, ucRx = 18;
+      
+      // System boundary
+      const boundary = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      boundary.setAttribute('x', 390);
+      boundary.setAttribute('y', 30);
+      boundary.setAttribute('width', 260);
+      boundary.setAttribute('height', 900);
+      boundary.setAttribute('rx', 14);
+      boundary.setAttribute('fill', '#f8faff');
+      boundary.setAttribute('stroke', '#94a3b8');
+      boundary.setAttribute('stroke-width', 1.5);
+      boundary.setAttribute('stroke-dasharray', '6,4');
+      svg.appendChild(boundary);
+
+      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      label.setAttribute('x', 520);
+      label.setAttribute('y', 22);
+      label.setAttribute('text-anchor', 'middle');
+      label.setAttribute('font-size', 11);
+      label.setAttribute('fill', '#64748b');
+      label.setAttribute('font-weight', 600);
+      label.textContent = 'Billy Bronco Market Analyst — System';
+      svg.appendChild(label);
+
+      // Connections
+      diagramActors.forEach(actor => {
+        const isHighlighted = !highlight || highlight === actor.id;
+        actor.ucs.forEach(ucId => {
+          const uc = diagramUCs.find(u => u.id === ucId);
+          if (!uc) return;
+          const ucy = uc.y + ucH / 2;
+          const ax = actor.x > 400 ? actor.x : actor.x + 52;
+          const ay = actor.y + 30;
+          const ex = actor.x > 400 ? 650 : 390;
+          
+          const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          line.setAttribute('x1', ax);
+          line.setAttribute('y1', ay);
+          line.setAttribute('x2', ex);
+          line.setAttribute('y2', ucy);
+          line.setAttribute('stroke', isHighlighted ? actorColors[actor.id] : '#e2e8f0');
+          line.setAttribute('stroke-width', isHighlighted ? 1.6 : 1);
+          line.setAttribute('opacity', isHighlighted ? 0.7 : 0.3);
+          svg.appendChild(line);
+        });
+      });
+
+      // Use cases
+      diagramUCs.forEach(uc => {
+        const activeActors = highlight ? diagramActors.filter(a => a.id === highlight && a.ucs.includes(uc.id)) : [];
+        const isActive = !highlight || activeActors.length > 0;
+        
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('x', uc.x);
+        rect.setAttribute('y', uc.y);
+        rect.setAttribute('width', ucW);
+        rect.setAttribute('height', ucH);
+        rect.setAttribute('rx', ucRx);
+        rect.setAttribute('fill', isActive ? 'white' : '#f1f5f9');
+        rect.setAttribute('stroke', isActive ? (highlight ? actorColors[highlight] : '#6366f1') : '#cbd5e1');
+        rect.setAttribute('stroke-width', isActive ? 1.8 : 1);
+        svg.appendChild(rect);
+
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', uc.x + ucW / 2);
+        text.setAttribute('y', uc.y + ucH / 2 + 4.5);
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('font-size', 10.5);
+        text.setAttribute('fill', isActive ? '#1e293b' : '#94a3b8');
+        text.setAttribute('font-weight', isActive ? 600 : 400);
+        text.textContent = uc.name;
+        svg.appendChild(text);
+      });
+
+      // Actors
+      diagramActors.forEach(actor => {
+        const isHighlighted = !highlight || highlight === actor.id;
+        const col = isHighlighted ? actorColors[actor.id] : '#cbd5e1';
+        const ax = actor.x, ay = actor.y;
+        const isPrimary = ['retail','trader','learner','fund'].includes(actor.id);
+        
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.setAttribute('opacity', isHighlighted ? 1 : 0.35);
+
+        // Head
+        const head = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        head.setAttribute('cx', ax + 26);
+        head.setAttribute('cy', ay);
+        head.setAttribute('r', 9);
+        head.setAttribute('fill', 'white');
+        head.setAttribute('stroke', col);
+        head.setAttribute('stroke-width', 2);
+        g.appendChild(head);
+
+        // Body
+        const body = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        body.setAttribute('x1', ax + 26);
+        body.setAttribute('y1', ay + 9);
+        body.setAttribute('x2', ax + 26);
+        body.setAttribute('y2', ay + 30);
+        body.setAttribute('stroke', col);
+        body.setAttribute('stroke-width', 2);
+        g.appendChild(body);
+
+        // Arms
+        const arms = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        arms.setAttribute('x1', ax + 14);
+        arms.setAttribute('y1', ay + 16);
+        arms.setAttribute('x2', ax + 38);
+        arms.setAttribute('y2', ay + 16);
+        arms.setAttribute('stroke', col);
+        arms.setAttribute('stroke-width', 2);
+        g.appendChild(arms);
+
+        // Legs
+        const leg1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        leg1.setAttribute('x1', ax + 26);
+        leg1.setAttribute('y1', ay + 30);
+        leg1.setAttribute('x2', ax + 14);
+        leg1.setAttribute('y2', ay + 46);
+        leg1.setAttribute('stroke', col);
+        leg1.setAttribute('stroke-width', 2);
+        g.appendChild(leg1);
+
+        const leg2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        leg2.setAttribute('x1', ax + 26);
+        leg2.setAttribute('y1', ay + 30);
+        leg2.setAttribute('x2', ax + 38);
+        leg2.setAttribute('y2', ay + 46);
+        leg2.setAttribute('stroke', col);
+        leg2.setAttribute('stroke-width', 2);
+        g.appendChild(leg2);
+
+        // Label
+        actor.label.split('\n').forEach((line, i) => {
+          const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          text.setAttribute('x', ax + 26);
+          text.setAttribute('y', ay + 60 + (i * 13));
+          text.setAttribute('text-anchor', 'middle');
+          text.setAttribute('font-size', 9.5);
+          text.setAttribute('fill', col);
+          text.setAttribute('font-weight', 600);
+          text.textContent = line;
+          g.appendChild(text);
+        });
+
+        svg.appendChild(g);
+      });
+    }
+
+    // Initialize
+    renderActors();
+  </script>
+</body>
+</html>

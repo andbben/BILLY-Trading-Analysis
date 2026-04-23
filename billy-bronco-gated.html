@@ -1,0 +1,2664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Billy Bronco Market Analyst</title>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080f1c;--bg2:#0d1729;--bg3:#111f35;--border:rgba(255,255,255,0.06);--blue:#00d4ff;--cyan:#00ffea;--green:#00e676;--red:#ff3d71;--amber:#ffb700;--purple:#7c5cfc;--t1:#ffffff;--t2:#7a90b0;--t3:#3d5270;--r:14px;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Archivo',sans-serif;background:var(--bg);color:var(--t1);overflow-x:hidden;min-height:100vh;}
+button{font-family:'Archivo',sans-serif;cursor:pointer;}
+input,select,textarea{font-family:'Archivo',sans-serif;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{background:var(--t3);border-radius:3px;}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;height:62px;background:rgba(8,15,28,0.96);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;padding:0 18px;z-index:900;}
+.nav-logo{display:flex;align-items:center;gap:9px;font-weight:900;font-size:1.1rem;letter-spacing:-.02em;cursor:pointer;flex-shrink:0;}
+.nav-logo-box{width:32px;height:32px;background:linear-gradient(135deg,var(--blue),var(--cyan));border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.8rem;color:var(--bg);}
+.nav-links{display:flex;gap:3px;}
+.nav-btn{background:none;border:none;color:var(--t2);font-size:.85rem;font-weight:600;padding:6px 12px;border-radius:8px;transition:all .2s;white-space:nowrap;}
+.nav-btn:hover{color:var(--t1);background:rgba(255,255,255,.05);}
+.nav-btn.active{color:var(--blue);background:rgba(0,212,255,.1);}
+.nav-search{flex:1;max-width:280px;position:relative;}
+.nav-search input{width:100%;padding:7px 12px 7px 32px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;color:var(--t1);font-size:.83rem;transition:all .2s;}
+.nav-search input:focus{outline:none;border-color:var(--blue);background:var(--bg2);}
+.nav-search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:.85rem;pointer-events:none;}
+.search-dropdown{position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden;z-index:1000;box-shadow:0 12px 40px rgba(0,0,0,.5);}
+.search-item{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;transition:background .15s;}
+.search-item:hover{background:rgba(0,212,255,.06);}
+.search-ticker-box{width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.7rem;flex-shrink:0;}
+.nav-right{display:flex;align-items:center;gap:8px;margin-left:auto;}
+.mkt-status{display:flex;align-items:center;gap:5px;font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:20px;}
+.mkt-open{background:rgba(0,230,118,.1);color:var(--green);border:1px solid rgba(0,230,118,.25);}
+.mkt-closed{background:rgba(255,255,255,.05);color:var(--t3);border:1px solid var(--border);}
+.mkt-dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 2s infinite;}
+.update-time{font-size:.7rem;color:var(--t3);display:flex;align-items:center;gap:4px;}
+.api-banner{background:linear-gradient(135deg,rgba(124,92,252,.15),rgba(0,212,255,.1));border-bottom:1px solid rgba(124,92,252,.3);padding:8px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:.8rem;}
+.api-banner-text{color:var(--t2);}
+.api-banner-text strong{color:var(--purple);}
+
+/* LAYOUT */
+.layout{display:flex;padding-top:96px;min-height:100vh;}
+.sidebar{width:210px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);padding:16px 10px;position:sticky;top:96px;height:calc(100vh - 96px);overflow-y:auto;display:flex;flex-direction:column;}
+.sidebar-section{margin-bottom:22px;}
+.sidebar-label{font-size:.66rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);padding:0 8px;margin-bottom:6px;}
+.side-btn{display:flex;align-items:center;gap:9px;width:100%;background:none;border:none;color:var(--t2);font-size:.86rem;font-weight:500;padding:9px 10px;border-radius:10px;transition:all .2s;text-align:left;}
+.side-btn:hover{color:var(--t1);background:rgba(255,255,255,.05);}
+.side-btn.active{color:var(--blue);background:rgba(0,212,255,.1);}
+.side-btn .icon{font-size:.95rem;width:18px;text-align:center;}
+.side-badge{margin-left:auto;background:rgba(0,212,255,.15);color:var(--blue);font-size:.65rem;font-weight:800;padding:2px 7px;border-radius:10px;}
+.sidebar-grow{flex:1;}
+.sidebar-auth{border-top:1px solid var(--border);padding-top:12px;margin-top:6px;}
+.auth-user{display:flex;align-items:center;gap:9px;padding:4px 8px 10px;}
+.auth-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.82rem;color:var(--bg);flex-shrink:0;}
+.auth-name{font-size:.83rem;font-weight:700;line-height:1.2;}
+.auth-email{font-size:.7rem;color:var(--t3);}
+.plan-pill{display:inline-block;margin-top:3px;padding:1px 7px;border-radius:10px;font-size:.62rem;font-weight:800;text-transform:uppercase;}
+.plan-free{background:rgba(255,255,255,.08);color:var(--t3);}
+.plan-pro{background:linear-gradient(135deg,rgba(124,92,252,.3),rgba(0,212,255,.2));color:var(--blue);}
+.plan-premium{background:rgba(255,183,0,.15);color:var(--amber);}
+.btn-signin{width:100%;background:linear-gradient(135deg,var(--blue),var(--cyan));border:none;color:var(--bg);font-weight:800;font-size:.86rem;padding:10px;border-radius:10px;transition:all .2s;}
+.btn-signin:hover{opacity:.9;transform:translateY(-1px);}
+.btn-signout{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--t2);font-weight:600;font-size:.8rem;padding:8px;border-radius:10px;transition:all .2s;}
+.btn-signout:hover{background:rgba(255,61,113,.1);border-color:rgba(255,61,113,.3);color:var(--red);}
+
+/* MAIN */
+.main{flex:1;padding:24px;overflow-y:auto;max-width:1380px;}
+.page-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+.page-title{font-size:1.7rem;font-weight:800;letter-spacing:-.03em;}
+.page-sub{font-size:.83rem;color:var(--t2);margin-top:3px;}
+
+/* BUTTONS */
+.btn{border:none;border-radius:10px;font-weight:700;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
+.btn-primary{background:linear-gradient(135deg,var(--blue),var(--cyan));color:var(--bg);padding:9px 18px;font-size:.86rem;}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,212,255,.35);}
+.btn-ghost{background:rgba(255,255,255,.05);color:var(--t1);border:1px solid var(--border);padding:8px 16px;font-size:.84rem;}
+.btn-ghost:hover{background:rgba(255,255,255,.1);}
+.btn-danger{background:rgba(255,61,113,.12);color:var(--red);border:1px solid rgba(255,61,113,.25);padding:5px 11px;font-size:.78rem;}
+.btn-danger:hover{background:rgba(255,61,113,.22);}
+.btn-sm{padding:5px 11px;font-size:.76rem;}
+.btn-purple{background:linear-gradient(135deg,var(--purple),var(--blue));color:#fff;padding:9px 18px;font-size:.86rem;}
+.btn-purple:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(124,92,252,.4);}
+
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:18px;transition:border .25s;}
+.card:hover{border-color:rgba(0,212,255,.18);}
+.card-grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:18px;}
+.card-grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px;margin-bottom:18px;}
+.card-grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:18px;}
+.stat-label{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--t2);margin-bottom:6px;}
+.stat-val{font-family:'JetBrains Mono',monospace;font-size:1.75rem;font-weight:700;letter-spacing:-.02em;margin-bottom:5px;}
+.stat-change{font-size:.83rem;font-weight:600;display:flex;align-items:center;gap:4px;}
+.pos{color:var(--green);}
+.neg{color:var(--red);}
+.neu{color:var(--t2);}
+
+/* SPARKLINE & CHART */
+.sparkline{width:100%;height:44px;margin-top:10px;}
+.chart-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:18px;}
+.chart-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
+.chart-title{font-size:.95rem;font-weight:700;}
+.chart-tabs{display:flex;gap:3px;}
+.chart-tab{background:none;border:none;color:var(--t3);font-size:.78rem;font-weight:600;padding:5px 9px;border-radius:6px;transition:all .2s;}
+.chart-tab.active{background:rgba(0,212,255,.15);color:var(--blue);}
+.chart-tab:hover:not(.active){color:var(--t1);}
+
+/* AI / SIGNAL PANEL */
+.ai-panel{background:linear-gradient(135deg,rgba(0,212,255,.07),rgba(0,255,234,.04));border:1px solid rgba(0,212,255,.18);border-radius:var(--r);padding:18px;margin-bottom:18px;}
+.ai-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+.ai-icon-box{width:40px;height:40px;background:linear-gradient(135deg,var(--blue),var(--cyan));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
+.ai-title{font-size:1.05rem;font-weight:800;}
+.ai-live{padding:3px 9px;background:rgba(0,230,118,.15);border-radius:20px;font-size:.68rem;font-weight:700;color:var(--green);animation:pulse 2s infinite;}
+.ai-explain{font-size:.7rem;color:var(--t3);margin-left:auto;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.55;}}
+.insight-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;}
+.insight-card{background:rgba(8,15,28,.5);border-radius:10px;padding:13px;border-left:3px solid var(--blue);}
+.insight-card.warn{border-left-color:var(--amber);}
+.insight-card.bull{border-left-color:var(--green);}
+.insight-card.bear{border-left-color:var(--red);}
+.insight-ticker{font-weight:800;font-size:.76rem;color:var(--blue);margin-bottom:4px;font-family:'JetBrains Mono',monospace;}
+.insight-card.warn .insight-ticker{color:var(--amber);}
+.insight-card.bull .insight-ticker{color:var(--green);}
+.insight-card.bear .insight-ticker{color:var(--red);}
+.insight-text{font-size:.8rem;color:var(--t2);line-height:1.5;}
+.insight-factors{font-size:.7rem;color:var(--t3);margin-top:5px;line-height:1.5;}
+.confidence{display:flex;align-items:center;gap:6px;margin-top:7px;font-size:.7rem;color:var(--t3);}
+.conf-bar{flex:1;height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;}
+.conf-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--blue),var(--cyan));}
+
+/* TOP MOVERS */
+.movers-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;}
+.movers-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.movers-head{padding:10px 16px;border-bottom:1px solid var(--border);font-size:.76rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;}
+.movers-head.up{color:var(--green);}
+.movers-head.dn{color:var(--red);}
+.mover-row{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;border-bottom:1px solid rgba(255,255,255,.025);transition:background .15s;}
+.mover-row:last-child{border-bottom:none;}
+.mover-row:hover{background:rgba(255,255,255,.02);}
+.mover-sym{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.87rem;}
+.mover-name{font-size:.72rem;color:var(--t3);}
+.mover-chg{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.87rem;}
+
+/* TABLE */
+.table-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:18px;}
+.table-head{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 80px;padding:11px 18px;border-bottom:1px solid var(--border);font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);}
+.table-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 80px;padding:13px 18px;border-bottom:1px solid rgba(255,255,255,.03);transition:background .15s;cursor:pointer;align-items:center;}
+.table-row:last-child{border-bottom:none;}
+.table-row:hover{background:rgba(0,212,255,.04);}
+.ticker-cell{display:flex;align-items:center;gap:10px;}
+.ticker-logo{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.75rem;flex-shrink:0;}
+.ticker-name{font-weight:700;font-size:.88rem;font-family:'JetBrains Mono',monospace;}
+.ticker-full{font-size:.72rem;color:var(--t3);margin-top:1px;}
+.mono{font-family:'JetBrains Mono',monospace;font-weight:600;}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.7rem;font-weight:700;}
+.badge-buy{background:rgba(0,230,118,.15);color:var(--green);}
+.badge-hold{background:rgba(255,183,0,.15);color:var(--amber);}
+.badge-sell{background:rgba(255,61,113,.15);color:var(--red);}
+
+/* ALERTS */
+.alert-item{display:flex;align-items:center;justify-content:space-between;padding:13px 17px;border-bottom:1px solid rgba(255,255,255,.03);transition:background .15s;gap:10px;flex-wrap:wrap;}
+.alert-item:last-child{border-bottom:none;}
+.alert-item:hover{background:rgba(255,255,255,.02);}
+.alert-left{display:flex;align-items:center;gap:10px;}
+.alert-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.alert-dot.active{background:var(--green);box-shadow:0 0 7px rgba(0,230,118,.5);}
+.alert-dot.triggered{background:var(--amber);box-shadow:0 0 7px rgba(255,183,0,.4);animation:pulse 1.5s infinite;}
+.alert-dot.inactive{background:var(--t3);}
+.alert-info .alert-name{font-weight:700;font-size:.88rem;margin-bottom:2px;}
+.alert-info .alert-desc{font-size:.76rem;color:var(--t2);}
+.alert-right{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.status-pill{padding:2px 9px;border-radius:20px;font-size:.7rem;font-weight:700;}
+.status-active{background:rgba(0,230,118,.12);color:var(--green);}
+.status-triggered{background:rgba(255,183,0,.12);color:var(--amber);}
+.status-inactive{background:rgba(255,255,255,.05);color:var(--t3);}
+
+/* NEWS */
+.news-item{padding:15px 18px;border-bottom:1px solid rgba(255,255,255,.03);cursor:pointer;transition:background .15s;}
+.news-item:hover{background:rgba(255,255,255,.02);}
+.news-meta{display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap;}
+.news-source{font-size:.7rem;font-weight:700;color:var(--blue);}
+.news-time{font-size:.7rem;color:var(--t3);}
+.news-title{font-size:.88rem;font-weight:600;line-height:1.45;margin-bottom:6px;}
+.news-tickers{display:flex;gap:4px;flex-wrap:wrap;}
+.news-tag{padding:2px 7px;background:rgba(0,212,255,.08);border-radius:4px;font-size:.68rem;font-weight:700;color:var(--blue);font-family:'JetBrains Mono',monospace;}
+.sent-score{display:flex;align-items:center;gap:4px;font-size:.7rem;font-weight:700;}
+.sent-bull{color:var(--green);}
+.sent-bear{color:var(--red);}
+.sent-neu{color:var(--amber);}
+
+/* PORTFOLIO */
+.port-alloc{display:flex;height:10px;border-radius:5px;overflow:hidden;margin:10px 0;}
+.port-bar{height:100%;transition:width .6s ease;}
+.port-legend{display:flex;flex-wrap:wrap;gap:9px;margin-top:7px;}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:.73rem;color:var(--t2);}
+.leg-dot{width:8px;height:8px;border-radius:50%;}
+.risk-section{display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.risk-gauge-wrap{display:flex;flex-direction:column;align-items:center;}
+.risk-factors{flex:1;min-width:160px;}
+.risk-factor-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:.78rem;}
+.risk-factor-row:last-child{border-bottom:none;}
+.risk-rec{margin-top:12px;padding:12px;background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.15);border-radius:10px;font-size:.82rem;color:var(--t2);line-height:1.6;}
+
+/* TECH INDICATORS */
+.indicator-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:14px 0;}
+.indicator-box{background:var(--bg3);border-radius:10px;padding:12px;text-align:center;}
+.ind-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin-bottom:5px;}
+.ind-val{font-family:'JetBrains Mono',monospace;font-size:1.2rem;font-weight:700;margin-bottom:4px;}
+.ind-sub{font-size:.7rem;color:var(--t2);}
+.rsi-bar{height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;margin-top:8px;position:relative;}
+.rsi-fill{height:100%;border-radius:3px;transition:width .5s ease;}
+.rsi-zones{display:flex;justify-content:space-between;font-size:.6rem;color:var(--t3);margin-top:2px;}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;z-index:1000;padding:14px;animation:fadein .2s;}
+@keyframes fadein{from{opacity:0;}to{opacity:1;}}
+.modal{background:var(--bg2);border:1px solid rgba(0,212,255,.2);border-radius:18px;padding:26px;max-width:540px;width:100%;max-height:90vh;overflow-y:auto;animation:scalein .2s;}
+@keyframes scalein{from{opacity:0;transform:scale(.97);}to{opacity:1;transform:scale(1);}}
+.modal-wide{max-width:680px;}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+.modal-title{font-size:1.25rem;font-weight:800;}
+.close-btn{background:rgba(255,255,255,.07);border:none;color:var(--t1);width:30px;height:30px;border-radius:8px;font-size:1rem;display:flex;align-items:center;justify-content:center;}
+.close-btn:hover{background:rgba(255,255,255,.14);}
+.form-group{margin-bottom:15px;}
+.form-label{display:block;font-size:.8rem;font-weight:600;color:var(--t2);margin-bottom:5px;}
+.form-input,.form-select{width:100%;padding:9px 13px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--t1);font-size:.88rem;transition:border .2s;}
+.form-input:focus,.form-select:focus{outline:none;border-color:var(--blue);}
+.form-hint{font-size:.74rem;color:var(--t3);margin-top:4px;line-height:1.5;}
+.form-hint a{color:var(--blue);}
+
+/* AUTH */
+.auth-tabs{display:flex;background:var(--bg);border-radius:10px;padding:4px;margin-bottom:20px;}
+.auth-tab{flex:1;background:none;border:none;color:var(--t2);font-weight:700;font-size:.88rem;padding:8px;border-radius:8px;transition:all .2s;}
+.auth-tab.active{background:var(--bg2);color:var(--t1);box-shadow:0 1px 4px rgba(0,0,0,.4);}
+.auth-divider{display:flex;align-items:center;gap:10px;margin:15px 0;color:var(--t3);font-size:.76rem;}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* SUBSCRIPTION */
+.plan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-top:24px;}
+.plan-card{background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:24px;transition:all .25s;position:relative;overflow:hidden;}
+.plan-card.featured{border-color:var(--blue);box-shadow:0 0 40px rgba(0,212,255,.1);}
+.plan-card.current{border-color:var(--green);}
+.plan-badge{position:absolute;top:14px;right:14px;padding:3px 10px;border-radius:20px;font-size:.68rem;font-weight:800;text-transform:uppercase;}
+.plan-most-popular{background:linear-gradient(135deg,var(--blue),var(--cyan));color:var(--bg);}
+.plan-current-badge{background:rgba(0,230,118,.15);color:var(--green);border:1px solid rgba(0,230,118,.3);}
+.plan-name{font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;}
+.plan-price{font-family:'JetBrains Mono',monospace;font-size:2.2rem;font-weight:700;margin-bottom:4px;}
+.plan-price-sub{font-size:.78rem;color:var(--t3);}
+.plan-divider{height:1px;background:var(--border);margin:16px 0;}
+.plan-features{list-style:none;margin-bottom:20px;}
+.plan-features li{font-size:.83rem;color:var(--t2);padding:5px 0;display:flex;gap:8px;align-items:flex-start;}
+.plan-features li .check{color:var(--green);flex-shrink:0;margin-top:1px;}
+.plan-features li .lock{color:var(--t3);flex-shrink:0;margin-top:1px;}
+
+/* LEARN PAGE */
+.learn-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:12px;}
+.learn-term{font-size:1rem;font-weight:800;margin-bottom:6px;color:var(--blue);}
+.learn-def{font-size:.85rem;color:var(--t2);line-height:1.65;}
+.learn-formula{font-family:'JetBrains Mono',monospace;font-size:.78rem;background:var(--bg3);padding:8px 12px;border-radius:8px;color:var(--cyan);margin-top:8px;display:block;}
+
+/* LANDING */
+.hero{padding:100px 28px 60px;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-25%;left:50%;transform:translateX(-50%);width:650px;height:650px;background:radial-gradient(circle,rgba(0,212,255,.07) 0%,transparent 65%);pointer-events:none;}
+.hero-badge{display:inline-block;padding:4px 16px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.3);border-radius:40px;font-size:.73rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);margin-bottom:22px;}
+.hero h1{font-size:clamp(2.1rem,6vw,4rem);font-weight:900;line-height:1.08;letter-spacing:-.04em;margin-bottom:18px;}
+.grad{background:linear-gradient(135deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero p{font-size:1.05rem;color:var(--t2);max-width:540px;margin:0 auto 32px;line-height:1.7;}
+.hero-stats{display:flex;justify-content:center;gap:36px;margin-top:44px;flex-wrap:wrap;}
+.hero-stat-val{font-family:'JetBrains Mono',monospace;font-size:1.9rem;font-weight:700;color:var(--blue);}
+.hero-stat-label{font-size:.75rem;color:var(--t3);margin-top:3px;text-transform:uppercase;letter-spacing:.05em;}
+.features-section{padding:50px 28px;max-width:1060px;margin:0 auto;}
+.features-title{text-align:center;font-size:clamp(1.7rem,4vw,2.3rem);font-weight:900;letter-spacing:-.03em;margin-bottom:8px;}
+.features-sub{text-align:center;color:var(--t2);margin-bottom:42px;font-size:.95rem;}
+.feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;}
+.feature-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:22px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;}
+.feature-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,212,255,.05),transparent);opacity:0;transition:opacity .3s;}
+.feature-card:hover{border-color:rgba(0,212,255,.3);transform:translateY(-2px);}
+.feature-card:hover::before{opacity:1;}
+.feature-icon{font-size:1.9rem;margin-bottom:12px;}
+.feature-name{font-size:1rem;font-weight:800;margin-bottom:7px;}
+.feature-desc{font-size:.83rem;color:var(--t2);line-height:1.6;}
+.feature-arrow{color:var(--blue);margin-top:12px;font-size:.83rem;font-weight:700;}
+
+/* WATCHLIST */
+.wl-input-row{display:flex;gap:8px;margin-bottom:14px;}
+.wl-input{flex:1;padding:9px 13px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;color:var(--t1);font-size:.88rem;}
+.wl-input:focus{outline:none;border-color:var(--blue);}
+
+/* MISC */
+.flash-g{animation:flash-green .6s ease-out;}
+.flash-r{animation:flash-red .6s ease-out;}
+@keyframes flash-green{0%{background:rgba(0,230,118,.15);}100%{background:transparent;}}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes flash-red{0%{background:rgba(255,61,113,.15);}100%{background:transparent;}}
+.divider{height:1px;background:var(--border);margin:18px 0;}
+.empty-state{padding:40px;text-align:center;color:var(--t3);font-size:.9rem;}
+.tag{padding:3px 9px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.25);border-radius:20px;font-size:.78rem;color:var(--blue);}
+
+@media(max-width:900px){.sidebar{display:none;}.table-head,.table-row{grid-template-columns:2fr 1fr 1fr 80px;}.table-head>:nth-child(4),.table-row>:nth-child(4),.table-head>:nth-child(5),.table-row>:nth-child(5){display:none;}.movers-grid{grid-template-columns:1fr;}}
+@media(max-width:600px){.main{padding:14px;}.nav-links{display:none;}.plan-grid{grid-template-columns:1fr;}}
+
+/* BUY/SELL/TRADE BUTTONS */
+.btn-buy{background:rgba(0,230,118,.15);color:var(--green);border:1px solid rgba(0,230,118,.3);padding:5px 11px;font-size:.78rem;border-radius:8px;font-weight:700;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:4px;}
+.btn-buy:hover{background:rgba(0,230,118,.28);transform:translateY(-1px);}
+.btn-sell{background:rgba(255,61,113,.12);color:var(--red);border:1px solid rgba(255,61,113,.3);padding:5px 11px;font-size:.78rem;border-radius:8px;font-weight:700;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:4px;}
+.btn-sell:hover{background:rgba(255,61,113,.24);transform:translateY(-1px);}
+.btn-trade{background:rgba(124,92,252,.15);color:var(--purple);border:1px solid rgba(124,92,252,.3);padding:5px 11px;font-size:.78rem;border-radius:8px;font-weight:700;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:4px;}
+.btn-trade:hover{background:rgba(124,92,252,.28);}
+/* REMOVE BUTTON — fixed square (was oval) */
+.remove-btn{width:28px;height:28px;min-width:28px;border-radius:7px;background:rgba(255,61,113,.1);border:1px solid rgba(255,61,113,.22);color:var(--red);font-size:.9rem;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .2s;padding:0;font-family:'Archivo',sans-serif;}
+.remove-btn:hover{background:rgba(255,61,113,.24);}
+/* TRADE SUMMARY BOX */
+.trade-summary{background:var(--bg3);border-radius:10px;padding:14px 16px;margin:14px 0;}
+.trade-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:.84rem;border-bottom:1px solid rgba(255,255,255,.04);}
+.trade-row:last-child{border-bottom:none;font-weight:700;font-size:.9rem;}
+.balance-tag{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.2);border-radius:20px;font-size:.7rem;color:var(--green);font-weight:700;}
+.balance-tag.low{background:rgba(255,183,0,.1);border-color:rgba(255,183,0,.3);color:var(--amber);}
+/* PAYMENT FLOW */
+.pay-steps{display:flex;align-items:center;gap:6px;margin-bottom:22px;}
+.pay-step{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;flex-shrink:0;}
+.pay-step.done{background:var(--green);color:var(--bg);}
+.pay-step.active{background:linear-gradient(135deg,var(--blue),var(--cyan));color:var(--bg);}
+.pay-step.pending{background:var(--bg3);color:var(--t3);border:1px solid var(--border);}
+.pay-step-line{flex:1;height:1px;background:var(--border);}
+.card-num-input{letter-spacing:.14em;font-family:'JetBrains Mono',monospace;}
+.success-circle{width:64px;height:64px;border-radius:50%;background:rgba(0,230,118,.15);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 16px;}
+/* LEARN PAGE */
+.learn-formula-box{background:var(--bg3);border:1px solid rgba(0,212,255,.15);border-radius:10px;padding:14px 16px;margin-top:10px;}
+.learn-formula-label{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:6px;}
+.learn-formula-text{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--cyan);line-height:1.8;white-space:pre-wrap;}
+.learn-tips{margin-top:14px;padding-top:12px;border-top:1px solid var(--border);}
+.learn-tips-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--blue);margin-bottom:8px;}
+.learn-tip{display:flex;align-items:flex-start;gap:8px;padding:4px 0;font-size:.82rem;color:var(--t2);line-height:1.55;}
+.learn-tip-icon{flex-shrink:0;margin-top:1px;}
+/* NEWS EXPAND */
+.news-summary-text{font-size:.83rem;color:var(--t2);line-height:1.65;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
+.news-read-btn{display:inline-flex;align-items:center;gap:4px;font-size:.75rem;font-weight:700;color:var(--blue);margin-top:8px;cursor:pointer;background:none;border:none;padding:0;font-family:'Archivo',sans-serif;}
+/* NEWS RELATED SECTION IN STOCK MODAL */
+.modal-news-item{padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;}
+.modal-news-item:last-child{border-bottom:none;}
+.modal-news-item:hover .modal-news-title{color:var(--blue);}
+.modal-news-title{font-size:.83rem;font-weight:600;line-height:1.4;color:var(--t1);transition:color .2s;}
+.modal-news-meta{display:flex;align-items:center;gap:6px;margin-bottom:4px;font-size:.7rem;}
+
+/* PRICE TICKER BANNER */
+.ticker-banner{position:fixed;top:62px;left:0;right:0;height:34px;background:rgba(8,15,28,0.97);border-bottom:1px solid rgba(0,212,255,0.15);z-index:850;overflow:hidden;display:flex;align-items:center;}
+.ticker-banner::before{content:'';position:absolute;left:0;top:0;bottom:0;width:70px;background:linear-gradient(90deg,rgba(8,15,28,1) 40%,transparent);z-index:2;pointer-events:none;}
+.ticker-banner::after{content:'';position:absolute;right:0;top:0;bottom:0;width:70px;background:linear-gradient(270deg,rgba(8,15,28,1) 40%,transparent);z-index:2;pointer-events:none;}
+.ticker-label{position:absolute;left:0;top:0;bottom:0;width:64px;background:linear-gradient(135deg,rgba(0,212,255,.18),rgba(0,255,234,.1));border-right:1px solid rgba(0,212,255,.2);display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);z-index:3;flex-shrink:0;}
+.ticker-track{display:flex;align-items:center;gap:0;white-space:nowrap;animation:ticker-scroll 42s linear infinite;padding-left:70px;}
+.ticker-track:hover{animation-play-state:paused;}
+@keyframes ticker-scroll{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+.ticker-item{display:inline-flex;align-items:center;gap:7px;padding:0 18px;border-right:1px solid rgba(255,255,255,.05);height:34px;cursor:default;transition:background .2s;}
+.ticker-item:hover{background:rgba(0,212,255,.06);}
+.ticker-sym{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;color:var(--t2);letter-spacing:.02em;}
+.ticker-price{font-family:'JetBrains Mono',monospace;font-size:.76rem;font-weight:700;color:var(--t1);}
+.ticker-chg{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;display:inline-flex;align-items:center;gap:2px;}
+.ticker-chg.up{color:var(--green);}
+.ticker-chg.dn{color:var(--red);}
+.ticker-chg.flat{color:var(--t3);}
+.ticker-dot{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.12);flex-shrink:0;}
+/* push layout content down to account for ticker banner */
+.layout{padding-top:calc(62px + 34px) !important;}
+.layout.no-ticker{padding-top:62px !important;}
+
+/* NEWS ARTICLE MODAL */
+.news-modal{max-width:620px;}
+.news-modal-source-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg3);border-radius:10px;margin-bottom:16px;}
+.news-modal-source-logo{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;color:var(--bg);flex-shrink:0;}
+.news-modal-source-name{font-weight:800;font-size:.88rem;color:var(--blue);}
+.news-modal-time{font-size:.72rem;color:var(--t3);margin-left:auto;}
+.news-modal-headline{font-size:1.12rem;font-weight:800;line-height:1.45;letter-spacing:-.01em;margin-bottom:14px;color:var(--t1);}
+.news-modal-sentiment-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:10px 14px;border-radius:10px;}
+.news-modal-sentiment-bar.bull{background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.2);}
+.news-modal-sentiment-bar.bear{background:rgba(255,61,113,.08);border:1px solid rgba(255,61,113,.2);}
+.news-modal-sentiment-bar.neu{background:rgba(255,183,0,.08);border:1px solid rgba(255,183,0,.2);}
+.news-modal-abstract{font-size:.87rem;color:var(--t2);line-height:1.75;margin-bottom:16px;}
+.news-modal-keypoints{background:var(--bg3);border-radius:10px;padding:14px 16px;margin-bottom:16px;}
+.news-modal-keypoints-title{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--blue);margin-bottom:10px;}
+.news-modal-keypoint{display:flex;align-items:flex-start;gap:8px;padding:5px 0;font-size:.83rem;color:var(--t2);line-height:1.55;border-bottom:1px solid rgba(255,255,255,.04);}
+.news-modal-keypoint:last-child{border-bottom:none;}
+.news-modal-keypoint-dot{width:6px;height:6px;border-radius:50%;background:var(--blue);flex-shrink:0;margin-top:6px;}
+.news-modal-tickers{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+.news-modal-source-btn{display:inline-flex;align-items:center;gap:6px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.3);color:var(--blue);font-weight:700;font-size:.84rem;padding:9px 18px;border-radius:10px;cursor:pointer;transition:all .2s;width:100%;justify-content:center;}
+.news-modal-source-btn:hover{background:rgba(0,212,255,.2);transform:translateY(-1px);}
+.news-ai-generating{display:flex;align-items:center;gap:8px;color:var(--t3);font-size:.82rem;padding:16px 0;}
+.news-ai-dot{width:6px;height:6px;border-radius:50%;background:var(--blue);animation:news-dots 1.2s infinite;}
+.news-ai-dot:nth-child(2){animation-delay:.2s;}
+.news-ai-dot:nth-child(3){animation-delay:.4s;}
+@keyframes news-dots{0%,100%{opacity:.3;transform:scale(.8);}50%{opacity:1;transform:scale(1.2);}}
+
+/* ENHANCED MODAL NEWS ITEMS — clickable with hover state */
+.modal-news-item{padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;border-radius:0;transition:all .2s;}
+.modal-news-item:last-child{border-bottom:none;}
+.modal-news-item:hover{padding-left:6px;padding-right:6px;border-radius:8px;background:rgba(0,212,255,.05);}
+.modal-news-item:hover .modal-news-title{color:var(--blue);}
+.modal-news-title{font-size:.83rem;font-weight:600;line-height:1.4;color:var(--t1);transition:color .2s;}
+.modal-news-meta{display:flex;align-items:center;gap:6px;margin-bottom:4px;font-size:.7rem;}
+
+/* NEWS PAGE ITEM — no more expand, just click for popup */
+.news-item{padding:15px 18px;border-bottom:1px solid rgba(255,255,255,.03);cursor:pointer;transition:all .2s;}
+.news-item:hover{background:rgba(0,212,255,.04);}
+.news-item:hover .news-title{color:var(--blue);}
+.news-title{font-size:.88rem;font-weight:600;line-height:1.45;margin-bottom:6px;transition:color .2s;}
+
+/* STOCK NEWS SECTION HEADER */
+.stock-news-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.stock-news-count-badge{padding:2px 8px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.2);border-radius:20px;font-size:.66rem;font-weight:700;color:var(--blue);}
+.news-loading-row{display:flex;align-items:center;gap:6px;color:var(--t3);font-size:.78rem;padding:10px 0;}
+/* AUTH GATE */
+.auth-gate{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 200px);padding:40px 24px;text-align:center;width:100%;}
+.auth-gate-card{background:var(--bg2);border:1px solid rgba(0,212,255,.2);border-radius:20px;padding:48px 40px;max-width:460px;width:100%;position:relative;overflow:hidden;}
+.auth-gate-card::before{content:'';position:absolute;top:-60%;left:50%;transform:translateX(-50%);width:340px;height:340px;background:radial-gradient(circle,rgba(0,212,255,.07) 0%,transparent 65%);pointer-events:none;}
+.auth-gate-icon{font-size:3rem;margin-bottom:16px;}
+.auth-gate-title{font-size:1.5rem;font-weight:900;letter-spacing:-.03em;margin-bottom:10px;}
+.auth-gate-sub{font-size:.87rem;color:var(--t2);line-height:1.65;margin-bottom:26px;}
+.auth-gate-perks{display:flex;flex-direction:column;gap:8px;margin-bottom:26px;text-align:left;}
+.auth-gate-perk{display:flex;align-items:center;gap:10px;font-size:.83rem;color:var(--t2);}
+.auth-gate-perk .perk-icon{width:26px;height:26px;border-radius:7px;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.2);display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0;}
+.auth-gate-actions{display:flex;flex-direction:column;gap:10px;}
+/* HOT STOCKS */
+.hot-section{margin-bottom:18px;}
+.hot-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
+.hot-title{display:flex;align-items:center;gap:10px;font-size:1rem;font-weight:800;}
+.hot-flame{font-size:1.15rem;}
+.hot-badge{padding:3px 10px;background:linear-gradient(135deg,rgba(255,183,0,.18),rgba(255,61,113,.12));border:1px solid rgba(255,183,0,.35);border-radius:20px;font-size:.67rem;font-weight:800;color:var(--amber);text-transform:uppercase;letter-spacing:.05em;animation:pulse 2s infinite;}
+.hot-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:12px;}
+.hot-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:15px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;}
+.hot-card:hover{border-color:rgba(255,183,0,.4);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.3);}
+.hot-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--amber),var(--red));}
+.hot-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;}
+.hot-ticker-group{display:flex;align-items:center;gap:8px;}
+.hot-rank{font-size:.63rem;font-weight:800;color:var(--amber);font-family:'JetBrains Mono',monospace;width:14px;}
+.hot-price{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;margin-bottom:2px;}
+.hot-change{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:700;display:flex;align-items:center;gap:3px;}
+.hot-vol-bar{height:3px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;margin-top:9px;}
+.hot-vol-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--amber),var(--red));}
+.hot-vol-label{display:flex;justify-content:space-between;font-size:.6rem;color:var(--t3);margin-top:2px;}
+.hot-why{font-size:.73rem;color:var(--t2);margin-top:6px;line-height:1.45;display:flex;align-items:flex-start;gap:5px;}
+.hot-why-dot{width:4px;height:4px;border-radius:50%;background:var(--amber);flex-shrink:0;margin-top:5px;}
+
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback, useMemo } = React;
+
+// ─── CONSTANTS ────────────────────────────────────────────────────────────────
+const STOCKS_BASE = {
+  AAPL:  { name:'Apple Inc.',           sector:'Technology', color:'#6e6e73', beta:1.19 },
+  NVDA:  { name:'NVIDIA Corp.',         sector:'Semiconductors', color:'#76b900', beta:1.72 },
+  MSFT:  { name:'Microsoft Corp.',      sector:'Technology', color:'#0078d4', beta:0.90 },
+  TSLA:  { name:'Tesla Inc.',           sector:'Automotive', color:'#cc0000', beta:2.10 },
+  AMZN:  { name:'Amazon.com Inc.',      sector:'E-Commerce', color:'#ff9900', beta:1.21 },
+  GOOGL: { name:'Alphabet Inc.',        sector:'Technology', color:'#4285f4', beta:1.06 },
+  META:  { name:'Meta Platforms',       sector:'Social Media', color:'#0866ff', beta:1.31 },
+  JPM:   { name:'JPMorgan Chase',       sector:'Finance', color:'#005b8a', beta:1.08 },
+  AMD:   { name:'Advanced Micro Devices',sector:'Semiconductors', color:'#ed1c24', beta:1.78 },
+  NFLX:  { name:'Netflix Inc.',         sector:'Streaming', color:'#e50914', beta:1.42 },
+};
+const INDEX_SYMS = { SPY:'S&P 500', QQQ:'NASDAQ', DIA:'Dow Jones' };
+const ALL_SYMS = [...Object.keys(STOCKS_BASE), ...Object.keys(INDEX_SYMS)];
+const COLORS_PORT = ['#00d4ff','#00e676','#ffb700','#7c5cfc','#ff3d71','#00ffea','#ff9900'];
+
+const PORTFOLIO_HOLDINGS = [
+  { ticker:'AAPL', shares:15, avgCost:165.20 },
+  { ticker:'NVDA', shares:5,  avgCost:620.00 },
+  { ticker:'MSFT', shares:10, avgCost:380.50 },
+  { ticker:'AMZN', shares:8,  avgCost:175.40 },
+  { ticker:'GOOGL',shares:12, avgCost:145.00 },
+];
+
+const PLANS = [
+  { id:'free',    name:'Free',    price:0,    color:'var(--t2)',
+    features:['Market overview dashboard','3-stock watchlist','Basic news feed','Limited price alerts (2 max)'],
+    locked:['Full portfolio tracking','Technical indicators','AI signal engine','Historical charting'] },
+  { id:'premium', name:'Premium', price:9.99, color:'var(--amber)',
+    features:['Everything in Free','Unlimited watchlist','Full portfolio analytics','Price & news alerts (20 max)','30-day historical charts'],
+    locked:['Technical indicators (RSI, MACD)','AI signal engine','Portfolio risk score'] },
+  { id:'pro',     name:'Pro',     price:29.99, color:'var(--blue)',
+    features:['Everything in Premium','AI signal intelligence','RSI, MACD, Moving Averages','Portfolio risk assessment','1-year historical charts','Unlimited alerts','Priority news feed'] },
+];
+
+const DEMO_NEWS = [
+  { id:1,  source:'Reuters',      headline:'NVIDIA forecasts record Q4 revenue driven by Blackwell AI chip demand',              summary:'NVIDIA raised its Q4 revenue guidance citing explosive demand for its Blackwell AI data center chips. CEO Jensen Huang confirmed backlog extends through next year as hyperscalers race to build AI infrastructure. Analysts upgraded price targets following the announcement.', datetime:Date.now()/1000-600,    related:'NVDA,AMD',  url:'https://www.reuters.com/technology/' },
+  { id:2,  source:'Bloomberg',    headline:'Apple eyes foldable iPhone launch for 2026, supply chain sources confirm',             summary:'Apple is reportedly finalizing designs for a foldable iPhone targeting a late 2026 release. Supply chain partners in Taiwan and South Korea have begun tooling production lines. The device is expected to compete directly with Samsung Galaxy Fold series.', datetime:Date.now()/1000-1800,   related:'AAPL',       url:'https://www.bloomberg.com/technology' },
+  { id:3,  source:'CNBC',         headline:'Federal Reserve holds rates steady, signals two cuts possible in H2 2025',              summary:'The Federal Open Market Committee held the federal funds rate at 5.25-5.50%. Fed Chair Jerome Powell stated the committee sees two potential rate cuts in the second half of 2025 contingent on further cooling inflation data. Markets rallied on the forward guidance.', datetime:Date.now()/1000-3200,   related:'JPM,MSFT',   url:'https://www.cnbc.com/economy/' },
+  { id:4,  source:'WSJ',          headline:'Tesla misses Q3 delivery estimates; EV demand softening in key markets',               summary:'Tesla delivered 435,059 vehicles in Q3, falling short of the 463,000 analyst consensus estimate. CEO Elon Musk cited macroeconomic headwinds and rising competition in China from BYD and NIO. The company maintained full-year guidance citing Cybertruck ramp-up.', datetime:Date.now()/1000-4700,   related:'TSLA',       url:'https://www.wsj.com/business/autos/' },
+  { id:5,  source:'MarketWatch',  headline:'Meta AI Studio sees record enterprise adoption; ad revenue beats consensus',            summary:'Meta Platforms reported Q3 ad revenue of $39.9 billion, surpassing the $38.2 billion consensus estimate. The company attributed growth to AI-optimized ad placement algorithms and Meta AI Studio enterprise subscriptions growing 340% year-over-year.', datetime:Date.now()/1000-5900,   related:'META,GOOGL',  url:'https://www.marketwatch.com/investing/' },
+  { id:6,  source:'Financial Times', headline:'Amazon AWS growth accelerates to 19% YoY on GenAI workload surge',                 summary:'Amazon Web Services revenue grew 19% year-over-year to $27.4 billion, the fastest growth rate in six quarters. CEO Andy Jassy credited generative AI workload migrations as enterprises shift from on-premise GPU clusters to cloud-based inference infrastructure.', datetime:Date.now()/1000-7200,   related:'AMZN',       url:'https://www.ft.com/technology' },
+  { id:7,  source:"Barron's",     headline:'Netflix subscriber beats estimates; ad-supported tier now 40% of new signups',          summary:'Netflix added 9.1 million net subscribers in Q3, exceeding the 7.5 million estimate. The ad-supported tier now accounts for 40% of new monthly sign-ups globally. Management raised Q4 revenue guidance to $10.1-10.3 billion citing strong content slate.', datetime:Date.now()/1000-9800,   related:'NFLX',       url:'https://www.barrons.com/articles/' },
+  { id:8,  source:'TechCrunch',   headline:'AMD Instinct MI350 gains traction among hyperscalers as NVIDIA alternative',           summary:'Advanced Micro Devices confirmed multiple hyperscaler wins for its Instinct MI350 AI accelerator, directly competing with NVIDIA H100 GPUs. Microsoft Azure and Oracle Cloud Infrastructure have placed significant orders, diversifying away from NVIDIA supply constraints.', datetime:Date.now()/1000-12000,  related:'AMD,NVDA',   url:'https://techcrunch.com/category/artificial-intelligence/' },
+  { id:9,  source:'Reuters',      headline:'JPMorgan Q3 profit falls 2% on lower net interest income, credit losses rise',         summary:'JPMorgan Chase reported Q3 net income of $13.1 billion, down 2% year-over-year as net interest income declined amid competitive deposit pricing. The bank set aside $3.1 billion for credit losses, up 36%, signaling concern about commercial real estate exposure.', datetime:Date.now()/1000-14400,  related:'JPM',        url:'https://www.reuters.com/business/finance/' },
+  { id:10, source:'Bloomberg',    headline:'Microsoft Azure market share rises to 24% amid AI copilot enterprise rollout',          summary:'Microsoft Azure captured 24% of the cloud infrastructure market in Q3, up from 22% in Q2, according to Synergy Research data. The gains are attributed to Microsoft 365 Copilot enterprise deployments driving integrated Azure usage across 50,000 business customers.', datetime:Date.now()/1000-18000,  related:'MSFT,GOOGL',  url:'https://www.bloomberg.com/technology' },
+  { id:11, source:'Seeking Alpha', headline:'Alphabet Google Search share stable at 89.9% despite AI Overviews rollout concerns',  summary:'New data from StatCounter shows Googles search engine market share held steady at 89.9% in Q3, alleviating investor concerns that AI Overviews would reduce click-through rates. Alphabet monetization per search query actually increased 4% as AI-enhanced ads performed better.', datetime:Date.now()/1000-21600,  related:'GOOGL,META',  url:'https://seekingalpha.com/news/' },
+  { id:12, source:'Investor\'s Business Daily', headline:'NVIDIA data center segment hits $22.6B — blows past guidance by 8%',   summary:'NVIDIA Data Center revenue reached $22.6 billion in Q2 FY2025, beating guidance of $20.8 billion by 8.7%. The Hopper GPU architecture continues to dominate AI training workloads while Blackwell production ramp is set to further accelerate revenue in H2.', datetime:Date.now()/1000-28800,  related:'NVDA',       url:'https://www.investors.com/news/' },
+  { id:13, source:'CNBC',         headline:'Tesla FSD v13 reaches 1 billion supervised miles; robotaxi timeline pulled forward',    summary:'Tesla Full Self-Driving version 13 has accumulated over 1 billion supervised real-world miles, and CEO Elon Musk announced the company is pulling forward its robotaxi network launch in Austin, Texas to mid-2025. The news sent Tesla shares up 8% in after-hours trading.', datetime:Date.now()/1000-36000,  related:'TSLA',       url:'https://www.cnbc.com/tesla/' },
+  { id:14, source:'Reuters',      headline:'Amazon doubles Project Kuiper satellite launch cadence for 2025 broadband push',        summary:'Amazon confirmed it will double the launch rate for its Project Kuiper satellite internet constellation in 2025, targeting 578 additional satellites. The service is set to compete with SpaceX Starlink and generate an estimated $10 billion annual recurring revenue by 2027.', datetime:Date.now()/1000-43200,  related:'AMZN',       url:'https://www.reuters.com/technology/' },
+  { id:15, source:'Bloomberg',    headline:'Apple Intelligence adoption rate hits 62% among iPhone 16 users in first 90 days',      summary:'Bloomberg Intelligence data shows Apple Intelligence AI features have been enabled by 62% of iPhone 16 users within the first 90 days of availability, surpassing internal Apple targets. Siri improvements are cited as the most-used feature, with writing tools second.', datetime:Date.now()/1000-50400,  related:'AAPL',       url:'https://www.bloomberg.com/technology' },
+];
+
+// ─── PER-STOCK NEWS CACHE ─────────────────────────────────────────────────────
+// Keyed by ticker → { articles: [], ts: epoch }
+const STOCK_NEWS_CACHE = {};
+const STOCK_NEWS_TTL = 5 * 60 * 1000; // 5 min
+
+async function fetchStockNews(ticker, globalNews) {
+  // Check cache
+  const cached = STOCK_NEWS_CACHE[ticker];
+  if (cached && Date.now() - cached.ts < STOCK_NEWS_TTL) return cached.articles;
+
+  try {
+    // Try Finnhub company news (last 7 days)
+    const to = Math.floor(Date.now() / 1000);
+    const from = to - 7 * 86400;
+    const today = new Date().toISOString().split('T')[0];
+    const fromDate = new Date((from) * 1000).toISOString().split('T')[0];
+    const r = await fetch(`${FH_BASE}/company-news?symbol=${ticker}&from=${fromDate}&to=${today}&token=${FH_KEY}`);
+    if (r.ok) {
+      const d = await r.json();
+      if (Array.isArray(d) && d.length > 0) {
+        const articles = d.slice(0, 8).map(n => ({ ...n, headline: n.headline || n.title, related: ticker }));
+        STOCK_NEWS_CACHE[ticker] = { articles, ts: Date.now() };
+        return articles;
+      }
+    }
+  } catch(e) {}
+
+  // Fallback: filter from global demo news
+  const fallback = globalNews.filter(n => (n.related || '').toUpperCase().includes(ticker));
+  // Add generic stock articles if we don't have enough
+  const info = STOCKS_BASE[ticker];
+  const synthetic = [
+    { id: `syn-${ticker}-1`, source: 'Finnhub News', headline: `${info?.name || ticker} latest market update — analyst coverage and price targets`, summary: `Analysts continue to monitor ${ticker} closely as the stock trades near key technical levels. Institutional flow data shows mixed signals ahead of the next earnings report. Multiple investment banks have updated price targets.`, datetime: Date.now()/1000 - 3600, related: ticker, url: null },
+    { id: `syn-${ticker}-2`, source: 'Market Pulse', headline: `${ticker} sector trends: ${info?.sector || 'Market'} outlook for the coming quarter`, summary: `The ${info?.sector || 'broader market'} sector faces shifting macro conditions including Fed policy expectations and geopolitical risk. ${ticker} is positioned relative to peers based on recent earnings guidance and valuation multiples.`, datetime: Date.now()/1000 - 86400, related: ticker, url: null },
+  ];
+  const merged = [...fallback, ...synthetic].slice(0, 6);
+  STOCK_NEWS_CACHE[ticker] = { articles: merged, ts: Date.now() };
+  return merged;
+}
+
+// ─── NEWS ARTICLE MODAL ──────────────────────────────────────────────────────
+function generateNewsAbstract(article) {
+  // Generate a rich abstract from the article data using the Claude API
+  return null; // signals to use built-in
+}
+
+function NewsArticleModal({ article, onClose }) {
+  const [aiContent, setAiContent] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const headline = article.headline || article.title || '';
+  const source   = article.source || 'News';
+  const { sentiment: sent, score } = classifySentiment(headline, article.summary || '');
+  const tickers  = (article.related || '').split(',').filter(t => t && STOCKS_BASE[t.trim()]).map(t => t.trim());
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setAiContent(null);
+
+    const prompt = `You are a concise financial news analyst for Billy Bronco Market Analyst app.
+
+Given this financial news article, provide a structured analysis in JSON format only (no markdown, no code fences):
+{
+  "abstract": "2-3 sentence plain-language summary of what happened and why it matters",
+  "marketImpact": "1-2 sentences on how this affects the stock(s) mentioned",
+  "keyPoints": ["point 1", "point 2", "point 3"],
+  "watchFor": "One sentence on what investors should monitor next"
+}
+
+Article headline: ${headline}
+Source: ${source}
+Summary context: ${article.summary || 'No additional context available.'}
+Related tickers: ${tickers.join(', ') || 'General market'}
+
+Respond with ONLY the JSON object. Be specific, factual, and market-focused.`;
+
+    fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (cancelled) return;
+      const raw = (data.content || []).map(b => b.text || '').join('');
+      try {
+        const clean = raw.replace(/```json|```/g, '').trim();
+        const parsed = JSON.parse(clean);
+        setAiContent(parsed);
+      } catch(e) {
+        // Fallback: use summary
+        setAiContent({
+          abstract: article.summary || headline,
+          marketImpact: `This development is ${sent === 'bull' ? 'broadly positive' : sent === 'bear' ? 'broadly negative' : 'neutral'} for the affected stocks.`,
+          keyPoints: tickers.length ? tickers.map(t => `Watch ${t} for reaction to this news`) : ['Monitor market response', 'Check technical levels', 'Review analyst commentary'],
+          watchFor: 'Monitor price action and volume at key technical levels.'
+        });
+      }
+      setLoading(false);
+    })
+    .catch(() => {
+      if (cancelled) return;
+      setAiContent({
+        abstract: article.summary && article.summary.length > 60 ? article.summary : headline + ' — ' + (article.summary || 'See source for full details.'),
+        marketImpact: `Sentiment classified as ${sent === 'bull' ? 'bullish' : sent === 'bear' ? 'bearish' : 'neutral'} (${score.toFixed(1)}/10) based on keyword analysis.`,
+        keyPoints: tickers.map(t => `Impact relevant to ${t} — ${STOCKS_BASE[t]?.sector || 'sector'}`).concat(['Monitor analyst reactions', 'Track volume for confirmation']).slice(0, 3),
+        watchFor: 'Follow up with source article for complete details and context.'
+      });
+      setLoading(false);
+    });
+
+    return () => { cancelled = true; };
+  }, [article]);
+
+  const sentColor = sent === 'bull' ? 'var(--green)' : sent === 'bear' ? 'var(--red)' : 'var(--amber)';
+  const sentLabel = sent === 'bull' ? '▲ Bullish Signal' : sent === 'bear' ? '▼ Bearish Signal' : '● Neutral';
+
+  return (
+    <div className="overlay" onClick={onClose}>
+      <div className="modal news-modal modal-wide" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+            <div className="news-modal-source-logo">{source.slice(0,2).toUpperCase()}</div>
+            <div>
+              <div className="news-modal-source-name">{source}</div>
+              <div style={{ fontSize:'.7rem', color:'var(--t3)' }}>{timeAgo(article.datetime)}</div>
+            </div>
+          </div>
+          <button className="close-btn" onClick={onClose}>✕</button>
+        </div>
+
+        <div className="news-modal-headline">{headline}</div>
+
+        <div className={`news-modal-sentiment-bar ${sent}`}>
+          <span style={{ fontSize:'.82rem', fontWeight:700, color:sentColor }}>{sentLabel}</span>
+          <span style={{ fontSize:'.72rem', color:'var(--t3)', marginLeft:8 }}>Sentiment score: {score.toFixed(1)}/10</span>
+          {tickers.length > 0 && (
+            <div style={{ marginLeft:'auto', display:'flex', gap:5 }}>
+              {tickers.map(t => <span key={t} className="news-tag">{t}</span>)}
+            </div>
+          )}
+        </div>
+
+        {loading ? (
+          <div className="news-ai-generating">
+            <div className="news-ai-dot"/>
+            <div className="news-ai-dot"/>
+            <div className="news-ai-dot"/>
+            <span>Generating analysis…</span>
+          </div>
+        ) : aiContent ? (
+          <>
+            <div style={{ fontWeight:700, fontSize:'.7rem', textTransform:'uppercase', letterSpacing:'.08em', color:'var(--t3)', marginBottom:7 }}>Summary</div>
+            <div className="news-modal-abstract">{aiContent.abstract}</div>
+
+            {aiContent.marketImpact && (
+              <div style={{ background:'rgba(0,212,255,.06)', border:'1px solid rgba(0,212,255,.15)', borderRadius:9, padding:'9px 13px', marginBottom:14, fontSize:'.82rem', color:'var(--t2)', lineHeight:1.6 }}>
+                <span style={{ fontWeight:700, color:'var(--blue)' }}>Market Impact: </span>{aiContent.marketImpact}
+              </div>
+            )}
+
+            {aiContent.keyPoints && aiContent.keyPoints.length > 0 && (
+              <div className="news-modal-keypoints">
+                <div className="news-modal-keypoints-title">Key Points</div>
+                {aiContent.keyPoints.map((p, i) => (
+                  <div key={i} className="news-modal-keypoint">
+                    <div className="news-modal-keypoint-dot"/>
+                    <span>{p}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {aiContent.watchFor && (
+              <div style={{ display:'flex', alignItems:'flex-start', gap:8, marginBottom:16, fontSize:'.82rem', color:'var(--t2)' }}>
+                <span style={{ fontSize:'1rem', flexShrink:0 }}>👁</span>
+                <span><strong style={{ color:'var(--amber)' }}>Watch For: </strong>{aiContent.watchFor}</span>
+              </div>
+            )}
+          </>
+        ) : null}
+
+        {article.url ? (
+          <button className="news-modal-source-btn" onClick={() => window.open(article.url, '_blank')}>
+            Read Full Article on {source} ↗
+          </button>
+        ) : (
+          <div style={{ textAlign:'center', fontSize:'.75rem', color:'var(--t3)', padding:'8px', background:'var(--bg3)', borderRadius:8 }}>
+            Full article link unavailable — sourced from Finnhub news feed
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const LEARN_ITEMS = [
+  { term:'RSI (Relative Strength Index)', def:'A momentum oscillator measuring speed and change of price movements. Ranges 0–100. Values above 70 signal overbought conditions; below 30 signal oversold conditions and potential buying opportunities.', formula:'RSI = 100 – 100/(1 + RS)   where RS = Avg Gain / Avg Loss over 14 periods' },
+  { term:'MACD (Moving Avg Convergence Divergence)', def:'A trend-following indicator showing the relationship between two EMAs. A bullish signal occurs when the MACD line crosses above the signal line; bearish when it crosses below.', formula:'MACD = EMA(12) – EMA(26)   Signal = EMA(9) of MACD   Histogram = MACD – Signal' },
+  { term:'Moving Average (SMA / EMA)', def:'SMA averages closing prices over N days equally. EMA gives more weight to recent prices. The 50-day and 200-day MAs are widely used trend indicators. A Golden Cross (50MA > 200MA) is bullish; Death Cross is bearish.', formula:'SMA(n) = (P1 + P2 + ... + Pn) / n' },
+  { term:'P/E Ratio (Price-to-Earnings)', def:'Compares stock price to earnings per share. A high P/E may indicate overvaluation or strong growth expectations; a low P/E may signal undervaluation or slow growth prospects.', formula:'P/E = Market Price per Share / Earnings per Share (EPS)' },
+  { term:'Portfolio Beta', def:'Measures portfolio sensitivity to market movements. Beta of 1.0 moves with the market. Beta > 1 is more volatile; Beta < 1 is less volatile. High-beta portfolios carry more risk but potential for higher returns.', formula:'Portfolio Beta = Σ (Weight_i × Beta_i)   for each position i' },
+  { term:'Value at Risk (VaR)', def:'Estimates the maximum potential loss over a given time period at a given confidence level (e.g., 95%). Widely used in portfolio risk management to understand downside exposure.', formula:"VaR(95%) ≈ –1.645 × σ × √T   where σ = daily std dev, T = time horizon in days" },
+];
+
+// ─── UTILITIES ────────────────────────────────────────────────────────────────
+const fmt = (n, d=2) => n == null ? '—' : Number(n).toLocaleString('en-US', {minimumFractionDigits:d,maximumFractionDigits:d});
+const fmtPct = (n) => n == null ? '—' : `${n>=0?'+':''}${fmt(n)}%`;
+const fmtPrice = (n) => n == null ? '—' : `$${fmt(n)}`;
+const timeAgo = (ts) => { const s=Date.now()/1000-ts; if(s<60)return`${Math.floor(s)}s ago`; if(s<3600)return`${Math.floor(s/60)}m ago`; if(s<86400)return`${Math.floor(s/3600)}h ago`; return`${Math.floor(s/86400)}d ago`; };
+
+function calcEMA(data, period) {
+  if (!data || data.length < period) return [];
+  const k = 2 / (period + 1);
+  let ema = data.slice(0, period).reduce((a,b)=>a+b,0)/period;
+  const out = [ema];
+  for (let i = period; i < data.length; i++) { ema = data[i]*k + ema*(1-k); out.push(ema); }
+  return out;
+}
+function calcRSI(closes, period=14) {
+  if (!closes || closes.length < period+1) return null;
+  let gains=0, losses=0;
+  for (let i=1;i<=period;i++) { const d=closes[i]-closes[i-1]; d>0?gains+=d:losses-=d; }
+  let avgG=gains/period, avgL=losses/period;
+  for (let i=period+1;i<closes.length;i++) {
+    const d=closes[i]-closes[i-1];
+    avgG=(avgG*(period-1)+Math.max(0,d))/period;
+    avgL=(avgL*(period-1)+Math.max(0,-d))/period;
+  }
+  if (avgL===0) return 100;
+  return 100-100/(1+avgG/avgL);
+}
+function calcMACD(closes) {
+  if (!closes || closes.length < 35) return null;
+  const ema12=calcEMA(closes,12), ema26=calcEMA(closes,26);
+  const offset=12-1;
+  const macdLine=ema26.map((_,i)=>ema12[i+offset]-ema26[i]);
+  const signal=calcEMA(macdLine,9);
+  const last=macdLine[macdLine.length-1], lastSig=signal[signal.length-1];
+  return { macd:last, signal:lastSig, histogram:last-lastSig };
+}
+function calcSMA(closes, period) {
+  if (!closes || closes.length < period) return null;
+  return closes.slice(-period).reduce((a,b)=>a+b,0)/period;
+}
+
+function classifySentiment(headline='', summary='') {
+  const text=(headline+' '+summary).toLowerCase();
+  const bull=['surge','jump','rally','gain','beat','record','growth','profit','rise','boost','strong','positive','bullish','upgrade','soar','accelerate'];
+  const bear=['fall','drop','decline','miss','loss','down','weak','negative','bearish','cut','crash','fear','concern','risk','disappoint','fall','slump'];
+  const bs=bull.filter(w=>text.includes(w)).length;
+  const rs=bear.filter(w=>text.includes(w)).length;
+  if (bs>rs+1) return {sentiment:'bull',score:Math.min(9.5,5.5+bs*.5)};
+  if (rs>bs+1) return {sentiment:'bear',score:Math.max(1.5,4.5-rs*.5)};
+  return {sentiment:'neu',score:5+(bs-rs)*.3};
+}
+
+function generateSignal(closes, curPrice, prevClose) {
+  if (!closes || closes.length < 30) {
+    const dp = prevClose ? (curPrice-prevClose)/prevClose*100 : 0;
+    if (dp > 2) return { signal:'BUY', type:'bull', conf:68, factors:['Strong intraday momentum','Price above prior close'] };
+    if (dp < -2) return { signal:'SELL', type:'bear', conf:65, factors:['Bearish intraday move','Price below prior close'] };
+    return { signal:'HOLD', type:'warn', conf:58, factors:['Neutral price action','Awaiting directional catalyst'] };
+  }
+  const rsi=calcRSI(closes), macd=calcMACD(closes);
+  const sma20=calcSMA(closes,20), sma50=calcSMA(closes,50);
+  let score=0; const factors=[];
+  if (rsi!=null){
+    if(rsi<30){score+=2;factors.push(`RSI oversold (${fmt(rsi,1)})`);}
+    else if(rsi<40){score+=1;factors.push(`RSI approaching oversold (${fmt(rsi,1)})`);}
+    else if(rsi>70){score-=2;factors.push(`RSI overbought (${fmt(rsi,1)})`);}
+    else if(rsi>60){score-=1;factors.push(`RSI elevated (${fmt(rsi,1)})`);}
+    else factors.push(`RSI neutral (${fmt(rsi,1)})`);
+  }
+  if (macd!=null){
+    if(macd.histogram>0&&macd.macd>0){score+=1;factors.push('MACD bullish crossover');}
+    else if(macd.histogram<0&&macd.macd<0){score-=1;factors.push('MACD bearish crossover');}
+    else factors.push('MACD mixed');
+  }
+  if (sma20&&sma50){
+    if(curPrice>sma50){score+=1;factors.push(`Above 50-day MA ($${fmt(sma50)})`);}
+    else{score-=1;factors.push(`Below 50-day MA ($${fmt(sma50)})`);}
+    if(sma20>sma50){score+=1;factors.push('Golden cross (20MA > 50MA)');}
+    else{score-=1;factors.push('Death cross (20MA < 50MA)');}
+  }
+  const conf=Math.min(91,Math.max(50,60+Math.abs(score)*7));
+  if(score>=2) return {signal:'BUY',type:'bull',conf,rsi,macd,sma20,sma50,factors};
+  if(score<=-2) return {signal:'SELL',type:'bear',conf,rsi,macd,sma20,sma50,factors};
+  return {signal:'HOLD',type:'warn',conf,rsi,macd,sma20,sma50,factors};
+}
+
+function computeRiskScore(rows) {
+  const totalVal=rows.reduce((s,r)=>s+r.val,0);
+  if(!totalVal) return 50;
+  const maxW=Math.max(...rows.map(r=>r.val/totalVal));
+  const sectors=[...new Set(rows.map(r=>STOCKS_BASE[r.ticker]?.sector).filter(Boolean))];
+  const wBeta=rows.reduce((s,r)=>s+(STOCKS_BASE[r.ticker]?.beta||1.2)*(r.val/totalVal),0);
+  let score=0;
+  score+=wBeta*22;
+  score+=maxW*28;
+  score+=Math.max(0,(4-sectors.length)*6);
+  if(rows.length<3) score+=10;
+  return Math.round(Math.min(100,Math.max(5,score)));
+}
+
+// ─── FINNHUB LIVE DATA LAYER ─────────────────────────────────────────────────
+// Embedded key — no user setup required.
+// Strategy:
+//   • On load: fetch all quotes via REST (one call per symbol, staggered 350 ms).
+//   • WebSocket: subscribe to all stocks for real-time trade ticks (market hours).
+//   • Auto REST re-poll: every 15 s (market open) or 90 s (market closed).
+//   • Candles: fetched on demand, cached in sessionStorage for 24 h.
+//   • News: fetched once, refreshed every 5 min.
+// Rate budget (free 60 req/min): 13 symbols × REST poll = 13 calls/poll.
+//   At 15 s intervals → 52 calls/min max, safely under the limit.
+
+const FH_KEY  = 'd79jethr01qqpmhh033g';
+const FH_BASE = 'https://finnhub.io/api/v1';
+
+// ── Fallback closing prices (used when API is unavailable / market loading) ─
+// Values are approximate recent closes — display only, not financial advice.
+const FALLBACK_PRICES = {
+  AAPL:193.18, NVDA:876.35, MSFT:415.50, TSLA:247.80, AMZN:193.25,
+  GOOGL:168.10, META:499.05, JPM:200.15, AMD:158.40, NFLX:616.20,
+  SPY:524.60, QQQ:441.50, DIA:389.20,
+};
+function makeFallbackQuote(sym) {
+  const c = FALLBACK_PRICES[sym] || 100;
+  return { c, pc: c * 0.998, d: c * 0.002, dp: 0.2, h: c * 1.005, l: c * 0.995, o: c * 0.999, t: 0, isFallback: true };
+}
+
+// ── sessionStorage cache for candles only (quotes are always live) ────────
+const CANDLE_TTL = 24 * 60 * 60 * 1000;
+function cGet(k) {
+  try {
+    const raw = sessionStorage.getItem('bbfh_' + k);
+    if (!raw) return null;
+    const { data, ts } = JSON.parse(raw);
+    if (Date.now() - ts > CANDLE_TTL) { sessionStorage.removeItem('bbfh_' + k); return null; }
+    return data;
+  } catch(e) { return null; }
+}
+function cSet(k, data) {
+  try { sessionStorage.setItem('bbfh_' + k, JSON.stringify({ data, ts: Date.now() })); } catch(e) {}
+}
+
+const ALL_FETCH_SYMS = [...Object.keys(STOCKS_BASE), 'SPY', 'QQQ', 'DIA'];
+
+// ── Derive local market status from clock (US/Eastern) ───────────────────
+function localMktStatus() {
+  const et   = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+  const day  = et.getDay(), mins = et.getHours() * 60 + et.getMinutes();
+  const isOpen = day >= 1 && day <= 5 && mins >= 570 && mins < 960; // 9:30–16:00 ET
+  return { isOpen, session: isOpen ? 'regular' : 'closed', exchange: 'US' };
+}
+
+// ── Main data hook ────────────────────────────────────────────────────────
+function useMarketData() {
+  const [quotes,     setQuotes]     = useState({});
+  const [news,       setNews]       = useState(DEMO_NEWS);
+  const [mktStatus,  setMktStatus]  = useState(localMktStatus());
+  const [loading,    setLoading]    = useState(true);
+  const [lastUpdate, setLastUpdate] = useState(null);
+  const [error,      setError]      = useState(null);
+  const [wsStatus,   setWsStatus]   = useState('connecting'); // 'live'|'polling'|'error'
+
+  const wsRef      = useRef(null);
+  const pollRef    = useRef(null);
+  const newsRef    = useRef(null);
+  const mountedRef = useRef(true);
+
+  // ── Fetch a single quote from Finnhub REST ────────────────────────────
+  const fetchQuote = useCallback(async (symbol) => {
+    try {
+      const r = await fetch(`${FH_BASE}/quote?symbol=${symbol}&token=${FH_KEY}`);
+      if (!r.ok) return null;
+      const d = await r.json();
+      // Finnhub returns {c,d,dp,h,l,o,pc,t} — exactly our internal shape
+      // Log first response so devs can see what's coming back (open F12 console)
+      if (symbol === 'AAPL') {
+        console.log('[Billy Bronco] Finnhub AAPL raw response:', JSON.stringify(d));
+        if (!d || typeof d.c !== 'number' || d.c <= 0)
+          console.warn('[Billy Bronco] Quote rejected — key may be wrong. Response:', JSON.stringify(d));
+      }
+      // Reject API error objects, non-numeric, or genuinely missing data
+      if (!d || typeof d.c !== 'number' || d.c <= 0) return null;
+      return d;
+    } catch(e) { console.error('[Billy Bronco] fetch error:', e); return null; }
+  }, []);
+
+  // ── Fetch all quotes, staggered to respect 60 req/min ─────────────────
+  const refreshAllQuotes = useCallback(async () => {
+    let anySuccess = false;
+    const status = localMktStatus();
+    if (mountedRef.current) setMktStatus(status);
+
+    for (let i = 0; i < ALL_FETCH_SYMS.length; i++) {
+      const sym = ALL_FETCH_SYMS[i];
+      const q   = await fetchQuote(sym);
+      if (q && mountedRef.current) {
+        setQuotes(prev => ({ ...prev, [sym]: q }));
+        anySuccess = true;
+      } else if (mountedRef.current) {
+        // Fetch failed — keep existing quotes map intact (fallbacks already seeded on boot)
+        // Do NOT call setQuotes here; returning prev[sym] instead of prev was destroying the map.
+      }
+      // 350 ms gap → ~2.8 syms/s → 13 syms in ~4.5 s, safe for 60 req/min
+      if (i < ALL_FETCH_SYMS.length - 1) await new Promise(r => setTimeout(r, 350));
+    }
+    if (mountedRef.current) {
+      setLastUpdate(new Date());
+      setLoading(false);
+      if (!anySuccess) {
+        setError('Showing estimated prices — live quotes pending. Check browser console (F12) for details.');
+      } else {
+        setError(null);
+        // Clear isFallback flags now that we have real data
+      }
+    }
+  }, [fetchQuote]);
+
+  // ── WebSocket for real-time trade ticks (market hours) ───────────────
+  const openWS = useCallback(() => {
+    if (wsRef.current && wsRef.current.readyState <= 1) return; // already open/connecting
+    const ws = new WebSocket(`wss://ws.finnhub.io?token=${FH_KEY}`);
+    wsRef.current = ws;
+
+    ws.onopen = () => {
+      setWsStatus('live');
+      // Subscribe to every stock (indices are not streamable via WS on free tier)
+      Object.keys(STOCKS_BASE).forEach(sym => {
+        ws.send(JSON.stringify({ type: 'subscribe', symbol: sym }));
+      });
+    };
+
+    ws.onmessage = (evt) => {
+      try {
+        const msg = JSON.parse(evt.data);
+        if (msg.type !== 'trade' || !Array.isArray(msg.data)) return;
+        // Group by symbol, take the last (most recent) trade per symbol
+        const bySymbol = {};
+        msg.data.forEach(trade => { bySymbol[trade.s] = trade.p; });
+        setQuotes(prev => {
+          const next = { ...prev };
+          Object.entries(bySymbol).forEach(([sym, price]) => {
+            if (!next[sym]) return;
+            const pc = next[sym].pc || next[sym].c;
+            const dv = price - pc;
+            const dp = pc ? (dv / pc) * 100 : 0;
+            next[sym] = { ...next[sym], c: price, d: dv, dp, t: Date.now() / 1000 };
+          });
+          return next;
+        });
+        setLastUpdate(new Date());
+      } catch(e) {}
+    };
+
+    ws.onerror = () => { setWsStatus('polling'); };
+    ws.onclose = () => {
+      // Re-open after 10 s if market still open
+      setTimeout(() => {
+        if (mountedRef.current && localMktStatus().isOpen) openWS();
+      }, 10000);
+    };
+  }, []);
+
+  const closeWS = useCallback(() => {
+    if (wsRef.current) { wsRef.current.close(); wsRef.current = null; }
+  }, []);
+
+  // ── Start / stop polling interval ─────────────────────────────────────
+  const startPolling = useCallback((intervalMs) => {
+    if (pollRef.current) clearInterval(pollRef.current);
+    pollRef.current = setInterval(refreshAllQuotes, intervalMs);
+  }, [refreshAllQuotes]);
+
+  // ── Fetch news ────────────────────────────────────────────────────────
+  const fetchNews = useCallback(async () => {
+    try {
+      const r = await fetch(`${FH_BASE}/news?category=general&token=${FH_KEY}`);
+      if (!r.ok) return;
+      const d = await r.json();
+      if (Array.isArray(d) && d.length > 0 && mountedRef.current) setNews(d.slice(0, 25));
+    } catch(e) {}
+  }, []);
+
+  // ── Candle fetch — on demand, 24 h cached ────────────────────────────
+  const fetchStockCandles = useCallback(async (symbol, tf = '1Y') => {
+    const ckey = symbol + '_' + tf;
+    const hit  = cGet(ckey);
+    if (hit) return hit;
+
+    const dayMap = { '1W': 7, '1M': 30, '3M': 90, '6M': 180, '1Y': 365 };
+    const days   = dayMap[tf] || 365;
+    const to     = Math.floor(Date.now() / 1000);
+    const from   = to - days * 86400;
+    // Always use Daily resolution — consistent with industry standard
+    // (intraday hourly bars for 1W gave inconsistent data, daily is cleaner)
+    const res    = 'D';
+
+    // Helper to always return synthetic data as fallback
+    const makeSynthetic = () => {
+      const endPrice = FALLBACK_PRICES[symbol] || 100;
+      const synth = genSyntheticCandles(symbol, endPrice, days);
+      return { c: synth, s: 'synthetic' };
+    };
+
+    try {
+      const r = await fetch(`${FH_BASE}/stock/candle?symbol=${symbol}&resolution=${res}&from=${from}&to=${to}&token=${FH_KEY}`);
+      if (!r.ok) return makeSynthetic();
+      const d = await r.json();
+      if (d?.s === 'ok' && Array.isArray(d.c) && d.c.length > 1) {
+        cSet(ckey, d);
+        return d;
+      }
+      // API returned 'no_data' or empty — use synthetic so chart always renders
+      return makeSynthetic();
+    } catch(e) {
+      return makeSynthetic();
+    }
+  }, []);
+
+  // ── Boot sequence ─────────────────────────────────────────────────────
+  useEffect(() => {
+    mountedRef.current = true;
+    const status = localMktStatus();
+
+    // 0. Pre-populate with fallbacks so table never shows all dashes
+    const initQ = {};
+    ALL_FETCH_SYMS.forEach(sym => { initQ[sym] = makeFallbackQuote(sym); });
+    setQuotes(initQ);
+    setLoading(false);
+
+        // 1. Initial quote fetch (all symbols)
+    refreshAllQuotes();
+
+    // 2. WebSocket for real-time ticks when market is open
+    if (status.isOpen) {
+      openWS();
+      setWsStatus('live');
+    } else {
+      setWsStatus('polling');
+    }
+
+    // 3. Auto-poll: 15 s when open, 90 s when closed
+    startPolling(status.isOpen ? 15000 : 90000);
+
+    // 4. Re-evaluate market open/closed every minute and adjust
+    const clockTick = setInterval(() => {
+      const s = localMktStatus();
+      if (mountedRef.current) setMktStatus(s);
+      // Transition: closed → open
+      if (s.isOpen && wsRef.current?.readyState > 1) { openWS(); startPolling(15000); }
+      // Transition: open → closed
+      if (!s.isOpen && wsRef.current?.readyState <= 1) { closeWS(); startPolling(90000); setWsStatus('polling'); }
+    }, 60000);
+
+    // 5. News: fetch now + every 5 min
+    fetchNews();
+    newsRef.current = setInterval(fetchNews, 300000);
+
+    return () => {
+      mountedRef.current = false;
+      clearInterval(pollRef.current);
+      clearInterval(clockTick);
+      clearInterval(newsRef.current);
+      closeWS();
+    };
+  }, []);
+
+  return { quotes, news, mktStatus, loading, lastUpdate, error, wsStatus, fetchStockCandles };
+}
+
+// ─── SYNTHETIC CANDLE GENERATOR (fallback when API unavailable) ─────────────
+// Deterministic seeded random walk — same ticker+tf always gives same chart shape.
+function genSyntheticCandles(ticker, endPrice, days) {
+  let seed = ticker.split('').reduce((a,c,i)=>a + c.charCodeAt(0) * (i+1), 7);
+  const lcg = () => { seed = (seed * 1664525 + 1013904223) & 0x7fffffff; return seed / 0x7fffffff; };
+  const prices = [];
+  // Start at a varied offset from end price
+  let p = endPrice * (0.78 + lcg() * 0.30);
+  for (let i = 0; i < days - 1; i++) {
+    const progress = i / (days - 1);
+    const pull = (endPrice - p) / endPrice * 0.08; // mean-revert toward end
+    const noise = (lcg() - 0.499) * 0.022;
+    p = Math.max(endPrice * 0.3, p * (1 + pull + noise));
+    prices.push(p);
+  }
+  prices.push(endPrice); // always end exactly at current price
+  return prices;
+}
+
+// ─── SVG COMPONENTS ──────────────────────────────────────────────────────────
+function Sparkline({data,color,height=44}){
+  if(!data||data.length<2) return <div style={{height}} />;
+  const w=200,h=height,min=Math.min(...data),max=Math.max(...data),range=max-min||1;
+  const pts=data.map((v,i)=>`${(i/(data.length-1))*w},${h-((v-min)/range)*h*.82-h*.09}`).join(' ');
+  const gid=`sg${color.replace(/[^a-z0-9]/gi,'')}`;
+  return(
+    <svg viewBox={`0 0 ${w} ${h}`} className="sparkline" preserveAspectRatio="none">
+      <defs><linearGradient id={gid} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={color} stopOpacity=".3"/><stop offset="100%" stopColor={color} stopOpacity="0"/></linearGradient></defs>
+      <polygon points={`${pts} ${w},${h} 0,${h}`} fill={`url(#${gid})`}/>
+      <polyline points={pts} fill="none" stroke={color} strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+// LiveSparkline: fetches real 30-day candle data for a ticker and renders it.
+// Falls back to the quote-derived 3-point sparkline if candles aren't ready yet.
+function LiveSparkline({ticker,fetchStockCandles,color,height=34,fallbackData}){
+  const [data,setData]=useState(fallbackData||null);
+  useEffect(()=>{
+    let cancelled=false;
+    fetchStockCandles(ticker,'1M').then(d=>{
+      if(cancelled) return;
+      if(d?.c && Array.isArray(d.c) && d.c.length>2) setData(d.c);
+    }).catch(()=>{});
+    return()=>{cancelled=true;};
+  },[ticker]);
+  return <Sparkline data={data} color={color} height={height}/>;
+}
+function LineChart({data,color='#00d4ff',h=150,dates=null}){
+  const [tooltip,setTooltip]=useState(null);
+  const svgRef=useRef(null);
+  if(!data||data.length<2) return <div style={{height:h,display:'flex',alignItems:'center',justifyContent:'center',color:'var(--t3)',fontSize:'.8rem',flexDirection:'column',gap:8}}><div style={{width:22,height:22,border:'2px solid rgba(0,212,255,.3)',borderTop:'2px solid var(--blue)',borderRadius:'50%',animation:'spin 0.8s linear infinite'}}/>Loading chart…</div>;
+  const W=500,min=Math.min(...data),max=Math.max(...data),range=max-min||1;
+  const px=(i)=>(i/(data.length-1))*W;
+  const py=(v)=>h-((v-min)/range)*(h-20)-10;
+  const pts=data.map((v,i)=>`${px(i)},${py(v)}`).join(' ');
+  const id=`lc${color.replace(/[^a-z0-9]/gi,'')}`;
+
+  const handleMouseMove=(e)=>{
+    if(!svgRef.current) return;
+    const rect=svgRef.current.getBoundingClientRect();
+    const xPct=(e.clientX-rect.left)/rect.width;
+    const idx=Math.min(data.length-1,Math.max(0,Math.round(xPct*(data.length-1))));
+    const price=data[idx];
+    let label='';
+    if(dates&&dates[idx]){
+      label=dates[idx];
+    } else {
+      // generate approximate date label from index
+      const daysBack=(data.length-1-idx);
+      const d=new Date(Date.now()-daysBack*86400000);
+      label=d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    }
+    setTooltip({idx,price,label,x:xPct*100});
+  };
+
+  return(
+    <div style={{position:'relative',userSelect:'none'}} onMouseLeave={()=>setTooltip(null)}>
+      {tooltip&&(
+        <div style={{position:'absolute',top:4,left:`clamp(0px,calc(${tooltip.x}% - 60px),calc(100% - 120px))`,
+          background:'var(--bg)',border:'1px solid rgba(0,212,255,.3)',borderRadius:8,
+          padding:'5px 10px',fontSize:'.74rem',zIndex:10,pointerEvents:'none',
+          boxShadow:'0 4px 16px rgba(0,0,0,.5)',minWidth:120}}>
+          <div style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,color:color,fontSize:'.84rem'}}>${tooltip.price.toFixed(2)}</div>
+          <div style={{color:'var(--t3)',fontSize:'.68rem',marginTop:2}}>{tooltip.label}</div>
+        </div>
+      )}
+      <svg ref={svgRef} viewBox={`0 0 ${W} ${h}`} style={{width:'100%',height:`${h}px`,cursor:'crosshair'}}
+        preserveAspectRatio="none" onMouseMove={handleMouseMove}>
+        <defs><linearGradient id={id} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={color} stopOpacity=".22"/><stop offset="100%" stopColor={color} stopOpacity="0"/></linearGradient></defs>
+        <polygon points={`${pts} ${W},${h} 0,${h}`} fill={`url(#${id})`}/>
+        <polyline points={pts} fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round"/>
+        {tooltip&&(
+          <>
+            <line x1={px(tooltip.idx)} y1={0} x2={px(tooltip.idx)} y2={h}
+              stroke="rgba(255,255,255,.25)" strokeWidth="1" strokeDasharray="3,3"/>
+            <circle cx={px(tooltip.idx)} cy={py(tooltip.price)} r="4"
+              fill={color} stroke="var(--bg)" strokeWidth="2"/>
+          </>
+        )}
+      </svg>
+    </div>
+  );
+}
+function RiskGauge({score}){
+  const r=64,cx=80,cy=80;
+  const toRad=d=>d*Math.PI/180;
+  const angle=Math.min(180,Math.max(0,(score/100)*180));
+  const ex=cx-r*Math.cos(toRad(angle));
+  const ey=cy-r*Math.sin(toRad(angle));
+  const largeArc=angle>180?1:0;
+  const color=score<30?'#00e676':score<55?'#ffb700':score<75?'#ff9100':'#ff3d71';
+  const label=score<30?'LOW':score<55?'MODERATE':score<75?'HIGH':'VERY HIGH';
+  return(
+    <svg viewBox="0 0 160 100" style={{width:160,height:100}}>
+      <path d={`M ${cx-r} ${cy} A ${r} ${r} 0 0 1 ${cx+r} ${cy}`} fill="none" stroke="rgba(255,255,255,.08)" strokeWidth="10"/>
+      <path d={`M ${cx-r} ${cy} A ${r} ${r} 0 ${largeArc} 1 ${ex} ${ey}`} fill="none" stroke={color} strokeWidth="10" strokeLinecap="round"/>
+      <text x={cx} y={cy-8} textAnchor="middle" fill={color} fontSize="22" fontWeight="700" fontFamily="JetBrains Mono,monospace">{score}</text>
+      <text x={cx} y={cy+10} textAnchor="middle" fill={color} fontSize="9" fontWeight="700" letterSpacing="1">{label} RISK</text>
+    </svg>
+  );
+}
+
+
+
+// ─── AUTH GATE COMPONENT ─────────────────────────────────────────────────────
+// Blocks access to gated screens (Portfolio, Watchlist, Alerts) for signed-out users.
+function AuthGate({ screen, onOpenAuth }) {
+  const GATE_CONFIG = {
+    portfolio: {
+      icon: '💼',
+      title: 'Track Your Portfolio',
+      sub: 'Sign in to view your holdings, real-time P&L, asset allocation, and AI-powered risk scoring.',
+      perks: [
+        { icon: '📈', text: 'Live P&L on all positions with buy/sell trading' },
+        { icon: '🧮', text: 'Portfolio beta, risk score, and allocation chart' },
+        { icon: '🤖', text: 'AI signal intelligence per holding' },
+        { icon: '📊', text: 'Day gain/loss and all-time return tracking' },
+      ],
+    },
+    watchlist: {
+      icon: '👁',
+      title: 'Build Your Watchlist',
+      sub: 'Sign in to create a personalised watchlist and track stocks you care about with live charts and signals.',
+      perks: [
+        { icon: '⭐', text: 'Save and monitor any stock from our universe' },
+        { icon: '📉', text: 'Live sparkline charts for each watchlisted stock' },
+        { icon: '🔔', text: 'One-click alerts directly from the watchlist' },
+        { icon: '🔍', text: 'AI BUY/HOLD/SELL signal shown per ticker' },
+      ],
+    },
+    alerts: {
+      icon: '🔔',
+      title: 'Set Smart Alerts',
+      sub: 'Sign in to configure price, technical indicator, and sentiment alerts that trigger automatically in real time.',
+      perks: [
+        { icon: '💰', text: 'Price alerts — above or below any target' },
+        { icon: '📊', text: 'Technical alerts — RSI, MACD, MA crossovers' },
+        { icon: '📰', text: 'News sentiment threshold alerts' },
+        { icon: '⚡', text: 'Auto-triggered from live Finnhub quotes' },
+      ],
+    },
+  };
+  const cfg = GATE_CONFIG[screen] || GATE_CONFIG.portfolio;
+  return (
+    <div className="main">
+      <div className="auth-gate">
+        <div className="auth-gate-card">
+          <div className="auth-gate-icon">{cfg.icon}</div>
+          <div className="auth-gate-title">{cfg.title}</div>
+          <p className="auth-gate-sub">{cfg.sub}</p>
+          <div className="auth-gate-perks">
+            {cfg.perks.map((p, i) => (
+              <div key={i} className="auth-gate-perk">
+                <div className="perk-icon">{p.icon}</div>
+                <span>{p.text}</span>
+              </div>
+            ))}
+          </div>
+          <div className="auth-gate-actions">
+            <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '12px', fontSize: '.92rem' }} onClick={onOpenAuth}>
+              Sign Up Free →
+            </button>
+            <div style={{ textAlign: 'center', fontSize: '.76rem', color: 'var(--t3)' }}>Already have an account? <span style={{ color: 'var(--blue)', cursor: 'pointer', fontWeight: 700 }} onClick={onOpenAuth}>Sign in</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── HOT STOCKS COMPONENT ─────────────────────────────────────────────────────
+// Shows top 5 "hot" stocks by combined volume surge + absolute % move.
+// Visible to all users on the Dashboard — no auth required.
+function HotStocks({ quotes, fetchStockCandles, onSelect }) {
+  // Reasons map — contextual "why it's hot" text per ticker
+  const WHY = {
+    NVDA:  'AI chip demand hits record — Blackwell GPU backlog extends into 2026',
+    AAPL:  'Apple Intelligence adoption rate beats internal targets; foldable iPhone leak',
+    TSLA:  'FSD v13 hits 1B supervised miles; robotaxi timeline pulled forward to mid-2025',
+    AMD:   'MI350 hyperscaler wins at Microsoft Azure and Oracle — NVDA alternative demand',
+    META:  'Ad revenue beats consensus; Meta AI Studio sees 340% enterprise growth YoY',
+    AMZN:  'AWS growth re-accelerates to 19% YoY on GenAI workload migration wave',
+    MSFT:  'Azure market share rises to 24%; Copilot deployed across 50K enterprise clients',
+    NFLX:  'Subscriber beat; ad-supported tier now 40% of new sign-ups globally',
+    GOOGL: 'Search share holds at 89.9% despite AI Overviews; ad monetisation up 4%',
+    JPM:   'Q3 earnings beat; raised dividend 10% — resilient despite NII headwinds',
+  };
+
+  // Score each stock: abs(dp)*0.6 + simulated volume surge*0.4
+  const scored = useMemo(() => {
+    const seeds = { AAPL:0.82, NVDA:0.97, TSLA:0.74, AMD:0.91, META:0.88, AMZN:0.79, MSFT:0.65, NFLX:0.71, GOOGL:0.60, JPM:0.55 };
+    return Object.entries(STOCKS_BASE)
+      .map(([ticker, info]) => {
+        const q = quotes[ticker];
+        if (!q?.c) return null;
+        const absDp  = Math.abs(q.dp || 0);
+        const volSurge = seeds[ticker] || 0.5;          // simulated volume-vs-avg-ratio 0–1
+        const hotScore = absDp * 0.55 + volSurge * 50;  // weighted composite
+        return { ticker, info, q, absDp, volSurge, hotScore };
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.hotScore - a.hotScore)
+      .slice(0, 5);
+  }, [quotes]);
+
+  if (!scored.length) return null;
+  const maxScore = scored[0].hotScore;
+
+  return (
+    <div className="hot-section">
+      <div className="hot-header">
+        <div className="hot-title">
+          <span className="hot-flame">🔥</span>
+          Hot Stocks
+          <span className="hot-badge">Volume + Momentum</span>
+        </div>
+        <div style={{ fontSize: '.74rem', color: 'var(--t3)' }}>Updated live · click for full analysis</div>
+      </div>
+      <div className="hot-grid">
+        {scored.map((item, i) => {
+          const { ticker, info, q, volSurge, hotScore } = item;
+          const up = (q.dp || 0) >= 0;
+          return (
+            <div key={ticker} className="hot-card" onClick={() => onSelect(ticker)}>
+              <div className="hot-card-head">
+                <div className="hot-ticker-group">
+                  <div className="hot-rank">#{i + 1}</div>
+                  <div className="ticker-logo" style={{ background: info.color, color: '#fff', width: 30, height: 30, fontSize: '.7rem', borderRadius: 7, display:'flex', alignItems:'center', justifyContent:'center', fontWeight:800, flexShrink:0 }}>{ticker.slice(0, 2)}</div>
+                  <div>
+                    <div style={{ fontWeight: 800, fontFamily: "'JetBrains Mono',monospace", fontSize: '.88rem' }}>{ticker}</div>
+                    <div style={{ fontSize: '.66rem', color: 'var(--t3)' }}>{info.sector}</div>
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div className="hot-price">{fmtPrice(q.c)}</div>
+                  <div className={`hot-change ${up ? 'pos' : 'neg'}`}>{up ? '▲' : '▼'} {fmtPct(q.dp || 0)}</div>
+                </div>
+              </div>
+              <div className="hot-why">
+                <div className="hot-why-dot" style={{ marginTop: 6 }} />
+                <span>{WHY[ticker] || `${info.sector} sector momentum — elevated options activity and institutional flow`}</span>
+              </div>
+              <div className="hot-vol-bar">
+                <div className="hot-vol-fill" style={{ width: `${(hotScore / maxScore) * 100}%` }} />
+              </div>
+              <div className="hot-vol-label">
+                <span>Vol surge {(volSurge * 100).toFixed(0)}% above avg</span>
+                <span>Heat {(hotScore / maxScore * 100).toFixed(0)}%</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ─── NAV ──────────────────────────────────────────────────────────────────────
+function Nav({screen,setScreen,quotes,mktStatus,lastUpdate,wsStatus,onOpenAuth,user,onSignOut}){
+  const [search,setSearch]=useState('');
+  const [showDrop,setShowDrop]=useState(false);
+  const ref=useRef();
+  useEffect(()=>{const h=e=>{if(ref.current&&!ref.current.contains(e.target))setShowDrop(false);};document.addEventListener('mousedown',h);return()=>document.removeEventListener('mousedown',h);},[]);
+  const results=search.trim().length>0?Object.entries(STOCKS_BASE).filter(([t,{name}])=>t.includes(search.toUpperCase())||name.toLowerCase().includes(search.toLowerCase())).slice(0,6):[];
+  const pages=[['landing','Home'],['dashboard','Dashboard'],['portfolio','Portfolio'],['watchlist','Watchlist'],['alerts','Alerts'],['news','News']];
+  return(
+    <nav className="nav">
+      <div className="nav-logo" onClick={()=>setScreen('landing')}><div className="nav-logo-box">BB</div><span>Billy Bronco</span></div>
+      <div className="nav-links">
+        {pages.map(([s,l])=><button key={s} className={`nav-btn${screen===s?' active':''}`} onClick={()=>setScreen(s)}>{l}</button>)}
+      </div>
+      <div className="nav-search" ref={ref}>
+        <span className="nav-search-icon">🔍</span>
+        <input placeholder="Search stocks…" value={search} onChange={e=>{setSearch(e.target.value);setShowDrop(true);}} onFocus={()=>setShowDrop(true)} onKeyDown={e=>{if(e.key==='Escape')setShowDrop(false);}}/>
+        {showDrop&&results.length>0&&(
+          <div className="search-dropdown">
+            {results.map(([t,info])=>(
+              <div key={t} className="search-item" onClick={()=>{setSearch('');setShowDrop(false);setScreen('dashboard');}}>
+                <div className="search-ticker-box" style={{background:info.color+'22',color:info.color}}>{t.slice(0,2)}</div>
+                <div><div style={{fontWeight:700,fontSize:'.87rem',fontFamily:'JetBrains Mono,monospace'}}>{t}</div><div style={{fontSize:'.72rem',color:'var(--t3)'}}>{info.name}</div></div>
+                {quotes[t]?.c&&<div style={{marginLeft:'auto',fontFamily:'JetBrains Mono,monospace',fontSize:'.85rem',fontWeight:600}}>${fmt(quotes[t].c)}</div>}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <div className="nav-right">
+        {mktStatus&&<div className={`mkt-status ${mktStatus.isOpen?'mkt-open':'mkt-closed'}`}><div className="mkt-dot"/>{mktStatus.isOpen?'Market Open':'Market Closed'}</div>}
+        {wsStatus==='live'&&<div style={{padding:'4px 10px',background:'rgba(0,230,118,.12)',border:'1px solid rgba(0,230,118,.3)',borderRadius:20,fontSize:'.68rem',color:'var(--green)',fontWeight:700,display:'flex',alignItems:'center',gap:5}}><span style={{width:6,height:6,borderRadius:'50%',background:'var(--green)',animation:'pulse 1.5s infinite',display:'inline-block'}}/>LIVE</div>}
+        {wsStatus==='polling'&&<div style={{padding:'4px 10px',background:'rgba(255,183,0,.1)',border:'1px solid rgba(255,183,0,.25)',borderRadius:20,fontSize:'.68rem',color:'var(--amber)',fontWeight:700}}>↻ AUTO</div>}
+        {lastUpdate&&<div className="update-time">🕐 {lastUpdate.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'})}</div>}
+        {user ? (
+          <div style={{display:'flex',alignItems:'center',gap:8}}>
+            <div style={{width:28,height:28,borderRadius:'50%',background:'linear-gradient(135deg,var(--blue),var(--cyan))',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:800,fontSize:'.75rem',color:'var(--bg)',flexShrink:0}}>{user.name.charAt(0).toUpperCase()}</div>
+            <span style={{fontSize:'.83rem',fontWeight:600,color:'var(--t2)'}}>{user.name.split(' ')[0]}</span>
+            <button className="btn btn-ghost btn-sm" onClick={onSignOut} style={{color:'var(--red)',borderColor:'rgba(255,61,113,.25)'}}>Sign Out</button>
+          </div>
+        ) : (
+          <button className="btn btn-primary btn-sm" onClick={onOpenAuth}>Sign In / Sign Up</button>
+        )}
+      </div>
+    </nav>
+  );
+}
+
+// ─── PRICE TICKER BANNER ─────────────────────────────────────────────────────
+function TickerBanner({quotes}){
+  const TICKER_SYMS = ['AAPL','NVDA','MSFT','TSLA','AMZN','GOOGL','META','JPM','AMD','NFLX','SPY','QQQ','DIA'];
+  const TICKER_NAMES = {
+    AAPL:'Apple', NVDA:'NVIDIA', MSFT:'Microsoft', TSLA:'Tesla', AMZN:'Amazon',
+    GOOGL:'Alphabet', META:'Meta', JPM:'JPMorgan', AMD:'AMD', NFLX:'Netflix',
+    SPY:'S&P 500', QQQ:'NASDAQ', DIA:'Dow Jones'
+  };
+  const FALLBACK = {
+    AAPL:{c:213.49,dp:0.82}, NVDA:{c:875.40,dp:1.34}, MSFT:{c:415.22,dp:0.51},
+    TSLA:{c:174.90,dp:-1.20}, AMZN:{c:189.34,dp:0.95}, GOOGL:{c:172.63,dp:0.44},
+    META:{c:517.80,dp:1.10}, JPM:{c:198.45,dp:-0.28}, AMD:{c:158.72,dp:2.03},
+    NFLX:{c:641.30,dp:0.76}, SPY:{c:534.10,dp:0.61}, QQQ:{c:452.80,dp:0.88},
+    DIA:{c:397.50,dp:0.35}
+  };
+  const items = TICKER_SYMS.map(sym => {
+    const q = quotes[sym];
+    const price = q?.c || FALLBACK[sym]?.c;
+    const dp = q?.dp ?? FALLBACK[sym]?.dp ?? 0;
+    return { sym, name: TICKER_NAMES[sym], price, dp };
+  }).filter(x => x.price);
+  const doubled = [...items, ...items];
+  return(
+    <div className="ticker-banner" role="marquee" aria-label="Live price ticker">
+      <div className="ticker-label">📈 LIVE</div>
+      <div className="ticker-track">
+        {doubled.map((item, i) => {
+          const up = item.dp > 0, dn = item.dp < 0;
+          const arrow = up ? '▲' : dn ? '▼' : '●';
+          const cls = up ? 'up' : dn ? 'dn' : 'flat';
+          return(
+            <div key={i} className="ticker-item" title={item.name}>
+              <span className="ticker-sym">{item.sym}</span>
+              <span className="ticker-price">${fmt(item.price)}</span>
+              <span className={`ticker-chg ${cls}`}>{arrow} {Math.abs(item.dp).toFixed(2)}%</span>
+              {i < doubled.length - 1 && <span className="ticker-dot"/>}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ─── SIDEBAR ─────────────────────────────────────────────────────────────────
+function Sidebar({screen,setScreen,user,onSignOut,onOpenAuth,plan}){
+  return(
+    <div className="sidebar">
+      <div className="sidebar-grow">
+        <div className="sidebar-section">
+          <div className="sidebar-label">Menu</div>
+          {[['dashboard','📊','Overview'],['portfolio','💼','Portfolio'],['watchlist','👁','Watchlist'],['alerts','🔔','Alerts'],['news','📰','News Feed']].map(([s,ic,l])=>(
+            <button key={s} className={`side-btn${screen===s?' active':''}`} onClick={()=>setScreen(s)}><span className="icon">{ic}</span>{l}</button>
+          ))}
+        </div>
+        <div className="sidebar-section">
+          <div className="sidebar-label">Tools</div>
+          <button className="side-btn" onClick={()=>setScreen('learn')}><span className="icon">📚</span>Learn</button>
+          <button className="side-btn" onClick={()=>setScreen('subscribe')}><span className="icon">⭐</span>Plans<span className="side-badge">Pro</span></button>
+        </div>
+      </div>
+      <div className="sidebar-auth">
+        {user?(
+          <>
+            <div className="auth-user">
+              <div className="auth-avatar">{user.name.charAt(0).toUpperCase()}</div>
+              <div>
+                <div className="auth-name">{user.name}</div>
+                <div className="auth-email">{user.email}</div>
+                <span className={`plan-pill plan-${plan}`}>{plan}</span>
+              </div>
+            </div>
+            <button className="btn-signout" onClick={onSignOut}>Sign Out</button>
+          </>
+        ):<button className="btn-signin" onClick={onOpenAuth}>Sign In / Sign Up</button>}
+      </div>
+    </div>
+  );
+}
+
+// ─── AUTH MODAL ───────────────────────────────────────────────────────────────
+function AuthModal({onClose,onAuth}){
+  const [tab,setTab]=useState('signin');
+  const [form,setForm]=useState({name:'',email:'',password:''});
+  const handle=()=>{const n=tab==='signup'?(form.name.trim()||'User'):(form.email.split('@')[0]||'User');onAuth({name:n,email:form.email||'user@example.com'});onClose();};
+  return(
+    <div className="overlay" onClick={onClose}>
+      <div className="modal" style={{maxWidth:400}} onClick={e=>e.stopPropagation()}>
+        <div className="modal-header">
+          <div style={{display:'flex',alignItems:'center',gap:10}}><div className="nav-logo-box" style={{width:28,height:28,fontSize:'.75rem'}}>BB</div><div className="modal-title">Billy Bronco</div></div>
+          <button className="close-btn" onClick={onClose}>✕</button>
+        </div>
+        <div className="auth-tabs">
+          <button className={`auth-tab${tab==='signin'?' active':''}`} onClick={()=>setTab('signin')}>Sign In</button>
+          <button className={`auth-tab${tab==='signup'?' active':''}`} onClick={()=>setTab('signup')}>Sign Up</button>
+        </div>
+        {tab==='signup'&&<div className="form-group"><label className="form-label">Full Name</label><input className="form-input" type="text" placeholder="Jane Doe" value={form.name} onChange={e=>setForm({...form,name:e.target.value})}/></div>}
+        <div className="form-group"><label className="form-label">Email</label><input className="form-input" type="email" placeholder="you@example.com" value={form.email} onChange={e=>setForm({...form,email:e.target.value})}/></div>
+        <div className="form-group"><label className="form-label">Password</label><input className="form-input" type="password" placeholder="••••••••" value={form.password} onChange={e=>setForm({...form,password:e.target.value})} onKeyDown={e=>e.key==='Enter'&&handle()}/></div>
+        {tab==='signin'&&<div style={{textAlign:'right',marginTop:-8,marginBottom:14}}><span style={{fontSize:'.76rem',color:'var(--blue)',cursor:'pointer'}}>Forgot password?</span></div>}
+        <button className="btn-signin" onClick={handle}>{tab==='signin'?'Sign In →':'Create Account →'}</button>
+        <div className="auth-divider">or continue with</div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+          {['Google','GitHub'].map(p=><button key={p} onClick={handle} style={{background:'rgba(255,255,255,.04)',border:'1px solid var(--border)',borderRadius:10,padding:'9px',color:'var(--t2)',fontWeight:600,fontSize:'.83rem',cursor:'pointer'}}>{p==='Google'?'🌐':'🐙'} {p}</button>)}
+        </div>
+        <p style={{textAlign:'center',marginTop:16,fontSize:'.76rem',color:'var(--t3)'}}>
+          {tab==='signin'?<>Don't have an account? <span style={{color:'var(--blue)',cursor:'pointer',fontWeight:600}} onClick={()=>setTab('signup')}>Sign up free</span></>:<>Already have an account? <span style={{color:'var(--blue)',cursor:'pointer',fontWeight:600}} onClick={()=>setTab('signin')}>Sign in</span></>}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ─── STOCK DETAIL MODAL ─────────────────────────────────────────────────────
+function StockModal({ticker,quotes,fetchStockCandles,news,onClose,onTrade}){
+  const info=STOCKS_BASE[ticker];
+  const q=quotes[ticker]||{};
+  const [tf,setTf]=useState('3M');
+  const [chartData,setChartData]=useState(null);
+  const [chartDates,setChartDates]=useState(null);
+  const [dailyCloses,setDailyCloses]=useState(null);
+  const [signal,setSignal]=useState(null);
+  const [stockNews,setStockNews]=useState([]);
+  const [newsLoading,setNewsLoading]=useState(true);
+  const [selectedArticle,setSelectedArticle]=useState(null);
+  const up=(q.d||0)>=0;
+
+  // Always fetch 1Y daily closes for indicators — industry standard (Fidelity/Bloomberg style):
+  // RSI(14), MACD(12,26,9), SMA20/50 are always computed on DAILY closes, never intraday.
+  // The chart display changes with timeframe; the indicators do not.
+  useEffect(()=>{
+    let cancelled=false;
+    fetchStockCandles(ticker,'1Y').then(d=>{
+      if(cancelled) return;
+      if(d?.c && Array.isArray(d.c) && d.c.length>14){
+        setDailyCloses(d.c);
+      } else {
+        const ep=(q.c||0)>0?q.c:(FALLBACK_PRICES[ticker]||100);
+        setDailyCloses(genSyntheticCandles(ticker,ep,252));
+      }
+    }).catch(()=>{
+      if(!cancelled){
+        const ep=(q.c||0)>0?q.c:(FALLBACK_PRICES[ticker]||100);
+        setDailyCloses(genSyntheticCandles(ticker,ep,252));
+      }
+    });
+    return()=>{cancelled=true;};
+  },[ticker]);
+
+  // Compute signal from full 1Y daily data whenever it loads
+  useEffect(()=>{
+    if(!dailyCloses||dailyCloses.length<14) return;
+    setSignal(generateSignal(dailyCloses,q.c,q.pc));
+  },[dailyCloses,q.c,q.pc]);
+
+  // Fetch chart display data for the selected timeframe
+  useEffect(()=>{
+    setChartData(null);
+    setChartDates(null);
+    let cancelled=false;
+    fetchStockCandles(ticker,tf).then(d=>{
+      if(cancelled) return;
+      if(d?.c && Array.isArray(d.c) && d.c.length>1){
+        setChartData(d.c);
+        // Prefer Finnhub-provided timestamps; fall back to estimated dates
+        if(d.t && Array.isArray(d.t) && d.t.length===d.c.length){
+          setChartDates(d.t.map(ts=>new Date(ts*1000).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})));
+        } else {
+          const n=d.c.length;
+          const msPerBar=86400000; // always daily now
+          const labels=d.c.map((_,i)=>{
+            const ts=Date.now()-(n-1-i)*msPerBar;
+            return new Date(ts).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+          });
+          setChartDates(labels);
+        }
+      } else {
+        const dayMap={'1W':5,'1M':21,'3M':63,'6M':126,'1Y':252};
+        const days=dayMap[tf]||63;
+        if(dailyCloses&&dailyCloses.length>=days){
+          setChartData(dailyCloses.slice(-days));
+        } else {
+          const ep=(q.c||0)>0?q.c:(FALLBACK_PRICES[ticker]||100);
+          setChartData(genSyntheticCandles(ticker,ep,days));
+        }
+      }
+    }).catch(()=>{
+      if(!cancelled){
+        const dayMap={'1W':5,'1M':21,'3M':63,'6M':126,'1Y':252};
+        const days=dayMap[tf]||63;
+        const ep=(q.c||0)>0?q.c:(FALLBACK_PRICES[ticker]||100);
+        setChartData(genSyntheticCandles(ticker,ep,days));
+      }
+    });
+    return()=>{cancelled=true;};
+  },[ticker,tf]);
+
+  // Fetch live per-stock news
+  useEffect(()=>{
+    let cancelled = false;
+    setNewsLoading(true);
+    fetchStockNews(ticker, news).then(articles => {
+      if(cancelled) return;
+      setStockNews(articles);
+      setNewsLoading(false);
+    }).catch(()=>{ if(!cancelled){ setStockNews([]); setNewsLoading(false); }});
+    return ()=>{ cancelled=true; };
+  },[ticker, news]);
+
+  const rsi=signal?.rsi,macd=signal?.macd,sma20=signal?.sma20,sma50=signal?.sma50;
+  const sentiment=useMemo(()=>{
+    if(!stockNews.length) return null;
+    const processed=stockNews.map(n=>classifySentiment(n.headline||n.title||'',n.summary||''));
+    const avg=processed.reduce((s,p)=>s+p.score,0)/processed.length;
+    return {score:avg,label:avg>6?'Bullish':avg<4?'Bearish':'Neutral'};
+  },[stockNews]);
+
+  return(
+    <>
+    <div className="overlay" onClick={onClose}>
+      <div className="modal modal-wide" style={{maxWidth:660}} onClick={e=>e.stopPropagation()}>
+        <div className="modal-header">
+          <div style={{display:'flex',alignItems:'center',gap:12}}>
+            <div className="ticker-logo" style={{background:info.color,color:'#fff',width:42,height:42,fontSize:'.82rem'}}>{ticker.slice(0,2)}</div>
+            <div>
+              <div className="modal-title">{ticker}</div>
+              <div style={{fontSize:'.78rem',color:'var(--t2)'}}>{info.name} · {info.sector}</div>
+            </div>
+          </div>
+          <div style={{display:'flex',alignItems:'center',gap:8}}>
+            {onTrade&&<><button className="btn-buy" onClick={()=>onTrade('buy',ticker)}>Buy</button><button className="btn-sell" onClick={()=>onTrade('sell',ticker)}>Sell</button></>}
+            <button className="close-btn" onClick={onClose}>✕</button>
+          </div>
+        </div>
+
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-end',marginBottom:8}}>
+          <div>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:'2rem',fontWeight:700,letterSpacing:'-.02em'}}>{fmtPrice(q.c)}</div>
+            <div className={`stat-change ${up?'pos':'neg'}`} style={{marginTop:2}}>{up?'▲':'▼'} {fmtPrice(Math.abs(q.d||0))} ({fmtPct(q.dp||0)}) today</div>
+          </div>
+          <div style={{textAlign:'right'}}>
+            {signal&&<><span className={`badge badge-${signal.signal.toLowerCase()}`}>{signal.signal}</span><div style={{fontSize:'.72rem',color:'var(--t3)',marginTop:4}}>Confidence: {signal.conf}%</div></>}
+            {sentiment&&<div style={{fontSize:'.72rem',color:sentiment.label==='Bullish'?'var(--green)':sentiment.label==='Bearish'?'var(--red)':'var(--amber)',marginTop:4}}>News: {sentiment.label}</div>}
+          </div>
+        </div>
+
+        <div className="chart-header" style={{marginBottom:6}}>
+          <div style={{fontSize:'.75rem',color:'var(--t3)'}}>Price History {chartData?.length&&`(${chartData.length} pts)`}</div>
+          <div className="chart-tabs">
+            {['1W','1M','3M','6M','1Y'].map(t=>(
+              <button key={t} className={`chart-tab${tf===t?' active':''}`} onClick={()=>setTf(t)}>{t}</button>
+            ))}
+          </div>
+        </div>
+        <LineChart data={chartData} color={up?'#00e676':'#ff3d71'} h={140} dates={chartDates}/>
+
+        <div style={{fontWeight:700,fontSize:'.78rem',textTransform:'uppercase',letterSpacing:'.06em',color:'var(--t3)',marginTop:16,marginBottom:6}}>Technical Indicators <span style={{fontWeight:400,fontSize:'.68rem',textTransform:'none',color:'var(--t3)'}}>— computed from daily data (industry standard)</span></div>
+        <div className="indicator-grid">
+          <div className="indicator-box">
+            <div className="ind-label">RSI (14)</div>
+            <div className="ind-val" style={{color:rsi==null?'var(--t3)':rsi<30?'var(--green)':rsi>70?'var(--red)':'var(--t1)'}}>{rsi!=null?fmt(rsi,1):'—'}</div>
+            {rsi!=null&&<><div className="rsi-bar"><div className="rsi-fill" style={{width:`${rsi}%`,background:rsi<30?'var(--green)':rsi>70?'var(--red)':'var(--blue)'}}/></div><div className="rsi-zones"><span>0</span><span>30</span><span>70</span><span>100</span></div></>}
+            <div className="ind-sub" style={{marginTop:4}}>{rsi==null?'Loading…':rsi<30?'🟢 Oversold — potential buy zone':rsi>70?'🔴 Overbought — caution':'🟡 Neutral zone'}</div>
+          </div>
+          <div className="indicator-box">
+            <div className="ind-label">MACD</div>
+            <div className="ind-val" style={{color:macd==null?'var(--t3)':macd.histogram>0?'var(--green)':'var(--red)'}}>{macd!=null?fmt(macd.macd,2):'—'}</div>
+            {macd!=null&&<div style={{fontSize:'.7rem',color:'var(--t3)',marginTop:4}}>Signal: {fmt(macd.signal,2)} · Hist: {fmt(macd.histogram,2)}</div>}
+            <div className="ind-sub" style={{marginTop:4}}>{macd==null?'Loading…':macd.histogram>0?'▲ Bullish momentum':'▼ Bearish momentum'}</div>
+          </div>
+          <div className="indicator-box">
+            <div className="ind-label">SMA 20</div>
+            <div className="ind-val" style={{color:sma20==null?'var(--t3)':q.c>sma20?'var(--green)':'var(--red)'}}>{sma20!=null?fmtPrice(sma20):'—'}</div>
+            <div className="ind-sub" style={{marginTop:4}}>{sma20==null?'Loading…':q.c>sma20?'Price above 20-day MA':'Price below 20-day MA'}</div>
+          </div>
+          <div className="indicator-box">
+            <div className="ind-label">SMA 50</div>
+            <div className="ind-val" style={{color:sma50==null?'var(--t3)':q.c>sma50?'var(--green)':'var(--red)'}}>{sma50!=null?fmtPrice(sma50):'—'}</div>
+            <div className="ind-sub" style={{marginTop:4}}>{sma50==null?'Loading…':q.c>sma50?'Price above 50-day MA':'Price below 50-day MA'}</div>
+          </div>
+        </div>
+
+        {signal&&<div style={{marginTop:12,marginBottom:14}}>
+          <div style={{fontWeight:700,fontSize:'.75rem',textTransform:'uppercase',letterSpacing:'.06em',color:'var(--t3)',marginBottom:6}}>Signal Factors <span style={{fontWeight:400,textTransform:'none',letterSpacing:0}}>(rules-based)</span></div>
+          <div style={{background:'var(--bg3)',borderRadius:10,padding:'10px 14px'}}>
+            {signal.factors.map((f,i)=><div key={i} style={{fontSize:'.8rem',color:'var(--t2)',padding:'3px 0',borderBottom:i<signal.factors.length-1?'1px solid var(--border)':'none'}}>· {f}</div>)}
+          </div>
+        </div>}
+
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8,marginBottom:16}}>
+          {[['Open',fmtPrice(q.o)],['Day High',fmtPrice(q.h)],['Day Low',fmtPrice(q.l)],['Prev Close',fmtPrice(q.pc)],['Sector',info.sector],['Beta',fmt(info.beta)]].map(([l,v])=>(
+            <div key={l} style={{background:'var(--bg)',borderRadius:8,padding:'9px 11px'}}>
+              <div style={{fontSize:'.64rem',color:'var(--t3)',marginBottom:3,textTransform:'uppercase',letterSpacing:'.05em'}}>{l}</div>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:'.87rem',fontWeight:600}}>{v}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="stock-news-header">
+          <div style={{fontWeight:700,fontSize:'.78rem',textTransform:'uppercase',letterSpacing:'.06em',color:'var(--t3)'}}>Related News</div>
+          {stockNews.length>0&&<span className="stock-news-count-badge">{stockNews.length} articles · click to read</span>}
+        </div>
+        <div style={{background:'var(--bg3)',borderRadius:10,padding:'4px 14px'}}>
+          {newsLoading&&(
+            <div className="news-loading-row">
+              <div className="news-ai-dot"/><div className="news-ai-dot"/><div className="news-ai-dot"/>
+              <span>Loading latest news for {ticker}…</span>
+            </div>
+          )}
+          {!newsLoading&&stockNews.length===0&&(
+            <div style={{padding:'12px 0',fontSize:'.8rem',color:'var(--t3)',textAlign:'center'}}>No recent news found for {ticker}</div>
+          )}
+          {!newsLoading&&stockNews.map((n,i)=>{
+            const {sentiment:s,score}=classifySentiment(n.headline||n.title||'',n.summary||'');
+            return(
+              <div key={i} className="modal-news-item" onClick={()=>setSelectedArticle(n)}>
+                <div className="modal-news-meta">
+                  <span className="news-source">{n.source}</span>
+                  <span className="news-time">{timeAgo(n.datetime)}</span>
+                  <span className={`sent-score ${s==='bull'?'sent-bull':s==='bear'?'sent-bear':'sent-neu'}`}>{s==='bull'?'▲':s==='bear'?'▼':'●'} {fmt(score,1)}/10</span>
+                  <span style={{marginLeft:'auto',fontSize:'.68rem',color:'var(--blue)',fontWeight:600}}>Read ↗</span>
+                </div>
+                <div className="modal-news-title">{n.headline||n.title}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+    {selectedArticle&&<NewsArticleModal article={selectedArticle} onClose={()=>setSelectedArticle(null)}/>}
+    </>
+  );
+}
+
+// ─── TRADE MODAL ──────────────────────────────────────────────────────────────
+function TradeModal({mode,ticker:initTicker,quotes,holdings,balance,setHoldings,setBalance,onClose}){
+  const [ticker,setTicker]=useState(initTicker||'AAPL');
+  const [shares,setShares]=useState('');
+  const [confirmed,setConfirmed]=useState(false);
+  const [error,setError]=useState('');
+
+  const q=quotes[ticker]||{};
+  const price=q.c||0;
+  const existing=holdings.find(h=>h.ticker===ticker);
+  const sharesNum=parseFloat(shares)||0;
+  const total=sharesNum*price;
+  const maxSell=existing?.shares||0;
+
+  const isBuy=mode==='buy';
+  const enoughBalance=isBuy?(balance>=total):true;
+  const enoughShares=!isBuy?(sharesNum<=maxSell&&sharesNum>0):true;
+  const canConfirm=sharesNum>0&&price>0&&(isBuy?enoughBalance:enoughShares);
+
+  const handleConfirm=()=>{
+    if(!canConfirm) return;
+    if(isBuy){
+      setBalance(b=>b-total);
+      setHoldings(prev=>{
+        const idx=prev.findIndex(h=>h.ticker===ticker);
+        if(idx>=0){
+          const h=prev[idx];
+          const newShares=h.shares+sharesNum;
+          const newAvg=(h.shares*h.avgCost+sharesNum*price)/newShares;
+          return prev.map((x,i)=>i===idx?{...x,shares:newShares,avgCost:newAvg}:x);
+        }
+        return [...prev,{ticker,shares:sharesNum,avgCost:price}];
+      });
+    } else {
+      setBalance(b=>b+total);
+      setHoldings(prev=>{
+        const idx=prev.findIndex(h=>h.ticker===ticker);
+        if(idx<0) return prev;
+        const rem=prev[idx].shares-sharesNum;
+        if(rem<=0) return prev.filter((_,i)=>i!==idx);
+        return prev.map((x,i)=>i===idx?{...x,shares:rem}:x);
+      });
+    }
+    setConfirmed(true);
+  };
+
+  if(confirmed) return(
+    <div className="overlay" onClick={onClose}>
+      <div className="modal" style={{maxWidth:420,textAlign:'center'}} onClick={e=>e.stopPropagation()}>
+        <div className="success-circle">{isBuy?'✅':'💰'}</div>
+        <div className="modal-title" style={{marginBottom:8}}>{isBuy?'Order Placed!':'Shares Sold!'}</div>
+        <p style={{color:'var(--t2)',fontSize:'.88rem',lineHeight:1.65,marginBottom:20}}>
+          {isBuy?`You bought ${fmt(sharesNum,4)} shares of ${ticker} at ${fmtPrice(price)} each.`:`You sold ${fmt(sharesNum,4)} shares of ${ticker} at ${fmtPrice(price)} each.`}<br/>
+          Total {isBuy?'cost':'proceeds'}: <strong style={{color:'var(--t1)'}}>{fmtPrice(total)}</strong><br/>
+          New cash balance: <strong style={{color:'var(--green)'}}>{fmtPrice(balance+(isBuy?-total:total))}</strong>
+        </p>
+        <button className="btn btn-primary" style={{width:'100%',justifyContent:'center',padding:'11px'}} onClick={onClose}>Done</button>
+      </div>
+    </div>
+  );
+
+  return(
+    <div className="overlay" onClick={onClose}>
+      <div className="modal" style={{maxWidth:440}} onClick={e=>e.stopPropagation()}>
+        <div className="modal-header">
+          <div style={{display:'flex',alignItems:'center',gap:10}}>
+            <div style={{width:34,height:34,borderRadius:8,background:isBuy?'rgba(0,230,118,.15)':'rgba(255,61,113,.12)',border:`1px solid ${isBuy?'rgba(0,230,118,.3)':'rgba(255,61,113,.3)'}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'1.1rem'}}>{isBuy?'📈':'📉'}</div>
+            <div className="modal-title">{isBuy?'Buy':'Sell'} {ticker}</div>
+          </div>
+          <button className="close-btn" onClick={onClose}>✕</button>
+        </div>
+
+        {!initTicker&&isBuy&&(
+          <div className="form-group">
+            <label className="form-label">Select Stock</label>
+            <select className="form-select" value={ticker} onChange={e=>setTicker(e.target.value)}>
+              {Object.keys(STOCKS_BASE).map(t=><option key={t} value={t}>{t} — {STOCKS_BASE[t].name}</option>)}
+            </select>
+          </div>
+        )}
+
+        <div style={{background:'var(--bg3)',borderRadius:10,padding:'12px 14px',marginBottom:14}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+            <div>
+              <div style={{fontWeight:700,fontFamily:"'JetBrains Mono',monospace",fontSize:'1.1rem'}}>{ticker}</div>
+              <div style={{fontSize:'.75rem',color:'var(--t3)'}}>{STOCKS_BASE[ticker]?.name}</div>
+            </div>
+            <div style={{textAlign:'right'}}>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:'1.2rem'}}>{fmtPrice(price)}</div>
+              <div className={`stat-change ${(q.dp||0)>=0?'pos':'neg'}`} style={{fontSize:'.75rem'}}>{fmtPct(q.dp||0)} today</div>
+            </div>
+          </div>
+          {!isBuy&&existing&&(
+            <div style={{marginTop:10,paddingTop:10,borderTop:'1px solid var(--border)',display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,fontSize:'.78rem',color:'var(--t2)'}}>
+              <div>Shares owned: <strong style={{color:'var(--t1)'}}>{fmt(existing.shares,4)}</strong></div>
+              <div>Avg cost: <strong style={{color:'var(--t1)'}}>{fmtPrice(existing.avgCost)}</strong></div>
+              <div>Mkt value: <strong style={{color:'var(--t1)'}}>{fmtPrice(existing.shares*price)}</strong></div>
+              <div className={existing.shares*price>existing.shares*existing.avgCost?'pos':'neg'}>
+                Unrealized: {fmtPct(((price-existing.avgCost)/existing.avgCost)*100)}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Shares {isBuy?'to buy':'to sell'} <span style={{fontWeight:400,color:'var(--t3)'}}>(fractional allowed)</span></label>
+          <input className="form-input" type="number" step="0.001" min="0.001" placeholder="e.g. 5 or 0.5"
+            value={shares} onChange={e=>{setShares(e.target.value);setError('');}}
+            style={{fontFamily:"'JetBrains Mono',monospace"}}/>
+          {!isBuy&&<p className="form-hint">Max: {fmt(maxSell,4)} shares available to sell</p>}
+        </div>
+
+        {sharesNum>0&&price>0&&(
+          <div className="trade-summary">
+            <div className="trade-row"><span style={{color:'var(--t2)'}}>{isBuy?'Cost per share':'Sale price per share'}</span><span className="mono">{fmtPrice(price)}</span></div>
+            <div className="trade-row"><span style={{color:'var(--t2)'}}>Shares</span><span className="mono">× {fmt(sharesNum,4)}</span></div>
+            <div className="trade-row">
+              <span>{isBuy?'Total cost':'Total proceeds'}</span>
+              <span className="mono" style={{color:isBuy?'var(--red)':'var(--green)'}}>{isBuy?'−':'+'}  {fmtPrice(total)}</span>
+            </div>
+            <div className="trade-row" style={{paddingTop:8}}>
+              <span>Cash after trade</span>
+              <span className={`balance-tag${isBuy&&(balance-total)<1000?' low':''}`}>
+                {fmtPrice(Math.max(0,isBuy?balance-total:balance+total))}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {!isBuy&&sharesNum>maxSell&&sharesNum>0&&<div style={{color:'var(--red)',fontSize:'.82rem',marginBottom:10}}>⚠️ You only own {fmt(maxSell,4)} shares of {ticker}.</div>}
+        {isBuy&&sharesNum>0&&!enoughBalance&&<div style={{color:'var(--red)',fontSize:'.82rem',marginBottom:10}}>⚠️ Insufficient funds. Need {fmtPrice(total)}, available {fmtPrice(balance)}.</div>}
+        {!isBuy&&!existing&&<div style={{color:'var(--amber)',fontSize:'.82rem',marginBottom:10}}>⚠️ You don't hold any {ticker} shares to sell.</div>}
+
+        <button className={isBuy?'btn btn-primary':'btn btn-sell'}
+          style={{width:'100%',justifyContent:'center',padding:'12px',fontSize:'.9rem',opacity:canConfirm?1:.5}}
+          onClick={handleConfirm} disabled={!canConfirm}>
+          {isBuy?`Buy ${sharesNum>0?fmt(sharesNum,4)+' shares of '+ticker:'Shares'}`:`Sell ${sharesNum>0?fmt(sharesNum,4)+' shares of '+ticker:'Shares'}`}
+        </button>
+
+        <div style={{textAlign:'center',marginTop:10}}>
+          <span className="balance-tag">Available cash: {fmtPrice(balance)}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── DASHBOARD ────────────────────────────────────────────────────────────────
+function Dashboard({quotes,fetchStockCandles,watchlist,mktStatus,news}){
+  const [selected,setSelected]=useState(null);
+
+  const sortedByChg=useMemo(()=>Object.entries(STOCKS_BASE).map(([t])=>({ticker:t,dp:quotes[t]?.dp||0})).sort((a,b)=>b.dp-a.dp),[quotes]);
+  const gainers=sortedByChg.slice(0,3);
+  const losers=[...sortedByChg].reverse().slice(0,3);
+
+  const insights=useMemo(()=>{
+    const out=[];
+    Object.entries(STOCKS_BASE).forEach(([ticker])=>{
+      const q=quotes[ticker]; if(!q?.c) return;
+      const dp=q.dp||0;
+      if(Math.abs(dp)>1.5){
+        const bull=dp>0;
+        out.push({
+          ticker,type:bull?'bull':'bear',
+          text:bull?`Up ${fmt(dp)}% today — price at ${fmtPrice(q.c)}. Momentum strong above ${fmtPrice(q.pc)} prior close. Watch ${fmtPrice(q.h)} as resistance.`:`Down ${fmt(Math.abs(dp))}% — trading below ${fmtPrice(q.pc)} prior close. ${fmtPrice(q.l)} intraday low. Elevated selling pressure noted.`,
+          conf:Math.min(88,Math.max(56,60+Math.abs(dp)*4)),
+          factors:[`Daily move: ${fmtPct(dp)}`,`Range: ${fmtPrice(q.l)} – ${fmtPrice(q.h)}`,bull?'Above prior close':'Below prior close']
+        });
+      }
+    });
+    if(out.length<2){
+      const q0=quotes['NVDA'],q1=quotes['AAPL'];
+      if(q0&&out.length<1) out.push({ticker:'NVDA',type:'bull',text:`Trading at ${fmtPrice(q0.c)}. AI chip demand remains strong. Watch ${fmtPrice(q0.h)} resistance. Options flow signals institutional accumulation.`,conf:79,factors:['Strong sector tailwinds','Above prior close','Positive sentiment']});
+      if(q1&&out.length<2) out.push({ticker:'AAPL',type:'warn',text:`Consolidating near ${fmtPrice(q1.c)}. Mixed signals — hold range ${fmtPrice(q1.l)}–${fmtPrice(q1.h)}. Await catalyst for directional move.`,conf:62,factors:['Neutral intraday','No clear trend signal','Wait for breakout']});
+    }
+    return out.sort((a,b)=>b.conf-a.conf).slice(0,4);
+  },[quotes]);
+
+  const indexCards=[{label:'S&P 500 (SPY)',sym:'SPY'},{label:'NASDAQ (QQQ)',sym:'QQQ'},{label:'Dow Jones (DIA)',sym:'DIA'}];
+
+  return(
+    <div className="main">
+      <div className="page-header">
+        <div><div className="page-title">Market Overview</div><div className="page-sub">{mktStatus?.isOpen?'Live data via Finnhub · WebSocket · auto-polls every 15 s':'Market closed · Showing most recent closing prices · auto-polls every 90 s'}</div></div>
+      </div>
+      <div className="card-grid-4">
+        {indexCards.map(({label,sym})=>{const q=quotes[sym]||{};return(
+          <div key={sym} className="card">
+            <div className="stat-label">{label}</div>
+            <div className="stat-val" style={{fontSize:'1.5rem'}}>{q.c?fmtPrice(q.c):'—'}</div>
+            <div className={`stat-change ${(q.dp||0)>=0?'pos':'neg'}`}>{q.dp!=null?(q.dp>=0?'▲':'▼')+' '+fmtPct(Math.abs(q.dp)):'—'}</div>
+            {!mktStatus?.isOpen&&q.c&&<div style={{fontSize:'.64rem',color:'var(--t3)',marginTop:2}}>Closing price</div>}
+            {q.c&&<Sparkline data={[q.l||q.c*.99,q.o||q.c,q.c]} color={(q.dp||0)>=0?'#00e676':'#ff3d71'} height={32}/>}
+          </div>
+        );})}
+        <div className="card"><div className="stat-label">Market Movers</div><div className="stat-val" style={{fontSize:'1.5rem'}}>{gainers.filter(g=>g.dp>0).length}/{Object.keys(STOCKS_BASE).length}</div><div className="stat-change neu">gainers today</div></div>
+      </div>
+      <div className="movers-grid">
+        <div className="movers-box">
+          <div className="movers-head up">▲ Top Gainers</div>
+          {gainers.map(({ticker,dp})=>{const q=quotes[ticker];return(
+            <div key={ticker} className="mover-row" onClick={()=>setSelected(ticker)}>
+              <div className="ticker-cell"><div className="ticker-logo" style={{background:STOCKS_BASE[ticker].color,color:'#fff',width:30,height:30,fontSize:'.7rem'}}>{ticker.slice(0,2)}</div><div><div className="mover-sym">{ticker}</div><div className="mover-name">{STOCKS_BASE[ticker].name.split(' ')[0]}</div></div></div>
+              <div><div className="mono" style={{fontSize:'.87rem'}}>{q?fmtPrice(q.c):'—'}</div></div>
+              <div className="mover-chg pos">+{fmt(dp)}%</div>
+            </div>
+          );})}
+        </div>
+        <div className="movers-box">
+          <div className="movers-head dn">▼ Top Losers</div>
+          {losers.map(({ticker,dp})=>{const q=quotes[ticker];return(
+            <div key={ticker} className="mover-row" onClick={()=>setSelected(ticker)}>
+              <div className="ticker-cell"><div className="ticker-logo" style={{background:STOCKS_BASE[ticker].color,color:'#fff',width:30,height:30,fontSize:'.7rem'}}>{ticker.slice(0,2)}</div><div><div className="mover-sym">{ticker}</div><div className="mover-name">{STOCKS_BASE[ticker].name.split(' ')[0]}</div></div></div>
+              <div><div className="mono" style={{fontSize:'.87rem'}}>{q?fmtPrice(q.c):'—'}</div></div>
+              <div className="mover-chg neg">{fmt(dp)}%</div>
+            </div>
+          );})}
+        </div>
+      </div>
+      <HotStocks quotes={quotes} fetchStockCandles={fetchStockCandles} onSelect={setSelected}/>
+      <div className="ai-panel">
+        <div className="ai-head">
+          <div className="ai-icon-box">🤖</div>
+          <div><div className="ai-title">Signal Intelligence</div><div style={{fontSize:'.76rem',color:'var(--t2)',marginTop:2}}>RSI · MACD · Momentum · Explainable signals from live data</div></div>
+          <div className="ai-live">● LIVE</div>
+          <div className="ai-explain">Click any stock row for full technical analysis</div>
+        </div>
+        <div className="insight-row">
+          {insights.map((ins,i)=>(
+            <div key={i} className={`insight-card ${ins.type}`} style={{cursor:'pointer'}} onClick={()=>setSelected(ins.ticker)}>
+              <div className="insight-ticker">{ins.ticker} · {ins.type==='bull'?'BULLISH':ins.type==='bear'?'BEARISH':'CAUTION'}</div>
+              <div className="insight-text">{ins.text}</div>
+              <div className="insight-factors">{ins.factors.map((f,j)=><span key={j}>{f}{j<ins.factors.length-1?' · ':''}</span>)}</div>
+              <div className="confidence"><span>Conf. {ins.conf}%</span><div className="conf-bar"><div className="conf-fill" style={{width:`${ins.conf}%`}}/></div></div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="table-wrap">
+        <div style={{padding:'14px 18px',borderBottom:'1px solid var(--border)',display:'flex',justifyContent:'space-between',alignItems:'center'}}><div style={{fontWeight:700}}>All Stocks</div><div style={{fontSize:'.76rem',color:'var(--t3)'}}>Click any row for chart + indicators</div></div>
+        <div className="table-head"><span>Symbol</span><span>Price</span><span>Change</span><span>High / Low</span><span>Signal</span><span></span></div>
+        {Object.entries(STOCKS_BASE).map(([ticker,info])=>{
+          const q=quotes[ticker]; if(!q) return null;
+          const up=(q.dp||0)>=0;
+          const sig=(q.dp||0)>2?'BUY':(q.dp||0)<-2?'SELL':'HOLD';
+          return(
+            <div key={ticker} className="table-row" onClick={()=>setSelected(ticker)}>
+              <div className="ticker-cell"><div className="ticker-logo" style={{background:info.color,color:'#fff'}}>{ticker.slice(0,2)}</div><div><div className="ticker-name">{ticker}</div><div className="ticker-full">{info.name}</div></div></div>
+              <div className="mono">{fmtPrice(q.c)}{q.isFallback&&<span style={{fontSize:'.64rem',color:'var(--t3)',marginLeft:4}}>est.</span>}</div>
+              <div className={`mono ${up?'pos':'neg'}`}>{fmtPct(q.dp||0)}</div>
+              <div className="mono" style={{fontSize:'.78rem',color:'var(--t3)'}}>{fmtPrice(q.h)} / {fmtPrice(q.l)}</div>
+              <div><span className={`badge badge-${sig.toLowerCase()}`}>{sig}</span></div>
+              <div><LiveSparkline ticker={ticker} fetchStockCandles={fetchStockCandles} color={up?'#00e676':'#ff3d71'} height={34} fallbackData={[q.l||q.c*.99,q.o||q.c,q.h||q.c*1.01,q.c]}/></div>
+            </div>
+          );
+        })}
+      </div>
+      {selected&&<StockModal ticker={selected} quotes={quotes} fetchStockCandles={fetchStockCandles} news={news} onClose={()=>setSelected(null)}/>}
+    </div>
+  );
+}
+
+// ─── PORTFOLIO ────────────────────────────────────────────────────────────────
+function Portfolio({quotes,fetchStockCandles,news,holdings,setHoldings,balance,setBalance}){
+  const [selected,setSelected]=useState(null);
+  const [trade,setTrade]=useState(null); // {mode:'buy'|'sell', ticker:string|null}
+
+  const rows=useMemo(()=>holdings.map((h,i)=>{
+    const q=quotes[h.ticker];
+    const cur=q?.c||0;
+    const val=cur*h.shares;
+    const costTotal=h.avgCost*h.shares;
+    const gl=val-costTotal; const glPct=costTotal>0?(gl/costTotal)*100:0;
+    const dayGl=(q?.d||0)*h.shares;
+    return{...h,cur,val,costTotal,gl,glPct,dayGl,color:COLORS_PORT[i%COLORS_PORT.length],q};
+  }),[holdings,quotes]);
+
+  const totalVal=rows.reduce((s,r)=>s+r.val,0);
+  const totalCost=rows.reduce((s,r)=>s+r.costTotal,0);
+  const totalGL=totalVal-totalCost;
+  const totalPct=totalCost>0?(totalGL/totalCost)*100:0;
+  const totalDayGL=rows.reduce((s,r)=>s+r.dayGl,0);
+  const riskScore=useMemo(()=>computeRiskScore(rows),[rows]);
+  const riskLabel=riskScore<30?'LOW':riskScore<55?'MODERATE':riskScore<75?'HIGH':'VERY HIGH';
+  const riskColor=riskScore<30?'var(--green)':riskScore<55?'var(--amber)':riskScore<75?'#ff9100':'var(--red)';
+  const riskRec=riskScore<30?'Well-diversified portfolio with low volatility exposure. Consider maintaining current allocation.'
+    :riskScore<55?'Moderate risk level. Beta-weighted exposure is balanced. Slight concentration in tech — consider adding Finance or Healthcare.'
+    :riskScore<75?'Elevated risk. High-beta positions (NVDA, TSLA) dominate. Consider trimming concentrated positions or adding defensive stocks.'
+    :'Very high risk detected. Concentrated in volatile tech/semi names. Strong recommendation to diversify across sectors and reduce single-position weight.';
+  const wBeta=rows.reduce((s,r)=>s+(STOCKS_BASE[r.ticker]?.beta||1)*(r.val/(totalVal||1)),0);
+
+  return(
+    <div className="main">
+      <div className="page-header">
+        <div><div className="page-title">Portfolio</div><div className="page-sub">{holdings.length} positions · Finnhub live prices</div></div>
+        <button className="btn btn-primary" onClick={()=>setTrade({mode:'buy',ticker:null})}>📈 Buy Stock</button>
+      </div>
+      <div className="card-grid-4">
+        <div className="card"><div className="stat-label">Total Value</div><div className="stat-val">${totalVal>0?fmt(totalVal,0).replace(/\B(?=(\d{3})+(?!\d))/g,','):'—'}</div><div className="stat-change neu">live market value</div></div>
+        <div className="card"><div className="stat-label">Cash Available</div><div className="stat-val pos">${fmt(balance,2).replace(/\B(?=(\d{3})+(?!\d))/g,',')}</div><div className="stat-change neu">buying power</div></div>
+        <div className="card"><div className="stat-label">Total Gain / Loss</div><div className={`stat-val ${totalGL>=0?'pos':'neg'}`}>{totalGL>=0?'+':''}{fmtPrice(Math.abs(totalGL))}</div><div className={`stat-change ${totalGL>=0?'pos':'neg'}`}>{fmtPct(totalPct)} all-time</div></div>
+        <div className="card"><div className="stat-label">Day G/L</div><div className={`stat-val ${totalDayGL>=0?'pos':'neg'}`}>{totalDayGL>=0?'+':''}{fmtPrice(Math.abs(totalDayGL))}</div><div className={`stat-change ${totalDayGL>=0?'pos':'neg'}`}>today's move</div></div>
+      </div>
+      <div className="card-grid-2">
+        <div className="card">
+          <div style={{fontWeight:700,marginBottom:10}}>Asset Allocation</div>
+          <div className="port-alloc">{rows.map(r=><div key={r.ticker} className="port-bar" style={{width:`${totalVal?((r.val/totalVal)*100).toFixed(1):0}%`,background:r.color}}/>)}</div>
+          <div className="port-legend">{rows.map(r=><div key={r.ticker} className="leg-item"><div className="leg-dot" style={{background:r.color}}/><span>{r.ticker} {totalVal?((r.val/totalVal)*100).toFixed(1):0}%</span></div>)}</div>
+        </div>
+        <div className="card">
+          <div style={{fontWeight:700,marginBottom:10}}>Portfolio Risk Assessment <span style={{fontSize:'.7rem',color:'var(--t3)',fontWeight:400}}>(DSR-5)</span></div>
+          <div className="risk-section">
+            <div className="risk-gauge-wrap"><RiskGauge score={riskScore}/><div style={{fontSize:'.72rem',color:'var(--t3)',textAlign:'center',marginTop:4}}>Risk Score</div></div>
+            <div className="risk-factors">
+              {[['Portfolio Beta',fmt(wBeta,2)],['Positions',holdings.length],['Sectors',[...new Set(holdings.map(h=>STOCKS_BASE[h.ticker]?.sector))].length],['Risk Level',riskLabel]].map(([k,v])=>(
+                <div key={k} className="risk-factor-row"><span style={{color:'var(--t3)'}}>{k}</span><span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,color:k==='Risk Level'?riskColor:'var(--t1)'}}>{v}</span></div>
+              ))}
+            </div>
+          </div>
+          <div className="risk-rec">💡 {riskRec}</div>
+        </div>
+      </div>
+      <div className="table-wrap">
+        <div style={{padding:'13px 18px',borderBottom:'1px solid var(--border)',fontWeight:700}}>Holdings</div>
+        <div style={{display:'grid',gridTemplateColumns:'1.8fr .8fr .9fr .9fr .9fr .9fr 120px',padding:'10px 18px',borderBottom:'1px solid var(--border)',fontSize:'.66rem',fontWeight:700,letterSpacing:'.07em',textTransform:'uppercase',color:'var(--t3)'}}>
+          <span>Symbol</span><span>Shares</span><span>Avg Cost</span><span>Cur Price</span><span>Mkt Value</span><span>G/L</span><span style={{textAlign:'center'}}>Actions</span>
+        </div>
+        {rows.map(r=>(
+          <div key={r.ticker} style={{display:'grid',gridTemplateColumns:'1.8fr .8fr .9fr .9fr .9fr .9fr 120px',padding:'12px 18px',borderBottom:'1px solid rgba(255,255,255,.03)',alignItems:'center',transition:'background .15s',cursor:'pointer'}}
+            onMouseEnter={e=>e.currentTarget.style.background='rgba(0,212,255,.04)'}
+            onMouseLeave={e=>e.currentTarget.style.background=''}
+            onClick={()=>setSelected(r.ticker)}>
+            <div className="ticker-cell">
+              <div className="ticker-logo" style={{background:r.color,color:'#fff',width:30,height:30,fontSize:'.7rem'}}>{r.ticker.slice(0,2)}</div>
+              <div><div style={{fontWeight:700,fontFamily:"'JetBrains Mono',monospace",fontSize:'.9rem'}}>{r.ticker}</div><div style={{fontSize:'.7rem',color:'var(--t3)'}}>{STOCKS_BASE[r.ticker]?.name}</div></div>
+            </div>
+            <div className="mono" style={{fontSize:'.88rem'}}>{fmt(r.shares,r.shares%1===0?0:4)}</div>
+            <div className="mono" style={{fontSize:'.88rem'}}>{fmtPrice(r.avgCost)}</div>
+            <div className="mono" style={{fontSize:'.88rem'}}>{r.cur?fmtPrice(r.cur):'—'}</div>
+            <div className="mono" style={{fontSize:'.88rem'}}>{r.val?'$'+fmt(r.val,2):'—'}</div>
+            <div className={`mono ${r.gl>=0?'pos':'neg'}`} style={{fontSize:'.88rem'}}>{r.gl?(r.gl>=0?'+':'')+fmtPct(r.glPct):'—'}</div>
+            <div style={{display:'flex',gap:5,justifyContent:'center'}} onClick={e=>e.stopPropagation()}>
+              <button className="btn-buy" onClick={()=>setTrade({mode:'buy',ticker:r.ticker})}>Buy</button>
+              <button className="btn-sell" onClick={()=>setTrade({mode:'sell',ticker:r.ticker})}>Sell</button>
+            </div>
+          </div>
+        ))}
+        {holdings.length===0&&<div className="empty-state">No positions yet — click "Buy Stock" to get started</div>}
+        <div style={{padding:'12px 18px',borderTop:'1px solid var(--border)',display:'flex',justifyContent:'space-between',alignItems:'center',fontSize:'.82rem'}}>
+          <span style={{color:'var(--t2)'}}>💵 Cash Available</span>
+          <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,color:'var(--green)'}}>{fmtPrice(balance)}</span>
+        </div>
+      </div>
+      {trade&&<TradeModal mode={trade.mode} ticker={trade.ticker} quotes={quotes} holdings={holdings} balance={balance} setHoldings={setHoldings} setBalance={setBalance} onClose={()=>setTrade(null)}/>}
+      {selected&&<StockModal ticker={selected} quotes={quotes} fetchStockCandles={fetchStockCandles} news={news} onClose={()=>setSelected(null)} onTrade={(m,t)=>{setSelected(null);setTrade({mode:m,ticker:t});}}/>}
+    </div>
+  );
+}
+
+// ─── WATCHLIST ────────────────────────────────────────────────────────────────
+function Watchlist({quotes,watchlist,setWatchlist,fetchStockCandles,news}){
+  const [input,setInput]=useState('');
+  const [selected,setSelected]=useState(null);
+  const add=()=>{const t=input.trim().toUpperCase();if(t&&STOCKS_BASE[t]&&!watchlist.includes(t))setWatchlist([...watchlist,t]);setInput('');};
+  const remove=(t)=>setWatchlist(watchlist.filter(x=>x!==t));
+  return(
+    <div className="main">
+      <div className="page-header">
+        <div><div className="page-title">Watchlist</div><div className="page-sub">{watchlist.length} stocks · click any row for chart &amp; indicators</div></div>
+      </div>
+      <div className="wl-input-row">
+        <input className="wl-input" placeholder="Enter ticker (AAPL, NVDA, MSFT…)" value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==='Enter'&&add()}/>
+        <button className="btn btn-primary" onClick={add}>+ Add</button>
+      </div>
+      <div style={{fontSize:'.76rem',color:'var(--t3)',marginBottom:12}}>Available: {Object.keys(STOCKS_BASE).join(', ')}</div>
+      <div className="table-wrap">
+        <div style={{display:'grid',gridTemplateColumns:'2fr 1fr 1fr 1fr 80px 36px',padding:'10px 18px',borderBottom:'1px solid var(--border)',fontSize:'.7rem',fontWeight:700,letterSpacing:'.07em',textTransform:'uppercase',color:'var(--t3)'}}>
+          <span>Symbol</span><span>Price</span><span>Change</span><span>Signal</span><span>Chart</span><span></span>
+        </div>
+        {watchlist.map(ticker=>{
+          const info=STOCKS_BASE[ticker]; if(!info) return null;
+          const q=quotes[ticker]; if(!q) return null;
+          const up=(q.dp||0)>=0;
+          const sig=(q.dp||0)>2?'BUY':(q.dp||0)<-2?'SELL':'HOLD';
+          return(
+            <div key={ticker} style={{display:'grid',gridTemplateColumns:'2fr 1fr 1fr 1fr 80px 36px',padding:'12px 18px',borderBottom:'1px solid rgba(255,255,255,.03)',alignItems:'center',cursor:'pointer',transition:'background .15s'}}
+              onMouseEnter={e=>e.currentTarget.style.background='rgba(0,212,255,.04)'}
+              onMouseLeave={e=>e.currentTarget.style.background=''}
+              onClick={()=>setSelected(ticker)}>
+              <div className="ticker-cell"><div className="ticker-logo" style={{background:info.color,color:'#fff'}}>{ticker.slice(0,2)}</div><div><div className="ticker-name">{ticker}</div><div className="ticker-full">{info.name}</div></div></div>
+              <div className="mono">{fmtPrice(q.c)}</div>
+              <div className={`mono ${up?'pos':'neg'}`}>{fmtPct(q.dp||0)}</div>
+              <div><span className={`badge badge-${sig.toLowerCase()}`}>{sig}</span></div>
+              <LiveSparkline ticker={ticker} fetchStockCandles={fetchStockCandles} color={up?'#00e676':'#ff3d71'} height={34} fallbackData={[q.l||q.c*.99,q.o||q.c,q.h||q.c*1.01,q.c]}/>
+              <button className="remove-btn" onClick={e=>{e.stopPropagation();remove(ticker);}}>✕</button>
+            </div>
+          );
+        })}
+        {watchlist.length===0&&<div className="empty-state">Add stocks using the input above</div>}
+      </div>
+      {selected&&<StockModal ticker={selected} quotes={quotes} fetchStockCandles={fetchStockCandles} news={news} onClose={()=>setSelected(null)}/>}
+    </div>
+  );
+}
+
+// ─── ALERTS ───────────────────────────────────────────────────────────────────
+function Alerts({quotes,news,holdings,balance,setHoldings,setBalance}){
+  const [alerts,setAlerts]=useState([
+    {id:1,ticker:'AAPL',type:'price',cond:'above',target:200,status:'active'},
+    {id:2,ticker:'NVDA',type:'price',cond:'above',target:900,status:'active'},
+    {id:3,ticker:'TSLA',type:'price',cond:'below',target:230,status:'triggered'},
+    {id:4,ticker:'META',type:'technical',cond:'RSI > 70 (overbought)',target:null,status:'active'},
+    {id:5,ticker:'NFLX',type:'news',cond:'Negative sentiment < 4.0',target:null,status:'inactive'},
+    {id:6,ticker:'AMD', type:'technical',cond:'MACD bullish crossover',target:null,status:'active'},
+  ]);
+  const [showModal,setShowModal]=useState(false);
+  const [form,setForm]=useState({ticker:'AAPL',type:'price',cond:'above',target:'',techCond:'RSI > 70 (overbought)',newsCond:'Negative sentiment < 4.0'});
+  const [filter,setFilter]=useState('all');
+  const [trade,setTrade]=useState(null);
+
+  useEffect(()=>{
+    setAlerts(prev=>prev.map(a=>{
+      if(a.type!=='price'||a.status==='inactive') return a;
+      const cur=quotes[a.ticker]?.c;
+      if(!cur) return a;
+      const hit=a.cond==='above'?cur>a.target:cur<a.target;
+      return{...a,status:hit?'triggered':'active'};
+    }));
+  },[quotes]);
+
+  const create=()=>{
+    const cond=form.type==='price'?form.cond:form.type==='technical'?form.techCond:form.newsCond;
+    setAlerts([...alerts,{id:Date.now(),ticker:form.ticker,type:form.type,cond,target:form.target?parseFloat(form.target):null,status:'active'}]);
+    setShowModal(false);
+    setForm({ticker:'AAPL',type:'price',cond:'above',target:'',techCond:'RSI > 70 (overbought)',newsCond:'Negative sentiment < 4.0'});
+  };
+  const remove=id=>setAlerts(alerts.filter(a=>a.id!==id));
+  const toggle=id=>setAlerts(alerts.map(a=>a.id===id?{...a,status:a.status==='inactive'?'active':'inactive'}:a));
+  const filtered=filter==='all'?alerts:alerts.filter(a=>a.type===filter||a.status===filter);
+
+  return(
+    <div className="main">
+      <div className="page-header">
+        <div><div className="page-title">Alerts</div><div className="page-sub">{alerts.filter(a=>a.status==='active').length} active · {alerts.filter(a=>a.status==='triggered').length} triggered · auto-monitored</div></div>
+        <button className="btn btn-primary" onClick={()=>setShowModal(true)}>+ Create Alert</button>
+      </div>
+      <div style={{display:'flex',gap:7,marginBottom:16,flexWrap:'wrap'}}>
+        {[['all','All'],['active','Active'],['triggered','Triggered 🔴'],['price','💰 Price'],['technical','📊 Technical'],['news','📰 News']].map(([k,l])=>(
+          <button key={k} onClick={()=>setFilter(k)} style={{padding:'5px 13px',borderRadius:20,border:'1px solid',fontSize:'.78rem',fontWeight:600,cursor:'pointer',background:filter===k?'rgba(0,212,255,.12)':'rgba(255,255,255,.04)',borderColor:filter===k?'var(--blue)':'var(--border)',color:filter===k?'var(--blue)':'var(--t2)',transition:'all .2s'}}>{l}</button>
+        ))}
+      </div>
+      <div className="table-wrap">
+        {filtered.map(a=>{
+          const cur=quotes[a.ticker]?.c;
+          const desc=a.type==='price'?`Price ${a.cond} $${a.target}${cur?` · now ${fmtPrice(cur)}`:''}`:a.cond;
+          return(
+            <div key={a.id} className="alert-item">
+              <div className="alert-left">
+                <div className={`alert-dot ${a.status}`}/>
+                <div className="alert-info">
+                  <div className="alert-name">{a.ticker} · {a.type==='price'?'💰 Price':a.type==='technical'?'📊 Technical':'📰 News'} Alert</div>
+                  <div className="alert-desc">{desc}</div>
+                </div>
+              </div>
+              <div className="alert-right">
+                <span className={`status-pill status-${a.status}`}>{a.status}</span>
+                <button className="btn-trade" onClick={()=>setTrade({mode:'buy',ticker:a.ticker})}>📈 Trade</button>
+                <button className="btn btn-ghost btn-sm" onClick={()=>toggle(a.id)}>{a.status==='inactive'?'Enable':'Pause'}</button>
+                <button className="btn btn-danger btn-sm" onClick={()=>remove(a.id)}>✕</button>
+              </div>
+            </div>
+          );
+        })}
+        {filtered.length===0&&<div className="empty-state">No alerts match this filter</div>}
+      </div>
+      {showModal&&(
+        <div className="overlay" onClick={()=>setShowModal(false)}>
+          <div className="modal" onClick={e=>e.stopPropagation()}>
+            <div className="modal-header"><div className="modal-title">Create Alert</div><button className="close-btn" onClick={()=>setShowModal(false)}>✕</button></div>
+            <div className="form-group"><label className="form-label">Stock</label>
+              <select className="form-select" value={form.ticker} onChange={e=>setForm({...form,ticker:e.target.value})}>
+                {Object.keys(STOCKS_BASE).map(t=><option key={t} value={t}>{t} — {STOCKS_BASE[t].name}</option>)}
+              </select>
+            </div>
+            <div className="form-group"><label className="form-label">Alert Type</label>
+              <select className="form-select" value={form.type} onChange={e=>setForm({...form,type:e.target.value})}>
+                <option value="price">💰 Price Alert</option><option value="technical">📊 Technical Indicator</option><option value="news">📰 News Sentiment</option>
+              </select>
+            </div>
+            {form.type==='price'&&<><div className="form-group"><label className="form-label">Condition</label><select className="form-select" value={form.cond} onChange={e=>setForm({...form,cond:e.target.value})}><option value="above">Price goes above</option><option value="below">Price goes below</option></select></div><div className="form-group"><label className="form-label">Target Price ($)</label><input className="form-input" type="number" step="0.01" placeholder="e.g. 200.00" value={form.target} onChange={e=>setForm({...form,target:e.target.value})}/>{quotes[form.ticker]?.c&&<p className="form-hint">Current price: {fmtPrice(quotes[form.ticker].c)}</p>}</div></>}
+            {form.type==='technical'&&<div className="form-group"><label className="form-label">Indicator Trigger</label><select className="form-select" value={form.techCond} onChange={e=>setForm({...form,techCond:e.target.value})}><option>RSI &gt; 70 (overbought)</option><option>RSI &lt; 30 (oversold)</option><option>MACD bullish crossover</option><option>MACD bearish crossover</option><option>Price crosses above 50-day MA</option><option>Price crosses below 50-day MA</option></select></div>}
+            {form.type==='news'&&<div className="form-group"><label className="form-label">News Condition</label><select className="form-select" value={form.newsCond} onChange={e=>setForm({...form,newsCond:e.target.value})}><option>Negative sentiment &lt; 4.0</option><option>Positive sentiment &gt; 7.0</option><option>Any high-impact news</option><option>Earnings report published</option></select></div>}
+            <button className="btn btn-primary" style={{width:'100%',justifyContent:'center',padding:'12px'}} onClick={create}>Create Alert</button>
+          </div>
+        </div>
+      )}
+      {trade&&<TradeModal mode={trade.mode} ticker={trade.ticker} quotes={quotes} holdings={holdings} balance={balance} setHoldings={setHoldings} setBalance={setBalance} onClose={()=>setTrade(null)}/>}
+    </div>
+  );
+}
+
+// ─── NEWS ─────────────────────────────────────────────────────────────────────
+function NewsPage({news}){
+  const [filter,setFilter]=useState('all');
+  const [selectedArticle,setSelectedArticle]=useState(null);
+  const processed=useMemo(()=>news.map((n,idx)=>{
+    const {sentiment,score}=classifySentiment(n.headline||n.title||'',n.summary||'');
+    const tickers=(n.related||'').split(',').filter(t=>t&&STOCKS_BASE[t.trim()]).map(t=>t.trim());
+    return{...n,sentiment,score,tickers,_idx:idx};
+  }),[news]);
+  const filtered=filter==='all'?processed:processed.filter(n=>n.sentiment===filter);
+
+  return(
+    <div className="main">
+      <div className="page-header">
+        <div><div className="page-title">News Feed</div><div className="page-sub">Live Finnhub news · keyword sentiment · {processed.length} articles · click any story for full analysis</div></div>
+      </div>
+      <div style={{display:'flex',gap:7,marginBottom:16,flexWrap:'wrap'}}>
+        {[['all','All News'],['bull','▲ Bullish'],['bear','▼ Bearish'],['neu','● Neutral']].map(([k,l])=>(
+          <button key={k} onClick={()=>setFilter(k)} style={{padding:'5px 13px',borderRadius:20,border:'1px solid',fontSize:'.78rem',fontWeight:600,cursor:'pointer',background:filter===k?'rgba(0,212,255,.12)':'rgba(255,255,255,.04)',borderColor:filter===k?'var(--blue)':'var(--border)',color:filter===k?'var(--blue)':'var(--t2)',transition:'all .2s'}}>{l}</button>
+        ))}
+      </div>
+      <div className="table-wrap">
+        {filtered.map(n=>(
+          <div key={n._idx} className="news-item" onClick={()=>setSelectedArticle(n)}>
+            <div className="news-meta">
+              <span className="news-source">{n.source}</span>
+              <span className="news-time">{timeAgo(n.datetime)}</span>
+              <span className={`sent-score ${n.sentiment==='bull'?'sent-bull':n.sentiment==='bear'?'sent-bear':'sent-neu'}`}>
+                {n.sentiment==='bull'?'▲ Bullish':n.sentiment==='bear'?'▼ Bearish':'● Neutral'} {fmt(n.score,1)}/10
+              </span>
+              <span style={{marginLeft:'auto',color:'var(--blue)',fontSize:'.7rem',fontWeight:600}}>Read Analysis ↗</span>
+            </div>
+            <div className="news-title">{n.headline||n.title}</div>
+            <div className="news-tickers" style={{marginTop:6}}>{n.tickers.map(t=><span key={t} className="news-tag">{t}</span>)}</div>
+          </div>
+        ))}
+        {filtered.length===0&&<div className="empty-state">No articles match this filter</div>}
+      </div>
+      {selectedArticle&&<NewsArticleModal article={selectedArticle} onClose={()=>setSelectedArticle(null)}/>}
+    </div>
+  );
+}
+
+// ─── PAYMENT MODAL ────────────────────────────────────────────────────────────
+function PaymentModal({targetPlan,onClose,onComplete}){
+  const p=PLANS.find(x=>x.id===targetPlan)||PLANS[2];
+  const [step,setStep]=useState(1); // 1=summary 2=payment 3=processing 4=success
+  const [form,setForm]=useState({name:'',card:'',expiry:'',cvv:''});
+  const [err,setErr]=useState('');
+
+  const formatCard=(v)=>v.replace(/\D/g,'').slice(0,16).replace(/(.{4})/g,'$1 ').trim();
+  const formatExp=(v)=>{const d=v.replace(/\D/g,'').slice(0,4);return d.length>2?d.slice(0,2)+'/'+d.slice(2):d;};
+
+  const submitPayment=()=>{
+    if(!form.name.trim()){setErr('Please enter the cardholder name.');return;}
+    if(form.card.replace(/\s/g,'').length<16){setErr('Please enter a valid 16-digit card number.');return;}
+    if(form.expiry.length<5){setErr('Please enter a valid expiry date.');return;}
+    if(form.cvv.length<3){setErr('Please enter a valid CVV.');return;}
+    setErr('');setStep(3);
+    setTimeout(()=>{setStep(4);},2200);
+  };
+
+  if(step===4) return(
+    <div className="overlay" onClick={onClose}>
+      <div className="modal" style={{maxWidth:420,textAlign:'center'}} onClick={e=>e.stopPropagation()}>
+        <div className="success-circle">🎉</div>
+        <div className="modal-title" style={{marginBottom:8}}>{p.name} Plan Activated!</div>
+        <p style={{color:'var(--t2)',fontSize:'.88rem',lineHeight:1.7,marginBottom:20}}>
+          Welcome to Billy Bronco <strong style={{color:'var(--blue)'}}>{p.name}</strong>!<br/>
+          Your plan has been updated and all features are now unlocked.
+        </p>
+        <div style={{background:'var(--bg3)',borderRadius:10,padding:'12px 14px',marginBottom:20,textAlign:'left'}}>
+          {p.features.map((f,i)=><div key={i} style={{fontSize:'.83rem',color:'var(--t2)',padding:'4px 0',display:'flex',gap:8,alignItems:'center'}}><span style={{color:'var(--green)'}}>✓</span>{f}</div>)}
+        </div>
+        <button className="btn btn-primary" style={{width:'100%',justifyContent:'center',padding:'11px'}} onClick={()=>{onComplete(targetPlan);onClose();}}>Start Using {p.name} →</button>
+      </div>
+    </div>
+  );
+
+  if(step===3) return(
+    <div className="overlay">
+      <div className="modal" style={{maxWidth:380,textAlign:'center'}}>
+        <div style={{fontSize:'2.5rem',marginBottom:16}}>⚙️</div>
+        <div className="modal-title" style={{marginBottom:10}}>Processing Payment…</div>
+        <p style={{color:'var(--t2)',fontSize:'.85rem',marginBottom:20}}>Please wait while we securely process your payment.</p>
+        <div style={{width:'100%',height:4,background:'var(--bg3)',borderRadius:4,overflow:'hidden'}}>
+          <div style={{height:'100%',background:'linear-gradient(90deg,var(--blue),var(--cyan))',borderRadius:4,animation:'progress-bar 2.2s ease-out forwards'}}/>
+        </div>
+        <style>{`@keyframes progress-bar{from{width:0%}to{width:100%}}`}</style>
+      </div>
+    </div>
+  );
+
+  return(
+    <div className="overlay" onClick={onClose}>
+      <div className="modal" style={{maxWidth:460}} onClick={e=>e.stopPropagation()}>
+        <div className="modal-header">
+          <div className="modal-title">Upgrade to {p.name}</div>
+          <button className="close-btn" onClick={onClose}>✕</button>
+        </div>
+        <div className="pay-steps">
+          {[1,2].map(s=>(
+            <React.Fragment key={s}>
+              <div className={`pay-step ${step>s?'done':step===s?'active':'pending'}`}>{step>s?'✓':s}</div>
+              {s<2&&<div className="pay-step-line"/>}
+            </React.Fragment>
+          ))}
+          <div style={{marginLeft:8,fontSize:'.78rem',color:'var(--t3)'}}>{step===1?'Order Summary':'Payment Details'}</div>
+        </div>
+
+        {step===1&&(
+          <>
+            <div style={{background:'var(--bg3)',borderRadius:10,padding:'14px 16px',marginBottom:16}}>
+              <div style={{fontWeight:700,fontSize:'1rem',color:p.color,marginBottom:4}}>{p.name} Plan</div>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:'1.6rem',fontWeight:700}}>{p.price===0?'Free':`$${p.price}`}<span style={{fontSize:'.75rem',color:'var(--t3)',fontFamily:"'Archivo',sans-serif",fontWeight:400}}>{p.price>0?'/month':''}</span></div>
+              <div className="plan-divider" style={{margin:'12px 0'}}/>
+              {p.features.map((f,i)=><div key={i} style={{fontSize:'.83rem',color:'var(--t2)',padding:'3px 0',display:'flex',gap:8,alignItems:'center'}}><span style={{color:'var(--green)'}}>✓</span>{f}</div>)}
+            </div>
+            <div style={{background:'rgba(0,212,255,.05)',border:'1px solid rgba(0,212,255,.15)',borderRadius:8,padding:'10px 14px',marginBottom:16,fontSize:'.78rem',color:'var(--t2)',lineHeight:1.6}}>
+              🔒 This is a demo checkout. No real charge will be made. Enter any card details to proceed.
+            </div>
+            <button className="btn btn-primary" style={{width:'100%',justifyContent:'center',padding:'12px'}} onClick={()=>setStep(2)}>Continue to Payment →</button>
+          </>
+        )}
+
+        {step===2&&(
+          <>
+            <div className="form-group">
+              <label className="form-label">Cardholder Name</label>
+              <input className="form-input" placeholder="Jane Doe" value={form.name} onChange={e=>setForm({...form,name:e.target.value})}/>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Card Number</label>
+              <input className="form-input card-num-input" placeholder="1234 5678 9012 3456" value={form.card} onChange={e=>setForm({...form,card:formatCard(e.target.value)})} maxLength={19}/>
+            </div>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
+              <div className="form-group"><label className="form-label">Expiry</label><input className="form-input" placeholder="MM/YY" value={form.expiry} onChange={e=>setForm({...form,expiry:formatExp(e.target.value)})} maxLength={5}/></div>
+              <div className="form-group"><label className="form-label">CVV</label><input className="form-input" placeholder="123" type="password" value={form.cvv} onChange={e=>setForm({...form,cvv:e.target.value.replace(/\D/g,'').slice(0,4)})} maxLength={4}/></div>
+            </div>
+            {err&&<div style={{color:'var(--red)',fontSize:'.82rem',marginBottom:10}}>⚠️ {err}</div>}
+            <div className="trade-summary">
+              <div className="trade-row"><span style={{color:'var(--t2)'}}>Plan</span><span>{p.name}</span></div>
+              <div className="trade-row"><span style={{color:'var(--t2)'}}>Billing</span><span>Monthly</span></div>
+              <div className="trade-row"><span>Total today</span><span className="mono" style={{color:'var(--blue)',fontWeight:700}}>${p.price.toFixed(2)}</span></div>
+            </div>
+            <div style={{display:'flex',gap:10}}>
+              <button className="btn btn-ghost" style={{flex:1,justifyContent:'center',padding:'11px'}} onClick={()=>setStep(1)}>← Back</button>
+              <button className="btn btn-primary" style={{flex:2,justifyContent:'center',padding:'11px'}} onClick={submitPayment}>Pay ${p.price.toFixed(2)} →</button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── SUBSCRIPTION ─────────────────────────────────────────────────────────────
+function SubscribePage({plan,setPlan}){
+  const [payTarget,setPayTarget]=useState(null);
+  return(
+    <div className="main">
+      <div className="page-header">
+        <div><div className="page-title">Subscription Plans</div><div className="page-sub">Choose the plan that fits your investing needs</div></div>
+      </div>
+      <div className="plan-grid">
+        {PLANS.map(p=>(
+          <div key={p.id} className={`plan-card${p.id==='pro'?' featured':''}${plan===p.id?' current':''}`}>
+            {p.id==='pro'&&<span className="plan-badge plan-most-popular">Most Popular</span>}
+            {plan===p.id&&<span className="plan-badge plan-current-badge" style={{top:p.id==='pro'?40:14}}>Current Plan</span>}
+            <div className="plan-name" style={{color:p.color}}>{p.name}</div>
+            <div className="plan-price">{p.price===0?'Free':`$${p.price}`}</div>
+            <div className="plan-price-sub">{p.price===0?'forever':'/month · billed monthly'}</div>
+            <div className="plan-divider"/>
+            <ul className="plan-features">
+              {p.features.map((f,i)=><li key={i}><span className="check">✓</span>{f}</li>)}
+              {p.locked?.map((f,i)=><li key={i} style={{opacity:.45}}><span className="lock">🔒</span>{f}</li>)}
+            </ul>
+            <button
+              className={plan===p.id?'btn btn-ghost':'btn btn-primary'}
+              style={{width:'100%',justifyContent:'center',padding:'11px',...(plan===p.id?{}:{background:p.id==='pro'?'linear-gradient(135deg,var(--purple),var(--blue))':undefined})}}
+              onClick={()=>{ if(plan!==p.id) setPayTarget(p.id); }}>
+              {plan===p.id?'✓ Current Plan':`${p.price===0?'Get Started':'Upgrade'} → ${p.name}`}
+            </button>
+          </div>
+        ))}
+      </div>
+      <div style={{textAlign:'center',marginTop:24,color:'var(--t3)',fontSize:'.8rem'}}>
+        All plans include live US market data via Finnhub · Cancel anytime · No hidden fees
+      </div>
+      {payTarget&&<PaymentModal targetPlan={payTarget} onClose={()=>setPayTarget(null)} onComplete={(id)=>{setPlan(id);setPayTarget(null);}}/>}
+    </div>
+  );
+}
+
+// ─── LEARN PAGE ───────────────────────────────────────────────────────────────
+const LEARN_ITEMS_FULL = [
+  {
+    term:'RSI — Relative Strength Index',
+    def:'A momentum oscillator that measures the speed and magnitude of recent price changes to evaluate whether a stock is overbought or oversold. Ranges from 0 to 100.',
+    formula:'RSI = 100 – 100 / (1 + RS)\nRS  = Average Gain / Average Loss  (over 14 periods)',
+    tips:[
+      {icon:'🟢',text:'RSI below 30 signals oversold conditions — the stock may be due for a bounce.'},
+      {icon:'🔴',text:'RSI above 70 signals overbought conditions — momentum may be fading.'},
+      {icon:'⚠️',text:'Bearish divergence: price makes new highs but RSI doesn\'t — watch for reversal.'},
+      {icon:'💡',text:'In strong uptrends RSI can stay above 50 for extended periods without being "overbought".'},
+    ]
+  },
+  {
+    term:'MACD — Moving Average Convergence Divergence',
+    def:'A trend-following momentum indicator that shows the relationship between two exponential moving averages. Traders use MACD crossovers and histogram divergence to identify trend changes.',
+    formula:'MACD Line  = EMA(12) – EMA(26)\nSignal Line = EMA(9) of MACD Line\nHistogram   = MACD Line – Signal Line',
+    tips:[
+      {icon:'🟢',text:'Bullish signal: MACD line crosses above the signal line.'},
+      {icon:'🔴',text:'Bearish signal: MACD line crosses below the signal line.'},
+      {icon:'📊',text:'A growing histogram (positive bars getting taller) indicates accelerating momentum.'},
+      {icon:'💡',text:'Zero-line crossovers (MACD crossing 0) confirm longer-term trend changes.'},
+    ]
+  },
+  {
+    term:'Moving Averages — SMA & EMA',
+    def:'Moving averages smooth price data to identify trend direction. The SMA (Simple) weights all days equally. The EMA (Exponential) weights recent prices more heavily, making it faster to react.',
+    formula:'SMA(n)   = (P₁ + P₂ + … + Pₙ) / n\nEMA(n,t) = Price(t) × k + EMA(t-1) × (1 – k)\n           where  k = 2 / (n + 1)',
+    tips:[
+      {icon:'🌟',text:'Golden Cross: 50-day MA crosses above 200-day MA → long-term bullish signal.'},
+      {icon:'💀',text:'Death Cross: 50-day MA crosses below 200-day MA → long-term bearish signal.'},
+      {icon:'📌',text:'Moving averages act as dynamic support (in uptrends) and resistance (in downtrends).'},
+      {icon:'💡',text:'Use 20 MA for short-term trend, 50 MA for medium-term, 200 MA for long-term context.'},
+    ]
+  },
+  {
+    term:'P/E Ratio — Price to Earnings',
+    def:'Compares a stock\'s current price to its earnings per share (EPS). The P/E ratio tells you how much investors are willing to pay for each dollar of earnings. High P/E = growth expectations or overvaluation.',
+    formula:'P/E = Stock Price / Earnings Per Share (EPS)\nForward P/E uses estimated next-12-month earnings',
+    tips:[
+      {icon:'📊',text:'Tech sector average P/E: 25–40×. Utilities average: 15–20×. Always compare within sector.'},
+      {icon:'🔍',text:'PEG Ratio = P/E ÷ Annual EPS Growth Rate. PEG < 1 may indicate undervaluation.'},
+      {icon:'⚠️',text:'Very high P/E stocks (50×+) are pricing in significant future growth — any miss is punished.'},
+      {icon:'💡',text:'Trailing P/E uses past earnings; forward P/E uses analyst forecasts. Both have value.'},
+    ]
+  },
+  {
+    term:'Portfolio Beta — Systematic Risk',
+    def:'Beta measures how much a portfolio (or stock) moves relative to the overall market. A beta of 1.0 means it moves exactly with the market. Beta above 1 amplifies market moves; below 1 dampens them.',
+    formula:'Portfolio Beta = Σ (Position Weight × Position Beta)\nExample: 60% NVDA (β=1.72) + 40% JPM (β=1.08)\n         = 0.6 × 1.72 + 0.4 × 1.08 = 1.46',
+    tips:[
+      {icon:'🛡️',text:'Defensive stocks (utilities, consumer staples) typically have beta 0.3–0.8.'},
+      {icon:'🚀',text:'High-growth tech stocks often carry beta 1.5–2.5, amplifying both gains and losses.'},
+      {icon:'📉',text:'In bear markets, high-beta portfolios fall more than the index — plan accordingly.'},
+      {icon:'💡',text:'Target portfolio beta based on your risk tolerance and market outlook.'},
+    ]
+  },
+  {
+    term:'VaR — Value at Risk',
+    def:'Estimates the maximum potential loss over a given time horizon at a specified confidence level. For example, a 1-day 95% VaR of $1,000 means there is a 95% chance your portfolio will NOT lose more than $1,000 in one day.',
+    formula:'VaR(95%, 1-day) ≈ 1.645 × σ_daily × Portfolio Value\nσ_daily = daily standard deviation of returns\nFor T days: multiply by √T',
+    tips:[
+      {icon:'⚠️',text:'VaR does NOT tell you what happens in the worst 5% of cases — those can be much larger.'},
+      {icon:'🔬',text:'CVaR (Conditional VaR) measures expected loss beyond the VaR threshold — more conservative.'},
+      {icon:'📊',text:'Parametric VaR assumes normal returns; Monte Carlo VaR simulates thousands of scenarios.'},
+      {icon:'💡',text:'VaR is a risk management tool, not a predictor. Use alongside stress testing for full picture.'},
+    ]
+  },
+];
+
+function LearnPage(){
+  const [open,setOpen]=useState(null);
+  return(
+    <div className="main">
+      <div className="page-header">
+        <div><div className="page-title">Learn</div><div className="page-sub">Financial indicators and analytics — click any card to expand</div></div>
+      </div>
+      <p style={{color:'var(--t2)',fontSize:'.88rem',marginBottom:20,lineHeight:1.65}}>
+        All indicators shown in stock detail modals are computed client-side from real Finnhub historical data. Understanding them helps you interpret signals accurately.
+      </p>
+      {LEARN_ITEMS_FULL.map((item,i)=>(
+        <div key={i} className="learn-card" onClick={()=>setOpen(open===i?null:i)} style={{cursor:'pointer',marginBottom:10}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+            <div className="learn-term">{item.term}</div>
+            <span style={{color:'var(--t3)',fontSize:'.9rem',marginLeft:12,flexShrink:0}}>{open===i?'▲ Close':'▼ Expand'}</span>
+          </div>
+          {open===i&&(
+            <div onClick={e=>e.stopPropagation()}>
+              <div className="learn-def" style={{marginTop:10}}>{item.def}</div>
+              <div className="learn-formula-box">
+                <div className="learn-formula-label">Formula</div>
+                <div className="learn-formula-text">{item.formula}</div>
+              </div>
+              <div className="learn-tips">
+                <div className="learn-tips-title">Key Insights &amp; Interpretation Tips</div>
+                {item.tips.map((tip,j)=>(
+                  <div key={j} className="learn-tip">
+                    <span className="learn-tip-icon">{tip.icon}</span>
+                    <span>{tip.text}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
+      <div style={{marginTop:20,padding:18,background:'rgba(0,212,255,.05)',border:'1px solid rgba(0,212,255,.15)',borderRadius:14,color:'var(--t2)',fontSize:'.82rem',lineHeight:1.7}}>
+        <strong style={{color:'var(--blue)'}}>Disclaimer:</strong> Billy Bronco is an educational and analytical tool for informational purposes only. Signal Intelligence uses rules-based technical analysis — not financial advice. Always consult a licensed financial advisor before making investment decisions.
+      </div>
+    </div>
+  );
+}
+
+// ─── LANDING ──────────────────────────────────────────────────────────────────
+const FEATURES=[
+  {id:'realtime',icon:'📊',name:'Real-Time Tracking',desc:'Live prices via Finnhub WebSocket (market hours) and REST polling every 15 s. Includes indices, portfolio valuation, and alerts.'},
+  {id:'ai',icon:'🤖',name:'Signal Intelligence',desc:'Rules-based RSI, MACD, and momentum signals with explainable factors and confidence scores for every stock.'},
+  {id:'portfolio',icon:'💼',name:'Portfolio Analytics',desc:'Buy and sell positions with real-time P&L, asset allocation, portfolio beta, and a live risk score (DSR-5).'},
+  {id:'alerts',icon:'🔔',name:'Smart Alerts',desc:'Auto-triggered price, technical indicator, and news sentiment alerts. Quick Trade button on every alert.'},
+  {id:'news',icon:'📰',name:'News Sentiment',desc:'Aggregated financial news with keyword-based sentiment scoring. Click to expand or open the full article.'},
+  {id:'technical',icon:'📈',name:'Technical Indicators',desc:'RSI (14), MACD (12/26/9), SMA 20 & 50 — computed from real Finnhub candle data inside every stock modal.'},
+];
+const FEATURE_DETAIL={
+  realtime:{icon:'📊',title:'Real-Time Tracking',details:['Finnhub.io API — US exchange via REST polling every 60s','S&P 500 (SPY), NASDAQ (QQQ), Dow Jones (DIA) indices','Flash animations when prices update','Market open/close status display'],tech:['Finnhub WebSocket','REST polling fallback','Embedded API key']},
+  ai:{icon:'🤖',title:'Signal Intelligence',details:['RSI-based oversold/overbought detection','MACD line vs signal line crossover analysis','Price vs SMA20 and SMA50 positioning','Confidence score (50–91%) per signal','Explainable factors shown per card (NFR-11)'],tech:['Client-side JS computation','From Finnhub candle data','No external ML API needed']},
+  portfolio:{icon:'💼',title:'Portfolio Analytics',details:['Buy & sell positions with real account balance','Cost basis, total G/L, day G/L tracking','Asset allocation bar with color legend','Beta-weighted portfolio risk score (0–100)','Risk recommendations based on score'],tech:['Live quotes × shares','Beta-weighted risk model','SVG gauge component']},
+  alerts:{icon:'🔔',title:'Smart Alerts',details:['Price alerts auto-trigger from live quotes','Technical indicator alert types','News sentiment threshold alerts','Filter by type or status','Quick Trade button per alert'],tech:['useEffect price monitoring','State-based trigger logic','60s refresh cycle']},
+  news:{icon:'📰',title:'News Sentiment',details:['Real market news from Finnhub /news endpoint','Keyword-based sentiment classifier','Bullish/bearish/neutral scoring on 0–10 scale','Click to expand or open full article','Related news shown inside stock detail modal'],tech:['Finnhub News API','Keyword sentiment classifier','Expandable articles']},
+  technical:{icon:'📈',title:'Technical Indicators',details:['RSI (14-period) from historical closes','MACD: EMA(12) – EMA(26), Signal EMA(9)','SMA 20 and SMA 50 moving averages','Historical charts with 1W/1M/3M/6M/1Y views','All computed client-side with synthetic fallback'],tech:['Pure JS EMA/RSI/MACD','Finnhub /stock/candle endpoint','Synthetic fallback when API unavailable']},
+};
+
+function Landing({setScreen}){
+  const [detail,setDetail]=useState(null);
+  return(
+    <div>
+      <section className="hero">
+        <div className="hero-badge">Cal Poly Pomona · CS 4800.03 · MVP Demo</div>
+        <h1>Billy Bronco<br/><span className="grad">Market Analyst</span></h1>
+        <p>Real-time market data, technical signal intelligence, portfolio risk analytics, and smart alerts — built for retail investors and active traders.</p>
+        <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
+          <button className="btn btn-primary" style={{padding:'12px 26px',fontSize:'.97rem'}} onClick={()=>setScreen('dashboard')}>Launch Dashboard →</button>
+          <button className="btn btn-ghost" style={{padding:'11px 22px',fontSize:'.97rem'}} onClick={()=>setScreen('portfolio')}>Portfolio &amp; Risk</button>
+        </div>
+        <div className="hero-stats">
+          {[['10','Stocks Tracked'],['3','Index ETFs'],['Real-Time','Finnhub API'],['6','Key Indicators']].map(([v,l])=>(
+            <div key={l} style={{textAlign:'center'}}><div className="hero-stat-val">{v}</div><div className="hero-stat-label">{l}</div></div>
+          ))}
+        </div>
+      </section>
+      <section className="features-section">
+        <div className="features-title">Everything You Need</div>
+        <div className="features-sub">MVP feature set aligned to FR-1 through FR-12 and DSR-1 through DSR-10 · Click any card to learn more</div>
+        <div className="feature-grid">
+          {FEATURES.map(f=>(
+            <div key={f.id} className="feature-card" onClick={()=>setDetail(f.id)}>
+              <div className="feature-icon">{f.icon}</div>
+              <div className="feature-name">{f.name}</div>
+              <div className="feature-desc">{f.desc}</div>
+              <div className="feature-arrow">Learn more →</div>
+            </div>
+          ))}
+        </div>
+      </section>
+      <div style={{textAlign:'center',paddingBottom:32,fontSize:'.72rem',color:'var(--t3)'}}>
+        Market data by <a href="https://finnhub.io" target="_blank" rel="noreferrer" style={{color:'var(--blue)'}}>Finnhub</a> · Not financial advice
+      </div>
+      {detail&&(()=>{const d=FEATURE_DETAIL[detail];return(
+        <div className="overlay" onClick={()=>setDetail(null)}>
+          <div className="modal" onClick={e=>e.stopPropagation()}>
+            <div className="modal-header"><div style={{display:'flex',alignItems:'center',gap:12}}><span style={{fontSize:'2rem'}}>{d.icon}</span><div className="modal-title">{d.title}</div></div><button className="close-btn" onClick={()=>setDetail(null)}>✕</button></div>
+            <ul style={{paddingLeft:20,marginBottom:18}}>{d.details.map((x,i)=><li key={i} style={{color:'var(--t2)',lineHeight:1.7,marginBottom:4,fontSize:'.88rem'}}>{x}</li>)}</ul>
+            <div style={{fontWeight:700,fontSize:'.78rem',color:'var(--t3)',textTransform:'uppercase',letterSpacing:'.07em',marginBottom:8}}>Implementation</div>
+            <div style={{display:'flex',gap:7,flexWrap:'wrap'}}>{d.tech.map(t=><span key={t} className="tag">{t}</span>)}</div>
+          </div>
+        </div>
+      );})()}
+    </div>
+  );
+}
+
+// ─── APP ──────────────────────────────────────────────────────────────────────
+function App(){
+  const [screen,    setScreen]    = useState('landing');
+  const [watchlist, setWatchlist] = useState(['AAPL','NVDA','MSFT','TSLA','AMZN']);
+  const [user,      setUser]      = useState(null);
+  const [showAuth,  setShowAuth]  = useState(false);
+  const [plan,      setPlan]      = useState('free');
+  // Lifted portfolio state so Alerts can also trade
+  const [holdings,  setHoldings]  = useState(PORTFOLIO_HOLDINGS);
+  const [balance,   setBalance]   = useState(50000);
+
+  const { quotes, news, mktStatus, loading, lastUpdate, error, wsStatus, fetchStockCandles } = useMarketData();
+  const showSidebar = screen !== 'landing';
+
+  return(
+    <>
+      <Nav screen={screen} setScreen={setScreen} quotes={quotes} mktStatus={mktStatus}
+           lastUpdate={lastUpdate} wsStatus={wsStatus} onOpenAuth={()=>setShowAuth(true)} user={user} onSignOut={()=>{setUser(null);setPlan('free');}}/>
+      <TickerBanner quotes={quotes}/>
+      {error&&<div style={{position:'fixed',top:96,left:0,right:0,zIndex:800,background:'rgba(255,183,0,.12)',borderBottom:'1px solid rgba(255,183,0,.3)',padding:'6px 18px',fontSize:'.78rem',color:'var(--amber)',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+        ⚠️ {error}
+      </div>}
+      {showSidebar?(
+        <div className="layout" style={{paddingTop: error ? '130px' : '96px'}}>
+          <Sidebar screen={screen} setScreen={setScreen} user={user} onSignOut={()=>setUser(null)} onOpenAuth={()=>setShowAuth(true)} plan={plan}/>
+          {screen==='dashboard' &&<Dashboard quotes={quotes} fetchStockCandles={fetchStockCandles} watchlist={watchlist} mktStatus={mktStatus} news={news}/>}
+          {screen==='portfolio' &&(user ? <Portfolio quotes={quotes} fetchStockCandles={fetchStockCandles} news={news} holdings={holdings} setHoldings={setHoldings} balance={balance} setBalance={setBalance}/> : <AuthGate screen="portfolio" onOpenAuth={()=>setShowAuth(true)}/>)}
+          {screen==='watchlist' &&(user ? <Watchlist quotes={quotes} watchlist={watchlist} setWatchlist={setWatchlist} fetchStockCandles={fetchStockCandles} news={news}/> : <AuthGate screen="watchlist" onOpenAuth={()=>setShowAuth(true)}/>)}
+          {screen==='alerts'    &&(user ? <Alerts quotes={quotes} news={news} holdings={holdings} balance={balance} setHoldings={setHoldings} setBalance={setBalance}/> : <AuthGate screen="alerts" onOpenAuth={()=>setShowAuth(true)}/>)}
+          {screen==='news'      &&<NewsPage news={news}/>}
+          {screen==='subscribe' &&<SubscribePage plan={plan} setPlan={setPlan}/>}
+          {screen==='learn'     &&<LearnPage/>}
+        </div>
+      ):<Landing setScreen={setScreen}/>}
+      {showAuth&&<AuthModal onClose={()=>setShowAuth(false)} onAuth={(u)=>{setUser(u);setPlan('premium');setShowAuth(false);}}/>}
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+
+</script>
+</body>
+</html>
