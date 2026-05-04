@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { ALL_STOCK_SYMBOLS } from '../data/market';
 import { FEATURES } from '../utils/pageContent';
 
 export default function Landing({ isAuth }) {
@@ -13,7 +14,7 @@ export default function Landing({ isAuth }) {
           <Link className="secondary-link" to={isAuth ? '/portfolio' : '/login'}>Portfolio and Risk</Link>
         </div>
         <div className="hero-stats">
-          <div><strong>10</strong><span>Tracked stocks</span></div>
+          <div><strong>{ALL_STOCK_SYMBOLS.length}</strong><span>Tracked stocks</span></div>
           <div><strong>3</strong><span>Major indexes</span></div>
           <div><strong>24/7</strong><span>Demo access</span></div>
         </div>
