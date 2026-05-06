@@ -7,7 +7,7 @@ import NewsArticleModal from '../components/modals/NewsArticleModal';
 
 export default function News({ marketData }) {
   const [filter, setFilter] = useState('all');
-  const [tickerQuery, setTickerQuery] = useState('');
+  const [outletQuery, setOutletQuery] = useState('');
   const [selected, setSelected] = useState(null);
   const [watchlistTickers, setWatchlistTickers] = useState([]);
   const [heldTickers, setHeldTickers] = useState([]);
@@ -58,13 +58,13 @@ export default function News({ marketData }) {
   const heldSet = useMemo(() => new Set(heldTickers), [heldTickers]);
 
   const filtered = useMemo(() => {
-    const searched = tickerQuery.trim().toUpperCase();
-    const base = searched ? processed.filter((item) => item.tickers.includes(searched)) : processed;
+    const searchedOutlet = outletQuery.trim().toLowerCase();
+    const base = searchedOutlet ? processed.filter((item) => String(item.source || 'News').toLowerCase().includes(searchedOutlet)) : processed;
     if (filter === 'all') return base;
     if (filter === 'watchlist') return base.filter((item) => item.tickers.some((ticker) => watchlistSet.has(ticker)));
     if (filter === 'held') return base.filter((item) => item.tickers.some((ticker) => heldSet.has(ticker)));
     return base.filter((item) => item.sentiment === filter);
-  }, [filter, heldSet, processed, tickerQuery, watchlistSet]);
+  }, [filter, heldSet, outletQuery, processed, watchlistSet]);
 
   return (
     <div className="page">
@@ -82,7 +82,7 @@ export default function News({ marketData }) {
             <button key={key} className={filter === key ? 'active' : ''} type="button" onClick={() => setFilter(key)}>{label}</button>
           ))}
         </div>
-        <input value={tickerQuery} onChange={(event) => setTickerQuery(event.target.value)} placeholder="Search ticker news" />
+        <input value={outletQuery} onChange={(event) => setOutletQuery(event.target.value)} placeholder="Filter by news outlet" />
       </div>
 
       <section className="panel">

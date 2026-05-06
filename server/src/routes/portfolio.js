@@ -9,6 +9,7 @@ router.get('/', portfolioController.getPortfolio);
 router.get('/transfers', portfolioController.getTransfers);
 router.post('/positions', portfolioController.addPosition);
 router.post('/trades', portfolioController.executeTrade);
+router.post('/billy-analyst', portfolioController.executeBillyAnalyst);
 router.post('/accounts/billy', portfolioController.createBillyAccount);
 router.post('/accounts/bank', portfolioController.connectBankAccount);
 router.patch('/accounts/:accountId', portfolioController.renameAccount);

@@ -53,6 +53,7 @@ export default function Dashboard({ marketData }) {
   const [selected, setSelected] = useState(null);
   const [accounts, setAccounts] = useState([]);
   const [watchlistTickers, setWatchlistTickers] = useState([]);
+  const [stockListMode, setStockListMode] = useState('watchlist');
   const { quotes, mktStatus, lastUpdate, fetchStockCandles, fetchCompanyNews } = marketData;
 
   const loadPortfolioAccounts = async () => {
@@ -76,6 +77,12 @@ export default function Dashboard({ marketData }) {
     await loadPortfolioAccounts();
   };
 
+  const executeBillyAnalyst = async (payload) => {
+    const result = await api.executeBillyAnalyst(payload);
+    await loadPortfolioAccounts();
+    return result;
+  };
+
   const sortedByChange = useMemo(() => Object.keys(STOCKS_BASE)
     .map((ticker) => ({ ticker, dp: quotes[ticker]?.dp || 0 }))
     .sort((a, b) => b.dp - a.dp), [quotes]);
@@ -86,6 +93,11 @@ export default function Dashboard({ marketData }) {
     const source = watchlistTickers.length ? watchlistTickers : ['NVDA', 'MSFT', 'AAPL', 'AMZN', 'GOOGL', 'META', 'AVGO', 'JPM'];
     return source.filter((ticker) => STOCKS_BASE[ticker]).slice(0, 8);
   }, [watchlistTickers]);
+
+  const stockListTickers = useMemo(() => {
+    if (stockListMode === 'watchlist' && watchlistTickers.length) return watchlistTickers.filter((ticker) => STOCKS_BASE[ticker]).slice(0, 8);
+    return Object.keys(STOCKS_BASE).slice(0, 8);
+  }, [stockListMode, watchlistTickers]);
 
   const insights = useMemo(() => sortedByChange
     .filter(({ ticker }) => quotes[ticker]?.c)
@@ -144,7 +156,7 @@ export default function Dashboard({ marketData }) {
           </div>
           <button className="secondary-button" type="button" onClick={() => window.location.assign('/movers')}>View Movers</button>
         </header>
-        <div className="hot-grid">
+        <div className="hot-grid dashboard-recommendations">
           {recommended.map((ticker, index) => {
             const quote = quotes[ticker] || {};
             const info = STOCKS_BASE[ticker];
@@ -186,15 +198,19 @@ export default function Dashboard({ marketData }) {
       <section className="panel">
         <header className="panel-header">
           <div>
-            <h2>All Stocks</h2>
+            <h2>Stock List</h2>
             <p>Click a row for chart, indicators, and related news.</p>
           </div>
+          <button className="secondary-button" type="button" onClick={() => setStockListMode((mode) => (mode === 'watchlist' ? 'all' : 'watchlist'))}>
+            {stockListMode === 'watchlist' ? 'Show Assortment' : 'Show Watchlist'}
+          </button>
         </header>
         <div className="data-table stock-table">
           <div className="table-head">
             <span>Symbol</span><span>Price</span><span>Change</span><span>High / Low</span><span>Signal</span><span>Chart</span>
           </div>
-          {Object.entries(STOCKS_BASE).map(([ticker, info]) => {
+          {stockListTickers.map((ticker) => {
+            const info = STOCKS_BASE[ticker];
             const quote = quotes[ticker] || {};
             const up = (quote.dp || 0) >= 0;
             const signal = (quote.dp || 0) > 2 ? 'BUY' : (quote.dp || 0) < -2 ? 'SELL' : 'HOLD';
@@ -224,6 +240,7 @@ export default function Dashboard({ marketData }) {
           tradeAccounts={accounts}
           defaultAccountId={accounts[0]?.id}
           onExecuteTrade={executeStockModalTrade}
+          onExecuteBillyAnalyst={executeBillyAnalyst}
           onClose={() => setSelected(null)}
         />
       )}

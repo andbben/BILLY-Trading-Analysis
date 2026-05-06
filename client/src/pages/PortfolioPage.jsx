@@ -123,6 +123,8 @@ export default function PortfolioPage({ marketData }) {
   const [bankAccounts, setBankAccounts] = useState([]);
   const [showBanks, setShowBanks] = useState(false);
   const [accountOrder, setAccountOrder] = useState(() => JSON.parse(localStorage.getItem('bb_account_list_order') || '[]'));
+  const [draftAccountOrder, setDraftAccountOrder] = useState([]);
+  const [reorganizingAccounts, setReorganizingAccounts] = useState(false);
   const [showMoreHoldings, setShowMoreHoldings] = useState(false);
   const [accountSetupMode, setAccountSetupMode] = useState(null);
   const [newBillyLabel, setNewBillyLabel] = useState('');
@@ -214,18 +216,39 @@ export default function PortfolioPage({ marketData }) {
   }, [accountOrder, accounts, bankAccounts, showBanks]);
 
   const moveAccount = (id, direction) => {
-    const base = accountOrder.length ? [...accountOrder] : displayedAccounts.map((account) => account.id);
+    const base = draftAccountOrder.length ? [...draftAccountOrder] : displayedAccounts.map((account) => account.id);
     const index = base.indexOf(id);
     const nextIndex = index + direction;
     if (index < 0 || nextIndex < 0 || nextIndex >= base.length) return;
     [base[index], base[nextIndex]] = [base[nextIndex], base[index]];
-    setAccountOrder(base);
-    localStorage.setItem('bb_account_list_order', JSON.stringify(base));
+    setDraftAccountOrder(base);
+  };
+
+  const startReorganizing = () => {
+    setDraftAccountOrder(displayedAccounts.map((account) => account.id));
+    setReorganizingAccounts(true);
+  };
+
+  const cancelReorganizing = () => {
+    setDraftAccountOrder([]);
+    setReorganizingAccounts(false);
+  };
+
+  const saveReorganizing = () => {
+    setAccountOrder(draftAccountOrder);
+    localStorage.setItem('bb_account_list_order', JSON.stringify(draftAccountOrder));
+    setReorganizingAccounts(false);
   };
 
   const executeStockModalTrade = async ({ mode, ticker, shares, price, accountId, orderType }) => {
     await api.executeTrade({ mode, ticker, shares, price, accountId, orderType });
     await loadPortfolio();
+  };
+
+  const executeBillyAnalyst = async (payload) => {
+    const result = await api.executeBillyAnalyst(payload);
+    await loadPortfolio();
+    return result;
   };
 
   const openBillyAccount = async () => {
@@ -288,6 +311,15 @@ export default function PortfolioPage({ marketData }) {
     }
   };
 
+  const accountsForDisplay = useMemo(() => {
+    if (!reorganizingAccounts || !draftAccountOrder.length) return displayedAccounts;
+    return [...displayedAccounts].sort((a, b) => {
+      const ai = draftAccountOrder.indexOf(a.id);
+      const bi = draftAccountOrder.indexOf(b.id);
+      return (ai < 0 ? 999 : ai) - (bi < 0 ? 999 : bi);
+    });
+  }, [displayedAccounts, draftAccountOrder, reorganizingAccounts]);
+
   if (loading) return <div className="page"><p className="status">Loading portfolio...</p></div>;
 
   return (
@@ -344,30 +376,42 @@ export default function PortfolioPage({ marketData }) {
           </button>
         </header>
         <div className="data-table accounts-table">
-          <div className="table-head"><span>Account</span><span>Type</span><span>Cash</span><span>Total Value</span><span>Positions</span><span>Actions</span></div>
-          {displayedAccounts.map((account) => (
-            <article className="table-row account-table-row" key={account.id}>
-              <button className="account-name-button" type="button" onClick={() => account.type === 'billy' && navigate(`/portfolio/accounts/${encodeURIComponent(account.id)}`)}>
+          <div className="table-head"><span>Account</span><span>Type</span><span>Cash</span><span>Total Value</span><span>Positions</span>{reorganizingAccounts && <span>Actions</span>}</div>
+          {accountsForDisplay.map((account) => (
+            <button className={`table-row account-table-row ${account.type === 'billy' ? 'selectable-row' : ''}`} type="button" key={account.id} onClick={() => account.type === 'billy' && !reorganizingAccounts && navigate(`/portfolio/accounts/${encodeURIComponent(account.id)}`)}>
+              <span className="account-name-button">
                 <strong>{account.label}</strong>
                 <small>{account.accountNumber ? `Account ${account.accountNumber}` : 'Connected bank'}</small>
-              </button>
+              </span>
               <span>{account.type === 'bank' ? 'Bank' : account.source === 'portfolio' ? 'Primary Billy' : 'Billy'}</span>
               <span className="mono">{account.type === 'bank' ? 'Hidden' : fmtPrice(account.balance || 0)}</span>
               <span className="mono">{account.type === 'bank' ? 'Connected' : fmtPrice(accountValue(account, quotes))}</span>
               <span>{account.type === 'bank' ? '-' : account.positions?.length || 0}</span>
-              <span>
-                {(account.type !== 'bank' || account.id.startsWith('bank:')) && (
-                  <button className="secondary-button" type="button" onClick={() => openRename(account)}>Rename</button>
-                )}
-                <button className="icon-btn" type="button" onClick={() => moveAccount(account.id, -1)}>^</button>
-                <button className="icon-btn" type="button" onClick={() => moveAccount(account.id, 1)}>v</button>
-              </span>
-            </article>
+              {reorganizingAccounts && (
+                <span className="account-reorg-actions">
+                  {account.type === 'billy' && (
+                    <>
+                      <button className="icon-btn" type="button" onClick={(event) => { event.stopPropagation(); moveAccount(account.id, -1); }}>^</button>
+                      <button className="secondary-button" type="button" onClick={(event) => { event.stopPropagation(); openRename(account); }}>Rename</button>
+                      <button className="icon-btn" type="button" onClick={(event) => { event.stopPropagation(); moveAccount(account.id, 1); }}>v</button>
+                    </>
+                  )}
+                </span>
+              )}
+            </button>
           ))}
         </div>
         <div className="account-setup-actions">
           <button className="secondary-button" type="button" onClick={() => setAccountSetupMode('billy')}>Open new Billy account</button>
           <button className="secondary-button" type="button" onClick={() => setAccountSetupMode('bank')}>Connect bank account</button>
+          {reorganizingAccounts ? (
+            <>
+              <button className="secondary-button" type="button" onClick={cancelReorganizing}>Cancel</button>
+              <button className="secondary-button alert-create-button" type="button" onClick={saveReorganizing}>Save & Close</button>
+            </>
+          ) : (
+            <button className="secondary-button alert-create-button" type="button" onClick={startReorganizing}>Reorganize</button>
+          )}
         </div>
       </section>
 
@@ -434,6 +478,7 @@ export default function PortfolioPage({ marketData }) {
           tradeAccounts={accounts}
           defaultAccountId={accounts[0]?.id}
           onExecuteTrade={executeStockModalTrade}
+          onExecuteBillyAnalyst={executeBillyAnalyst}
           onClose={() => { setSelected(null); setSearchParams({}); }}
         />
       )}

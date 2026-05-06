@@ -118,7 +118,7 @@ export default function Plans() {
               {item.features.map((feature) => <li key={feature}>{feature}</li>)}
               {(item.locked || []).map((feature) => <li className="locked" key={feature}>{feature}</li>)}
             </ul>
-            <button type="button" disabled={plan === item.id} onClick={() => setTarget(item.id)}>
+            <button className="secondary-button alert-create-button" type="button" disabled={plan === item.id} onClick={() => setTarget(item.id)}>
               {plan === item.id ? 'Current Plan' : item.price === 0 ? 'Choose Starter' : `Upgrade to ${item.name}`}
             </button>
           </article>

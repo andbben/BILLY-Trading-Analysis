@@ -32,6 +32,7 @@ export const api = {
   addPosition:    (ticker, shares, avg_cost)  => request('POST',   '/api/portfolio/positions', { ticker, shares, avg_cost }),
   deletePosition: (ticker)                    => request('DELETE',  `/api/portfolio/positions/${ticker}`),
   executeTrade:   (data)                      => request('POST',   '/api/portfolio/trades', data),
+  executeBillyAnalyst: (data)                 => request('POST',   '/api/portfolio/billy-analyst', data),
   createBillyAccount: (data)                  => request('POST',   '/api/portfolio/accounts/billy', data),
   connectBankAccount: (data)                  => request('POST',   '/api/portfolio/accounts/bank', data),
   renameAccount: (accountId, data)            => request('PATCH',  `/api/portfolio/accounts/${encodeURIComponent(accountId)}`, data),

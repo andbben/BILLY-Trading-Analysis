@@ -122,6 +122,27 @@ CREATE TABLE IF NOT EXISTS connected_bank_accounts (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS billy_analyst_actions (
+  id SERIAL PRIMARY KEY,
+  portfolio_id INTEGER NOT NULL REFERENCES portfolios(id) ON DELETE CASCADE,
+  account_id VARCHAR(80) NOT NULL,
+  account_label VARCHAR(255) NOT NULL,
+  ticker VARCHAR(10) NOT NULL,
+  action VARCHAR(20) NOT NULL,
+  initial_fund DECIMAL(14, 2) NOT NULL,
+  invested_amount DECIMAL(14, 2) NOT NULL DEFAULT 0,
+  shares DECIMAL(14, 4) NOT NULL DEFAULT 0,
+  max_investment_dollars DECIMAL(14, 2),
+  max_investment_percent DECIMAL(8, 4),
+  max_loss_dollars DECIMAL(14, 2),
+  max_loss_percent DECIMAL(8, 4),
+  reinvest_gains BOOLEAN NOT NULL DEFAULT false,
+  confidence DECIMAL(8, 4),
+  rationale TEXT,
+  status VARCHAR(20) NOT NULL DEFAULT 'active',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Cached deterministic/optional AI article analysis
 CREATE TABLE IF NOT EXISTS article_analysis_cache (
   id SERIAL PRIMARY KEY,
@@ -188,6 +209,7 @@ CREATE INDEX IF NOT EXISTS idx_billy_accounts_user_id ON billy_accounts(user_id)
 CREATE INDEX IF NOT EXISTS idx_billy_account_positions_account_id ON billy_account_positions(billy_account_id);
 CREATE INDEX IF NOT EXISTS idx_asset_transfers_portfolio_id ON asset_transfers(portfolio_id);
 CREATE INDEX IF NOT EXISTS idx_connected_bank_accounts_user_id ON connected_bank_accounts(user_id);
+CREATE INDEX IF NOT EXISTS idx_billy_analyst_actions_portfolio_id ON billy_analyst_actions(portfolio_id);
 CREATE INDEX IF NOT EXISTS idx_article_analysis_cache_key ON article_analysis_cache(cache_key);
 CREATE INDEX IF NOT EXISTS idx_watchlist_user_id ON watchlist(user_id);
 CREATE INDEX IF NOT EXISTS idx_alerts_user_id ON alerts(user_id);

@@ -228,6 +228,12 @@ export default function AccountPage({ marketData }) {
     await loadPortfolio();
   };
 
+  const executeBillyAnalyst = async (payload) => {
+    const result = await api.executeBillyAnalyst(payload);
+    await loadPortfolio();
+    return result;
+  };
+
   const saveRename = async () => {
     if (!selectedAccount || !renameLabel.trim()) {
       setError('Enter a new account name.');
@@ -279,8 +285,8 @@ export default function AccountPage({ marketData }) {
           <p>Account {selectedAccount.accountNumber} - balance, buying power, risk, positions, and related news.</p>
         </div>
         <div className="header-actions">
-          <button className="secondary-button" type="button" onClick={() => { setRenameLabel(selectedAccount.label || ''); setShowRename(true); }}>Rename</button>
-          <button className="secondary-button" type="button" onClick={() => navigate('/portfolio')}>Back to Portfolio</button>
+          <button className="secondary-button alert-create-button" type="button" onClick={() => { setRenameLabel(selectedAccount.label || ''); setShowRename(true); }}>Rename</button>
+          <button className="secondary-button alert-create-button" type="button" onClick={() => navigate('/portfolio')}>Back To Portfolio</button>
         </div>
       </header>
 
@@ -357,6 +363,7 @@ export default function AccountPage({ marketData }) {
             <article
               className={`position-entry compact-position ${movementClass}`}
               key={row.ticker}
+              onClick={() => setSelected(row.ticker)}
               style={{ '--movement-color': row.dayGl >= 0 ? '#00c2a8' : '#ff4f7b' }}
             >
               <div className="position-entry-title">
@@ -365,10 +372,10 @@ export default function AccountPage({ marketData }) {
                 <span className="sector-chip">{STOCKS_BASE[row.ticker]?.sector || 'Unknown'}</span>
                 <span className="compact-price"><strong>{fmtPrice(row.cur)}</strong><small className={row.dayPct >= 0 ? 'pos' : 'neg'}>{fmtPct(row.dayPct)}</small></span>
                 <span className="row-actions">
-                  <button className="secondary-button" type="button" onClick={() => openTrade('buy')}>Buy</button>
-                  <button className="secondary-button" type="button" onClick={() => openTrade('sell')}>Sell</button>
-                  <button className="icon-btn" type="button" onClick={() => movePosition(row.ticker, -1)}>^</button>
-                  <button className="icon-btn" type="button" onClick={() => movePosition(row.ticker, 1)}>v</button>
+                  <button className="secondary-button" type="button" onClick={(event) => { event.stopPropagation(); openTrade('buy'); }}>Buy</button>
+                  <button className="secondary-button" type="button" onClick={(event) => { event.stopPropagation(); openTrade('sell'); }}>Sell</button>
+                  <button className="icon-btn" type="button" onClick={(event) => { event.stopPropagation(); movePosition(row.ticker, -1); }}>^</button>
+                  <button className="icon-btn" type="button" onClick={(event) => { event.stopPropagation(); movePosition(row.ticker, 1); }}>v</button>
                 </span>
               </div>
               <div className="position-compact-metrics">
@@ -378,7 +385,7 @@ export default function AccountPage({ marketData }) {
                 <span>Weight <strong>{fmtPct(accountPct)}</strong></span>
                 <span>Shares <strong>{fmt(row.shares, 4)}</strong></span>
                 <span>Avg cost <strong>{fmtPrice(row.avgCost)}</strong></span>
-                <span className="compact-range">52w <RangeIndicator low={row.low52} high={row.high52} current={row.cur} /></span>
+                <span className="compact-range">Day <RangeIndicator low={row.low52} high={row.high52} current={row.cur} /></span>
               </div>
             </article>
           );
@@ -438,6 +445,7 @@ export default function AccountPage({ marketData }) {
           defaultAccountId={selectedAccount.id}
           defaultTradeMode={tradeIntent}
           onExecuteTrade={executeStockModalTrade}
+          onExecuteBillyAnalyst={executeBillyAnalyst}
           onClose={() => setSelected(null)}
         />
       )}

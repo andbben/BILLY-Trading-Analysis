@@ -54,6 +54,29 @@ async function ensureTransfersTable(queryable = pool) {
   await queryable.query('ALTER TABLE trades ADD COLUMN IF NOT EXISTS account_id VARCHAR(80)');
   await queryable.query('ALTER TABLE trades ADD COLUMN IF NOT EXISTS account_label VARCHAR(255)');
   await queryable.query(`
+    CREATE TABLE IF NOT EXISTS billy_analyst_actions (
+      id SERIAL PRIMARY KEY,
+      portfolio_id INTEGER NOT NULL REFERENCES portfolios(id) ON DELETE CASCADE,
+      account_id VARCHAR(80) NOT NULL,
+      account_label VARCHAR(255) NOT NULL,
+      ticker VARCHAR(10) NOT NULL,
+      action VARCHAR(20) NOT NULL,
+      initial_fund DECIMAL(14, 2) NOT NULL,
+      invested_amount DECIMAL(14, 2) NOT NULL DEFAULT 0,
+      shares DECIMAL(14, 4) NOT NULL DEFAULT 0,
+      max_investment_dollars DECIMAL(14, 2),
+      max_investment_percent DECIMAL(8, 4),
+      max_loss_dollars DECIMAL(14, 2),
+      max_loss_percent DECIMAL(8, 4),
+      reinvest_gains BOOLEAN NOT NULL DEFAULT false,
+      confidence DECIMAL(8, 4),
+      rationale TEXT,
+      status VARCHAR(20) NOT NULL DEFAULT 'active',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+  await queryable.query('CREATE INDEX IF NOT EXISTS idx_billy_analyst_actions_portfolio_id ON billy_analyst_actions(portfolio_id)');
+  await queryable.query(`
     CREATE TABLE IF NOT EXISTS billy_accounts (
       id SERIAL PRIMARY KEY,
       user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -789,6 +812,119 @@ exports.executeTrade = async (req, res) => {
     await client.query('ROLLBACK');
     console.error(err);
     res.status(500).json({ error: 'Failed to execute trade.' });
+  } finally {
+    client.release();
+  }
+};
+
+exports.executeBillyAnalyst = async (req, res) => {
+  const {
+    accountId,
+    ticker,
+    price,
+    initialFund,
+    maxInvestmentDollars,
+    maxInvestmentPercent,
+    maxLossDollars,
+    maxLossPercent,
+    reinvestGains,
+    confidence,
+    recommendation,
+    rationale,
+  } = req.body;
+  const symbol = String(ticker || '').toUpperCase();
+  const executionPrice = Number(price);
+  const fund = Number(initialFund);
+  const capDollars = Number(maxInvestmentDollars || 0);
+  const capPercent = Number(maxInvestmentPercent || 0);
+  const lossDollars = Number(maxLossDollars || 0);
+  const lossPercent = Number(maxLossPercent || 0);
+
+  if (!symbol || !accountId || !Number.isFinite(executionPrice) || executionPrice <= 0 || !Number.isFinite(fund) || fund <= 0) {
+    return res.status(400).json({ error: 'Account, ticker, price, and initial fund are required.' });
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    await ensureTransfersTable(client);
+
+    const userResult = await client.query('SELECT plan FROM users WHERE id = $1', [req.userId]);
+    if (userResult.rows[0]?.plan !== 'pro') {
+      await client.query('ROLLBACK');
+      return res.status(403).json({ error: 'Billy Analyst automated trading is available on the Pro plan.' });
+    }
+
+    const portfolio = await getOrCreatePortfolio(req.userId, client, true);
+    const account = await findAccount(accountId, req.userId, portfolio, client, false);
+    if (!account) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({ error: 'Choose a valid Billy account for Billy Analyst.' });
+    }
+
+    const percentCapAmount = capPercent > 0 ? fund * (capPercent / 100) : fund;
+    const maxDeployable = Math.min(fund, capDollars > 0 ? capDollars : fund, percentCapAmount, Number(account.balance || 0));
+    const action = recommendation === 'sell' ? 'sell' : recommendation === 'hold' ? 'hold' : 'buy';
+    let investedAmount = 0;
+    let shares = 0;
+
+    if (action === 'buy' && maxDeployable >= executionPrice) {
+      shares = Math.floor((maxDeployable / executionPrice) * 10000) / 10000;
+      investedAmount = shares * executionPrice;
+      await addShares(account, symbol, shares, executionPrice, client);
+      await adjustCash(account, -investedAmount, client);
+      await client.query(
+        'INSERT INTO trades (portfolio_id, ticker, trade_type, shares, price, total, account_id, account_label) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
+        [portfolio.id, symbol, 'buy', shares, executionPrice, investedAmount, account.id, account.label]
+      );
+    } else if (action === 'sell') {
+      const existing = await getAccountPosition(account, symbol, client);
+      if (existing && Number(existing.shares) > 0) {
+        shares = Number(existing.shares);
+        investedAmount = shares * executionPrice;
+        await removeShares(account, existing, shares, client);
+        await adjustCash(account, investedAmount, client);
+        await client.query(
+          'INSERT INTO trades (portfolio_id, ticker, trade_type, shares, price, total, account_id, account_label) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
+          [portfolio.id, symbol, 'sell', shares, executionPrice, investedAmount, account.id, account.label]
+        );
+      }
+    }
+
+    const status = action === 'hold' || investedAmount === 0 ? 'monitoring' : 'active';
+    const result = await client.query(
+      `INSERT INTO billy_analyst_actions
+       (portfolio_id, account_id, account_label, ticker, action, initial_fund, invested_amount, shares,
+        max_investment_dollars, max_investment_percent, max_loss_dollars, max_loss_percent, reinvest_gains,
+        confidence, rationale, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+       RETURNING *`,
+      [
+        portfolio.id,
+        account.id,
+        account.label,
+        symbol,
+        action,
+        fund,
+        investedAmount,
+        shares,
+        capDollars || null,
+        capPercent || null,
+        lossDollars || null,
+        lossPercent || null,
+        Boolean(reinvestGains),
+        Number(confidence || 0),
+        String(rationale || '').slice(0, 1200),
+        status,
+      ]
+    );
+
+    await client.query('COMMIT');
+    res.status(201).json({ action: result.rows[0] });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error(err);
+    res.status(500).json({ error: 'Billy Analyst action failed.' });
   } finally {
     client.release();
   }

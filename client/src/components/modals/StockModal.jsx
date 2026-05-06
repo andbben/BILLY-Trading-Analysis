@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { STOCKS_BASE } from '../../data/market';
 import { fmt, fmtPct, fmtPrice, timeAgo } from '../../utils/formatters';
 import { classifySentiment, generateSignal, genSyntheticCandles } from '../../utils/indicators';
+import { api } from '../../services/api';
 import LineChart from '../charts/LineChart';
 import AlertComposer from './AlertComposer';
 import NewsArticleModal from './NewsArticleModal';
@@ -28,6 +29,62 @@ function QuoteRange({ label, low, high, current }) {
   );
 }
 
+function FactorText({ text }) {
+  const words = String(text).split(/(\s+)/);
+  return (
+    <>
+      {words.map((word, index) => {
+        const key = word.toLowerCase().replace(/[^a-z]/g, '');
+        const tone = ['positive', 'bullish', 'above', 'up', 'supportive'].includes(key)
+          ? 'pos'
+          : ['negative', 'bearish', 'below', 'down', 'risk'].includes(key)
+            ? 'neg'
+            : ['neutral', 'mixed', 'hold'].includes(key)
+              ? 'neu'
+              : '';
+        return <span className={tone ? `factor-word ${tone}` : ''} key={`${word}-${index}`}>{word}</span>;
+      })}
+    </>
+  );
+}
+
+function getSavedPlan() {
+  try {
+    const storedUser = JSON.parse(localStorage.getItem('bb_user') || '{}');
+    return localStorage.getItem('bb_plan') || storedUser.plan || 'free';
+  } catch {
+    return localStorage.getItem('bb_plan') || 'free';
+  }
+}
+
+function clampScore(value) {
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+function buildBillyAnalysis({ ticker, quote, signal, newsSentiment, stockNews, info }) {
+  const dayMove = Number(quote.dp || 0);
+  const rsi = Number(signal.rsi || 50);
+  const macd = Number(signal.macd?.macd || 0);
+  const beta = Number(info?.beta || 1);
+  const sentimentScore = newsSentiment === 'Bullish' ? 12 : newsSentiment === 'Bearish' ? -12 : 0;
+  const signalScore = signal.signal === 'BUY' ? 20 : signal.signal === 'SELL' ? -20 : 0;
+  const moveScore = dayMove >= 0 ? Math.min(12, dayMove * 2) : -Math.min(12, Math.abs(dayMove) * 2);
+  const rsiScore = rsi < 30 ? 10 : rsi > 70 ? -10 : 2;
+  const macdScore = macd > 0 ? 8 : macd < 0 ? -8 : 0;
+  const riskAdjustment = beta > 1.35 ? -5 : beta < 0.85 ? 4 : 0;
+  const newsDepth = Math.min(4, stockNews.length);
+  const score = clampScore(50 + sentimentScore + signalScore + moveScore + rsiScore + macdScore + riskAdjustment + newsDepth);
+  const recommendation = score >= 62 ? 'buy' : score <= 38 ? 'sell' : 'hold';
+  const rationale = [
+    `${ticker} composite confidence ${score}/100 with ${recommendation.toUpperCase()} bias.`,
+    `Signal ${signal.signal}, RSI ${Number.isFinite(rsi) ? rsi.toFixed(1) : 'n/a'}, MACD ${Number.isFinite(macd) ? macd.toFixed(2) : 'n/a'}, SMA trend: ${signal.factors.slice(0, 2).join('; ') || 'mixed'}.`,
+    `Quote move ${dayMove.toFixed(2)}%, beta ${beta.toFixed(2)}, last price ${Number(quote.c || 0).toFixed(2)}, previous close ${Number(quote.pc || 0).toFixed(2)}.`,
+    `News sentiment ${newsSentiment || 'Neutral'} from ${stockNews.length} recent article${stockNews.length === 1 ? '' : 's'}.`,
+  ].join(' ');
+
+  return { score, recommendation, rationale };
+}
+
 export default function StockModal({
   ticker,
   quotes,
@@ -39,9 +96,10 @@ export default function StockModal({
   defaultAccountId = '',
   defaultTradeMode = 'buy',
   onExecuteTrade,
+  onExecuteBillyAnalyst,
 }) {
   const info = STOCKS_BASE[ticker];
-  const quote = quotes[ticker] || {};
+  const quote = useMemo(() => quotes[ticker] || {}, [quotes, ticker]);
   const [timeframe, setTimeframe] = useState('3M');
   const [chartData, setChartData] = useState(null);
   const [chartDates, setChartDates] = useState(null);
@@ -58,6 +116,15 @@ export default function StockModal({
   const [tradeError, setTradeError] = useState('');
   const [tradeStatus, setTradeStatus] = useState('');
   const [submittingTrade, setSubmittingTrade] = useState(false);
+  const [billyConfig, setBillyConfig] = useState({
+    initialFund: '',
+    maxInvestmentDollars: '',
+    maxInvestmentPercent: '',
+    maxLossDollars: '',
+    maxLossPercent: '',
+    reinvestGains: false,
+    confirmRisk: false,
+  });
 
   useEffect(() => {
     setAccountId(defaultAccountId || tradeAccounts[0]?.id || '');
@@ -112,20 +179,76 @@ export default function StockModal({
     const avg = scores.reduce((sum, score) => sum + score, 0) / scores.length;
     return avg > 6 ? 'Bullish' : avg < 4 ? 'Bearish' : 'Neutral';
   }, [stockNews]);
+  const billyAnalysis = useMemo(
+    () => buildBillyAnalysis({ ticker, quote, signal, newsSentiment, stockNews, info }),
+    [ticker, quote, signal, newsSentiment, stockNews, info],
+  );
 
   const selectedAccount = tradeAccounts.find((account) => account.id === accountId);
   const heldPosition = selectedAccount?.positions?.find((position) => position.ticker === ticker);
   const heldShares = Number(heldPosition?.shares || 0);
+  const currentPrice = Number(quote.c || quote.pc || 100);
   const executionPrice = orderType === 'limit' ? Number(limitPrice) : Number(quote.c || 0);
   const shareCount = Number(shares || 0);
   const estimatedTotal = shareCount * executionPrice;
+  const isPro = getSavedPlan() === 'pro';
+  const isBillyMode = tradeMode === 'billy_analyst';
+  const billyInitialFund = Number(billyConfig.initialFund || 0);
+  const billyRiskLimitReady = Number(billyConfig.maxLossDollars || 0) > 0 || Number(billyConfig.maxLossPercent || 0) > 0;
+  const billyDeployablePreview = Math.min(
+    billyInitialFund || 0,
+    Number(billyConfig.maxInvestmentDollars || billyInitialFund || 0) || billyInitialFund || 0,
+    Number(billyConfig.maxInvestmentPercent || 0) > 0 ? billyInitialFund * (Number(billyConfig.maxInvestmentPercent) / 100) : billyInitialFund || 0,
+    Number(selectedAccount?.balance || 0),
+  );
   const canSubmitTrade = Boolean(onExecuteTrade)
+    && !isBillyMode
     && accountId
     && shareCount > 0
     && executionPrice > 0
     && (tradeMode === 'buy' ? estimatedTotal <= Number(selectedAccount?.balance || 0) : shareCount <= heldShares);
+  const canSubmitBilly = isBillyMode
+    && isPro
+    && accountId
+    && currentPrice > 0
+    && billyInitialFund > 0
+    && billyRiskLimitReady
+    && billyDeployablePreview > 0
+    && billyConfig.confirmRisk;
 
   const submitTrade = async () => {
+    if (isBillyMode) {
+      if (!canSubmitBilly) return;
+      setSubmittingTrade(true);
+      setTradeError('');
+      setTradeStatus('');
+      try {
+        const payload = {
+          accountId,
+          ticker,
+          price: currentPrice,
+          initialFund: billyInitialFund,
+          maxInvestmentDollars: Number(billyConfig.maxInvestmentDollars || 0),
+          maxInvestmentPercent: Number(billyConfig.maxInvestmentPercent || 0),
+          maxLossDollars: Number(billyConfig.maxLossDollars || 0),
+          maxLossPercent: Number(billyConfig.maxLossPercent || 0),
+          reinvestGains: billyConfig.reinvestGains,
+          confidence: billyAnalysis.score,
+          recommendation: billyAnalysis.recommendation,
+          rationale: billyAnalysis.rationale,
+        };
+        const data = onExecuteBillyAnalyst ? await onExecuteBillyAnalyst(payload) : await api.executeBillyAnalyst(payload);
+        const action = data?.action?.action || billyAnalysis.recommendation;
+        const status = data?.action?.status || 'monitoring';
+        setTradeStatus(`Billy Analyst ${action.toUpperCase()} action created. Status: ${status}.`);
+      } catch (err) {
+        setTradeError(err.message || 'Billy Analyst action failed.');
+      } finally {
+        setSubmittingTrade(false);
+      }
+      return;
+    }
+
     if (!canSubmitTrade) return;
     setSubmittingTrade(true);
     setTradeError('');
@@ -151,7 +274,6 @@ export default function StockModal({
   const dividend = info.sector === 'Technology' || info.sector === 'Semiconductors' ? 0.15 : (profileSeed % 90) / 100;
   const location = ['Cupertino, CA', 'Redmond, WA', 'New York, NY', 'Austin, TX', 'San Jose, CA'][profileSeed % 5];
   const exchange = ticker.length <= 4 ? 'NASDAQ-NMS' : 'NYSE';
-  const currentPrice = Number(quote.c || quote.pc || 100);
   const bidPrice = currentPrice - Math.max(0.01, currentPrice * 0.000045);
   const askPrice = currentPrice + Math.max(0.01, currentPrice * 0.000045);
   const bidSize = 20 + (profileSeed % 140);
@@ -290,8 +412,10 @@ export default function StockModal({
             <div><span>SMA 20</span><strong>{signal.sma20 == null ? '-' : fmtPrice(signal.sma20)}</strong></div>
             <div><span>SMA 50</span><strong>{signal.sma50 == null ? '-' : fmtPrice(signal.sma50)}</strong></div>
             <div className="signal-factors compact-signal-factors">
-              <span className="section-eyebrow">Signal Factors</span>
-              <p>{signal.factors.join(' ')}</p>
+              <span className="vertical-signal-label">Signal Factors</span>
+              <ul>
+                {signal.factors.slice(0, 3).map((factor) => <li key={factor}><FactorText text={factor} /></li>)}
+              </ul>
             </div>
           </div>
 
@@ -305,26 +429,66 @@ export default function StockModal({
                 </div>
               </header>
               <div className="trade-controls-grid">
-                <label className="form-field"><span>Action</span><select value={tradeMode} onChange={(event) => setTradeMode(event.target.value)}><option value="buy">Buy</option><option value="sell">Sell</option></select></label>
+                <label className="form-field"><span>Action</span><select value={tradeMode} onChange={(event) => setTradeMode(event.target.value)}><option value="buy">Buy</option><option value="sell">Sell</option>{isPro && <option value="billy_analyst">Trade with Billy Analyst</option>}</select></label>
                 <label className="form-field"><span>Account</span><select value={accountId} onChange={(event) => setAccountId(event.target.value)}>{tradeAccounts.map((account) => <option key={account.id} value={account.id}>{account.label} - {account.accountNumber}</option>)}</select></label>
-                <label className="form-field"><span>Purchase option</span><select value={orderType} onChange={(event) => setOrderType(event.target.value)}><option value="market">Market</option><option value="limit">Limit</option></select></label>
-                {orderType === 'limit' && <label className="form-field"><span>Limit price</span><input type="number" min="0.01" step="0.01" value={limitPrice} onChange={(event) => setLimitPrice(event.target.value)} /></label>}
-                <label className="form-field"><span>Stock amount</span><input type="number" min="0.001" step="0.001" value={shares} onChange={(event) => setShares(event.target.value)} placeholder="0.000" /></label>
+                {!isBillyMode && (
+                  <>
+                    <label className="form-field"><span>Purchase option</span><select value={orderType} onChange={(event) => setOrderType(event.target.value)}><option value="market">Market</option><option value="limit">Limit</option></select></label>
+                    {orderType === 'limit' && <label className="form-field"><span>Limit price</span><input type="number" min="0.01" step="0.01" value={limitPrice} onChange={(event) => setLimitPrice(event.target.value)} /></label>}
+                    <label className="form-field"><span>Stock amount</span><input type="number" min="0.001" step="0.001" value={shares} onChange={(event) => setShares(event.target.value)} placeholder="0.000" /></label>
+                  </>
+                )}
               </div>
-              <div className="trade-summary">
-                <div><span>Last price</span><strong>{fmtPrice(quote.c)}</strong></div>
-                <div><span>Execution price</span><strong>{fmtPrice(executionPrice)}</strong></div>
-                <div><span>Estimated total</span><strong>{fmtPrice(estimatedTotal)}</strong></div>
-                <div><span>Account cash</span><strong>{fmtPrice(selectedAccount?.balance || 0)}</strong></div>
-                <div><span>Shares held</span><strong>{fmt(heldShares, 4)}</strong></div>
-                <div><span>Sector</span><strong>{info.sector}</strong></div>
-              </div>
-              {tradeMode === 'buy' && estimatedTotal > Number(selectedAccount?.balance || 0) && <p className="status error">Insufficient cash in selected account.</p>}
-              {tradeMode === 'sell' && shareCount > heldShares && <p className="status error">Selected account does not hold enough shares.</p>}
+              {isBillyMode ? (
+                <div className="billy-analyst-panel">
+                  <div className="billy-score-card">
+                    <div>
+                      <span>Billy Composite</span>
+                      <strong>{billyAnalysis.score}/100</strong>
+                    </div>
+                    <span className={`billy-recommendation ${billyAnalysis.recommendation}`}>{billyAnalysis.recommendation}</span>
+                  </div>
+                  <p>{billyAnalysis.rationale}</p>
+                  <div className="billy-analyst-grid">
+                    <label className="form-field"><span>Initial bot fund</span><input type="number" min="1" step="1" value={billyConfig.initialFund} onChange={(event) => setBillyConfig((prev) => ({ ...prev, initialFund: event.target.value }))} placeholder="$" /></label>
+                    <label className="form-field"><span>Max investment $</span><input type="number" min="0" step="1" value={billyConfig.maxInvestmentDollars} onChange={(event) => setBillyConfig((prev) => ({ ...prev, maxInvestmentDollars: event.target.value }))} placeholder="Optional" /></label>
+                    <label className="form-field"><span>Max investment %</span><input type="number" min="0" max="100" step="0.1" value={billyConfig.maxInvestmentPercent} onChange={(event) => setBillyConfig((prev) => ({ ...prev, maxInvestmentPercent: event.target.value }))} placeholder="Optional" /></label>
+                    <label className="form-field"><span>Max loss $</span><input type="number" min="0" step="1" value={billyConfig.maxLossDollars} onChange={(event) => setBillyConfig((prev) => ({ ...prev, maxLossDollars: event.target.value }))} placeholder="Required if no %" /></label>
+                    <label className="form-field"><span>Max loss %</span><input type="number" min="0" max="100" step="0.1" value={billyConfig.maxLossPercent} onChange={(event) => setBillyConfig((prev) => ({ ...prev, maxLossPercent: event.target.value }))} placeholder="Required if no $" /></label>
+                    <label className="check-row billy-toggle"><input type="checkbox" checked={billyConfig.reinvestGains} onChange={(event) => setBillyConfig((prev) => ({ ...prev, reinvestGains: event.target.checked }))} /><span>Reinvest capital gains into this Billy action</span></label>
+                  </div>
+                  <div className="trade-summary">
+                    <div><span>Last price</span><strong>{fmtPrice(quote.c)}</strong></div>
+                    <div><span>Deployable now</span><strong>{fmtPrice(billyDeployablePreview)}</strong></div>
+                    <div><span>Account cash</span><strong>{fmtPrice(selectedAccount?.balance || 0)}</strong></div>
+                    <div><span>Automated command</span><strong>{billyAnalysis.recommendation.toUpperCase()}</strong></div>
+                  </div>
+                  <div className="billy-risk-disclaimer">
+                    <strong>Professional risk disclosure</strong>
+                    <p>Billy Analyst is a simulated, rules-based automated trading workflow. Market prices, liquidity, execution quality, and news sentiment can change quickly; this feature can lose money, underperform the market, or liquidate positions when your loss thresholds are reached. This is not financial advice and does not guarantee gains.</p>
+                    <label className="check-row"><input type="checkbox" checked={billyConfig.confirmRisk} onChange={(event) => setBillyConfig((prev) => ({ ...prev, confirmRisk: event.target.checked }))} /><span>I understand the risks and authorize Billy Analyst to follow these limits.</span></label>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="trade-summary">
+                    <div><span>Last price</span><strong>{fmtPrice(quote.c)}</strong></div>
+                    <div><span>Execution price</span><strong>{fmtPrice(executionPrice)}</strong></div>
+                    <div><span>Estimated total</span><strong>{fmtPrice(estimatedTotal)}</strong></div>
+                    <div><span>Account cash</span><strong>{fmtPrice(selectedAccount?.balance || 0)}</strong></div>
+                    <div><span>Shares held</span><strong>{fmt(heldShares, 4)}</strong></div>
+                    <div><span>Sector</span><strong>{info.sector}</strong></div>
+                  </div>
+                  {tradeMode === 'buy' && estimatedTotal > Number(selectedAccount?.balance || 0) && <p className="status error">Insufficient cash in selected account.</p>}
+                  {tradeMode === 'sell' && shareCount > heldShares && <p className="status error">Selected account does not hold enough shares.</p>}
+                </>
+              )}
+              {isBillyMode && !billyRiskLimitReady && <p className="status error">Set a maximum loss in dollars, percentage, or both.</p>}
+              {isBillyMode && billyInitialFund > Number(selectedAccount?.balance || 0) && <p className="status error">Initial bot fund exceeds liquid cash available in this Billy account.</p>}
               {tradeError && <p className="status error">{tradeError}</p>}
               {tradeStatus && <p className="status success">{tradeStatus}</p>}
-              <button className={tradeMode === 'buy' ? 'buy-button full' : 'sell-button full'} type="button" disabled={!canSubmitTrade || submittingTrade} onClick={submitTrade}>
-                {submittingTrade ? 'Submitting...' : `${tradeMode === 'buy' ? 'Buy' : 'Sell'} ${shareCount > 0 ? fmt(shareCount, 4) : ''} shares`}
+              <button className={tradeMode === 'sell' ? 'sell-button full' : 'buy-button full'} type="button" disabled={(isBillyMode ? !canSubmitBilly : !canSubmitTrade) || submittingTrade} onClick={submitTrade}>
+                {submittingTrade ? 'Submitting...' : isBillyMode ? 'Start Billy Analyst Action' : `${tradeMode === 'buy' ? 'Buy' : 'Sell'} ${shareCount > 0 ? fmt(shareCount, 4) : ''} shares`}
               </button>
             </section>
           )}

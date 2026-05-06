@@ -23,6 +23,7 @@ const db = {
   billyAccountPositions: [],
   assetTransfers: [],
   connectedBankAccounts: [],
+  billyAnalystActions: [],
 };
 
 const ids = {
@@ -36,6 +37,7 @@ const ids = {
   billyAccountPosition: 1,
   assetTransfer: 1,
   connectedBankAccount: 1,
+  billyAnalystAction: 1,
 };
 
 function resetDb() {
@@ -49,6 +51,7 @@ function resetDb() {
   db.billyAccountPositions = [];
   db.assetTransfers = [];
   db.connectedBankAccounts = [];
+  db.billyAnalystActions = [];
   ids.user = 1;
   ids.portfolio = 1;
   ids.position = 1;
@@ -59,6 +62,7 @@ function resetDb() {
   ids.billyAccountPosition = 1;
   ids.assetTransfer = 1;
   ids.connectedBankAccount = 1;
+  ids.billyAnalystAction = 1;
 }
 
 function rows(rowsValue = []) {
@@ -98,6 +102,11 @@ function runQuery(sql, params = []) {
     };
     db.users.push(user);
     return rows([{ id: user.id, name: user.name, email: user.email }]);
+  }
+
+  if (normalized.includes('select plan from users where id')) {
+    const user = db.users.find((item) => item.id === params[0]);
+    return rows(user ? [{ plan: user.plan }] : []);
   }
 
   if (normalized.includes('insert into portfolios')) {
@@ -339,6 +348,31 @@ function runQuery(sql, params = []) {
       created_at: new Date(),
     });
     return rows();
+  }
+
+  if (normalized.includes('insert into billy_analyst_actions')) {
+    const action = {
+      id: ids.billyAnalystAction++,
+      portfolio_id: params[0],
+      account_id: params[1],
+      account_label: params[2],
+      ticker: params[3],
+      action: params[4],
+      initial_fund: Number(params[5]),
+      invested_amount: Number(params[6]),
+      shares: Number(params[7]),
+      max_investment_dollars: params[8],
+      max_investment_percent: params[9],
+      max_loss_dollars: params[10],
+      max_loss_percent: params[11],
+      reinvest_gains: params[12],
+      confidence: params[13],
+      rationale: params[14],
+      status: params[15],
+      created_at: new Date(),
+    };
+    db.billyAnalystActions.push(action);
+    return rows([action]);
   }
 
   if (normalized.includes('select * from alerts where user_id')) {
