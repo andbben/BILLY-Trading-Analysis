@@ -7,12 +7,16 @@ const BANK_ACCOUNTS = [
     type: 'bank',
     label: 'Connected Checking - 4821',
     balance: BANK_BALANCE,
+    accountNumber: '4821',
+    institution: 'Billy Demo Bank',
   },
   {
     id: 'bank-savings',
     type: 'bank',
     label: 'Connected Savings - 9024',
     balance: BANK_BALANCE,
+    accountNumber: '9024',
+    institution: 'Billy Demo Bank',
   },
 ];
 
@@ -47,6 +51,8 @@ async function ensureTransfersTable(queryable = pool) {
   await queryable.query('ALTER TABLE cash_transfers ADD COLUMN IF NOT EXISTS start_date DATE');
   await queryable.query('ALTER TABLE cash_transfers ADD COLUMN IF NOT EXISTS end_date DATE');
   await queryable.query('ALTER TABLE cash_transfers ADD COLUMN IF NOT EXISTS transaction_id VARCHAR(64)');
+  await queryable.query('ALTER TABLE trades ADD COLUMN IF NOT EXISTS account_id VARCHAR(80)');
+  await queryable.query('ALTER TABLE trades ADD COLUMN IF NOT EXISTS account_label VARCHAR(255)');
   await queryable.query(`
     CREATE TABLE IF NOT EXISTS billy_accounts (
       id SERIAL PRIMARY KEY,
@@ -88,6 +94,22 @@ async function ensureTransfersTable(queryable = pool) {
     )
   `);
   await queryable.query('CREATE INDEX IF NOT EXISTS idx_asset_transfers_portfolio_id ON asset_transfers(portfolio_id)');
+  await queryable.query(`
+    CREATE TABLE IF NOT EXISTS connected_bank_accounts (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      account_name VARCHAR(255) NOT NULL,
+      institution_name VARCHAR(255) NOT NULL,
+      account_type VARCHAR(60) NOT NULL,
+      routing_last4 VARCHAR(4) NOT NULL,
+      account_last4 VARCHAR(4) NOT NULL,
+      demo_balance DECIMAL(14, 2) NOT NULL,
+      agreements JSONB,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+  await queryable.query('CREATE INDEX IF NOT EXISTS idx_connected_bank_accounts_user_id ON connected_bank_accounts(user_id)');
 }
 
 async function getOrCreatePortfolio(userId, queryable = pool, lock = false) {
@@ -108,20 +130,16 @@ async function getOrCreatePortfolio(userId, queryable = pool, lock = false) {
   return insertResult.rows[0];
 }
 
-function getAccounts(portfolio) {
-  return [
-    ...BANK_ACCOUNTS,
-    {
-      id: `billy-${portfolio.id}`,
-      type: 'billy',
-      label: portfolio.name || 'Billy Cash Account',
-      balance: Number(portfolio.cash_balance || 0),
-    },
-  ];
-}
-
 function makeTransferId(prefix = 'TX') {
   return `${prefix}-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+}
+
+function makeAccountNumber() {
+  return String(Math.floor(1000 + Math.random() * 9000));
+}
+
+function makeBankDemoBalance() {
+  return Math.floor(444444 + Math.random() * (7777777 - 444444 + 1));
 }
 
 function normalizePosition(position) {
@@ -208,13 +226,35 @@ async function getBillyAccounts(userId, portfolio, queryable = pool) {
   ];
 }
 
-function getBankAccounts() {
-  return BANK_ACCOUNTS;
+async function getBankAccounts(userId, queryable = pool) {
+  await ensureTransfersTable(queryable);
+  const result = await queryable.query(
+    'SELECT * FROM connected_bank_accounts WHERE user_id = $1 ORDER BY created_at DESC',
+    [userId]
+  );
+  const connected = result.rows.map((account) => ({
+    id: `bank:${account.id}`,
+    rawId: account.id,
+    type: 'bank',
+    label: account.account_name,
+    institution: account.institution_name,
+    accountType: account.account_type,
+    accountNumber: account.account_last4,
+    balance: Number(account.demo_balance || 0),
+    balanceHidden: true,
+    updatedAt: account.updated_at || account.created_at,
+  }));
+
+  return [
+    ...connected,
+    ...BANK_ACCOUNTS.map((account) => ({ ...account, balanceHidden: true })),
+  ];
 }
 
 async function findAccount(accountId, userId, portfolio, queryable = pool, includeBanks = true) {
   const billyAccounts = await getBillyAccounts(userId, portfolio, queryable);
-  const accounts = includeBanks ? [...getBankAccounts(), ...billyAccounts] : billyAccounts;
+  const bankAccounts = includeBanks ? await getBankAccounts(userId, queryable) : [];
+  const accounts = includeBanks ? [...bankAccounts, ...billyAccounts] : billyAccounts;
   return accounts.find((account) => account.id === accountId);
 }
 
@@ -251,10 +291,11 @@ async function getTransferWorkspace(userId, queryable = pool, portfolioOverride 
     [portfolio.id]
   );
   const billyAccounts = await getBillyAccounts(userId, portfolio, queryable);
+  const bankAccounts = await getBankAccounts(userId, queryable);
 
   return {
     portfolio,
-    accounts: [...getBankAccounts(), ...billyAccounts],
+    accounts: [...bankAccounts, ...billyAccounts],
     billyAccounts,
     transfers: transfersResult.rows,
     assetTransfers: assetTransfersResult.rows,
@@ -283,11 +324,12 @@ exports.getPortfolio = async (req, res) => {
       [portfolio.id]
     );
     const billyAccounts = await getBillyAccounts(req.userId, portfolio);
+    const bankAccounts = await getBankAccounts(req.userId);
 
     res.json({
       portfolio,
       positions: positionsResult.rows,
-      accounts: [...getBankAccounts(), ...billyAccounts],
+      accounts: [...bankAccounts, ...billyAccounts],
       billyAccounts,
       orders: tradesResult.rows,
       transfers: transfersResult.rows,
@@ -343,12 +385,12 @@ exports.createTransfer = async (req, res) => {
       return res.status(400).json({ error: 'Transfers must move cash to or from a Billy account.' });
     }
 
-    if (from.type === 'bank' && transferAmount > BANK_BALANCE) {
+    if (from.type === 'bank' && transferAmount > Number(from.balance || 0)) {
       await client.query('ROLLBACK');
-      return res.status(400).json({ error: 'Connected bank funding is limited to $1,000,000 for this demo.' });
+      return res.status(400).json({ error: 'Connected bank funding limit exceeded for this demo.' });
     }
 
-    if (from.type === 'billy' && Number(portfolio.cash_balance) < transferAmount) {
+    if (from.type === 'billy' && Number(from.balance || 0) < transferAmount) {
       await client.query('ROLLBACK');
       return res.status(400).json({ error: 'Insufficient liquid cash in the Billy account.' });
     }
@@ -397,6 +439,68 @@ exports.createTransfer = async (req, res) => {
     res.status(500).json({ error: 'Transfer failed.' });
   } finally {
     client.release();
+  }
+};
+
+exports.createBillyAccount = async (req, res) => {
+  const label = String(req.body.label || '').trim() || `Billy Account ${makeAccountNumber()}`;
+  const openingCash = Number(req.body.openingCash || 0);
+
+  if (!Number.isFinite(openingCash) || openingCash < 0) {
+    return res.status(400).json({ error: 'Opening cash must be zero or greater.' });
+  }
+
+  try {
+    await ensureTransfersTable(pool);
+    await pool.query(
+      'INSERT INTO billy_accounts (user_id, label, account_number, cash_balance) VALUES ($1, $2, $3, $4)',
+      [req.userId, label, makeAccountNumber(), openingCash]
+    );
+    const portfolio = await getOrCreatePortfolio(req.userId);
+    const workspace = await getTransferWorkspace(req.userId, pool, portfolio);
+    res.status(201).json(workspace);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to open Billy account.' });
+  }
+};
+
+exports.connectBankAccount = async (req, res) => {
+  const accountName = String(req.body.accountName || '').trim();
+  const institutionName = String(req.body.institutionName || '').trim();
+  const accountType = String(req.body.accountType || 'Checking').trim();
+  const routingNumber = String(req.body.routingNumber || '').replace(/\D/g, '');
+  const accountNumber = String(req.body.accountNumber || '').replace(/\D/g, '');
+  const agreements = req.body.agreements || {};
+  const accepted = ['ownership', 'fdic', 'ach', 'privacy'].every((key) => agreements[key] === true);
+
+  if (!accountName || !institutionName || routingNumber.length < 4 || accountNumber.length < 4 || !accepted) {
+    return res.status(400).json({ error: 'Complete bank details and accept all required agreements.' });
+  }
+
+  try {
+    await ensureTransfersTable(pool);
+    await pool.query(
+      `INSERT INTO connected_bank_accounts
+       (user_id, account_name, institution_name, account_type, routing_last4, account_last4, demo_balance, agreements)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [
+        req.userId,
+        accountName,
+        institutionName,
+        accountType,
+        routingNumber.slice(-4),
+        accountNumber.slice(-4),
+        makeBankDemoBalance(),
+        JSON.stringify(agreements),
+      ]
+    );
+    const portfolio = await getOrCreatePortfolio(req.userId);
+    const workspace = await getTransferWorkspace(req.userId, pool, portfolio);
+    res.status(201).json(workspace);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to connect bank account.' });
   }
 };
 
@@ -632,8 +736,8 @@ exports.executeTrade = async (req, res) => {
     }
 
     await client.query(
-      'INSERT INTO trades (portfolio_id, ticker, trade_type, shares, price, total) VALUES ($1, $2, $3, $4, $5, $6)',
-      [portfolio.id, symbol, mode, shareCount, executionPrice, total]
+      'INSERT INTO trades (portfolio_id, ticker, trade_type, shares, price, total, account_id, account_label) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
+      [portfolio.id, symbol, mode, shareCount, executionPrice, total, account.id, account.label]
     );
 
     const updatedPortfolio = await client.query('SELECT * FROM portfolios WHERE id = $1', [portfolio.id]);

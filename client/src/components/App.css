@@ -675,6 +675,7 @@ h2 {
   aspect-ratio: 1;
   border-radius: 50%;
   border: 1px solid var(--border);
+  box-shadow: inset 0 0 0 10px rgba(255, 255, 255, 0.08), 0 14px 38px rgba(0, 194, 168, 0.12);
 }
 
 .allocation-legend {
@@ -716,6 +717,11 @@ h2 {
 .accounts-table .table-head,
 .accounts-table .table-row {
   grid-template-columns: 2fr 0.9fr 1fr 1fr 0.7fr;
+}
+
+.account-orders-table .table-head,
+.account-orders-table .table-row {
+  grid-template-columns: 1.3fr 0.7fr 0.7fr 0.8fr 0.8fr 0.9fr;
 }
 
 .active-holdings-table .table-head,
@@ -987,6 +993,12 @@ pre {
   width: min(820px, 100%);
 }
 
+.modal-stock {
+  width: min(1240px, calc(100vw - 28px));
+  max-height: min(900px, calc(100vh - 24px));
+  gap: 18px;
+}
+
 .modal-header {
   display: flex;
   justify-content: space-between;
@@ -1038,6 +1050,11 @@ pre {
 .line-chart {
   position: relative;
   height: 180px;
+  overflow: hidden;
+  border-radius: 10px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent),
+    rgba(255, 255, 255, 0.025);
 }
 
 .line-chart svg {
@@ -1066,6 +1083,15 @@ pre {
   border: 1px solid var(--border);
   pointer-events: none;
   text-align: center;
+}
+
+.chart-grid-line {
+  stroke: rgba(126, 139, 119, 0.2);
+  stroke-width: 1;
+}
+
+.chart-grid-line-vertical {
+  stroke-dasharray: 4 6;
 }
 
 .indicator-grid,
@@ -1116,6 +1142,209 @@ pre {
   gap: 12px;
   color: var(--muted2);
   font-size: 0.76rem;
+}
+
+.stock-trade-panel {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.trade-controls-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.stock-detail-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2.2fr) minmax(250px, 0.8fr);
+  gap: 18px;
+}
+
+.quote-info-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1fr) minmax(300px, 1fr);
+  gap: 18px;
+  align-items: stretch;
+}
+
+.quote-panel {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.mini-panel-header,
+.detailed-quote div,
+.company-profile div,
+.price-performance div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  padding-bottom: 9px;
+  border-bottom: 1px solid var(--border);
+}
+
+.mini-panel-header h3 {
+  font-size: 1rem;
+}
+
+.mini-panel-header span,
+.score-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  min-height: 22px;
+  border-radius: 6px;
+  color: #17371f;
+  background: #9be564;
+  font-weight: 900;
+}
+
+.chart-panel {
+  gap: 12px;
+}
+
+.chart-quote-row,
+.chart-range-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.chart-range-actions {
+  justify-content: flex-end;
+}
+
+.chart-range-actions button {
+  min-height: 28px;
+  padding: 4px 8px;
+  border-radius: 5px;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.chart-range-actions button.active {
+  color: #17371f;
+  background: #9be564;
+}
+
+.quote-market-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.quote-market-strip > div {
+  display: grid;
+  grid-template-columns: minmax(130px, 0.75fr) minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  min-height: 46px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.quote-market-strip > div:nth-child(odd) {
+  border-right: 1px solid var(--border);
+}
+
+.quote-market-strip span {
+  color: var(--muted);
+}
+
+.quote-market-strip strong {
+  justify-self: end;
+  font-weight: 700;
+}
+
+.quote-range-row {
+  grid-template-columns: minmax(90px, 0.7fr) minmax(64px, auto) minmax(130px, 1fr) minmax(64px, auto) !important;
+}
+
+.quote-range-track {
+  position: relative;
+  height: 1px;
+  background: var(--border);
+}
+
+.quote-range-track i {
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--text);
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.company-profile p,
+.events-card p {
+  color: var(--text);
+  line-height: 1.45;
+}
+
+.events-card article {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+
+.events-card time {
+  display: grid;
+  overflow: hidden;
+  border: 1px solid #2f8f25;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.events-card time strong {
+  color: white;
+  background: #2f8f25;
+  font-size: 0.7rem;
+}
+
+.portfolio-summary-chart > .sparkline {
+  height: 130px;
+}
+
+.position-sort-controls {
+  align-items: end;
+}
+
+.account-setup-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-top: 14px;
+}
+
+.agreement-list {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.modal-bank-connect {
+  width: min(780px, 100%);
 }
 
 .sentiment-bar {
@@ -1429,7 +1658,11 @@ pre {
 .theme-dark .account-summary,
 .theme-dark .investment-row,
 .theme-dark .account-inner-panel,
-.theme-dark .position-entry {
+.theme-dark .position-entry,
+.theme-dark .stock-trade-panel,
+.theme-dark .quote-panel,
+.theme-dark .agreement-list,
+.theme-dark .quote-market-strip {
   background: #253628;
 }
 
@@ -1555,10 +1788,25 @@ pre {
   background: var(--surface);
 }
 
+.compact-position {
+  gap: 8px;
+  padding: 11px 12px;
+  border-left: 5px solid var(--movement-color, var(--green));
+}
+
+.compact-position.movement-up {
+  box-shadow: inset 0 0 0 1px rgba(0, 194, 168, 0.08);
+}
+
+.compact-position.movement-down {
+  box-shadow: inset 0 0 0 1px rgba(255, 79, 123, 0.08);
+}
+
 .position-entry-title {
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
 }
 
 .position-entry-title .row-actions {
@@ -1568,6 +1816,61 @@ pre {
 .position-entry-title > span:last-child {
   display: grid;
   gap: 2px;
+}
+
+.sector-chip {
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: var(--text);
+  background: rgba(79, 124, 255, 0.14);
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.compact-price {
+  display: grid;
+  gap: 1px;
+  margin-left: auto;
+  text-align: right;
+}
+
+.row-actions {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.row-actions .secondary-button {
+  min-height: 30px;
+  padding: 5px 10px;
+}
+
+.position-compact-metrics {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(90px, 1fr));
+  gap: 8px;
+  align-items: center;
+}
+
+.position-compact-metrics span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.position-compact-metrics strong {
+  color: var(--text);
+  font-size: 0.82rem;
+}
+
+.compact-range .range-indicator {
+  padding-top: 5px;
+}
+
+.compact-range .range-indicator small {
+  display: none;
 }
 
 .position-metrics {
@@ -1617,6 +1920,7 @@ pre {
 
 .totals-entry {
   border-color: rgba(47, 143, 37, 0.35);
+  border-left: 5px solid var(--movement-color, var(--green));
 }
 
 .transfer-field {
@@ -1768,8 +2072,14 @@ pre {
   .hot-grid,
   .insight-grid,
   .plan-grid,
-  .transfer-tiles {
+  .transfer-tiles,
+  .stock-detail-layout,
+  .quote-info-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .position-compact-metrics {
+    grid-template-columns: repeat(4, minmax(90px, 1fr));
   }
 }
 
@@ -1794,7 +2104,10 @@ pre {
   .metric-grid,
   .analysis-grid,
   .transfer-tiles,
-  .account-grid {
+  .account-grid,
+  .stock-detail-layout,
+  .quote-info-grid,
+  .position-compact-metrics {
     grid-template-columns: 1fr;
   }
 
@@ -1834,12 +2147,33 @@ pre {
   .investment-row,
   .confirmation-grid,
   .position-metrics,
-  .allocation-pie-wrap {
+  .allocation-pie-wrap,
+  .trade-controls-grid,
+  .quote-market-strip,
+  .quote-market-strip > div {
     grid-template-columns: 1fr;
+  }
+
+  .quote-market-strip > div:nth-child(odd) {
+    border-right: 0;
   }
 
   .transfer-segmented,
   .share-entry {
     width: 100%;
+  }
+
+  .modal-stock {
+    width: min(100%, calc(100vw - 18px));
+    padding: 14px;
+  }
+
+  .position-entry-title {
+    flex-wrap: wrap;
+  }
+
+  .compact-price {
+    margin-left: 0;
+    text-align: left;
   }
 }

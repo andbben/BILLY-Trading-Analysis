@@ -44,6 +44,8 @@ CREATE TABLE IF NOT EXISTS trades (
   shares DECIMAL(14, 4) NOT NULL,
   price DECIMAL(14, 4) NOT NULL,
   total DECIMAL(14, 2) NOT NULL,
+  account_id VARCHAR(80),
+  account_label VARCHAR(255),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -106,6 +108,20 @@ CREATE TABLE IF NOT EXISTS asset_transfers (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS connected_bank_accounts (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  account_name VARCHAR(255) NOT NULL,
+  institution_name VARCHAR(255) NOT NULL,
+  account_type VARCHAR(60) NOT NULL,
+  routing_last4 VARCHAR(4) NOT NULL,
+  account_last4 VARCHAR(4) NOT NULL,
+  demo_balance DECIMAL(14, 2) NOT NULL,
+  agreements JSONB,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Cached deterministic/optional AI article analysis
 CREATE TABLE IF NOT EXISTS article_analysis_cache (
   id SERIAL PRIMARY KEY,
@@ -160,6 +176,8 @@ ALTER TABLE cash_transfers ADD COLUMN IF NOT EXISTS frequency VARCHAR(30);
 ALTER TABLE cash_transfers ADD COLUMN IF NOT EXISTS start_date DATE;
 ALTER TABLE cash_transfers ADD COLUMN IF NOT EXISTS end_date DATE;
 ALTER TABLE cash_transfers ADD COLUMN IF NOT EXISTS transaction_id VARCHAR(64);
+ALTER TABLE trades ADD COLUMN IF NOT EXISTS account_id VARCHAR(80);
+ALTER TABLE trades ADD COLUMN IF NOT EXISTS account_label VARCHAR(255);
 
 -- Create indexes for faster queries
 CREATE INDEX IF NOT EXISTS idx_portfolios_user_id ON portfolios(user_id);
@@ -169,6 +187,7 @@ CREATE INDEX IF NOT EXISTS idx_cash_transfers_portfolio_id ON cash_transfers(por
 CREATE INDEX IF NOT EXISTS idx_billy_accounts_user_id ON billy_accounts(user_id);
 CREATE INDEX IF NOT EXISTS idx_billy_account_positions_account_id ON billy_account_positions(billy_account_id);
 CREATE INDEX IF NOT EXISTS idx_asset_transfers_portfolio_id ON asset_transfers(portfolio_id);
+CREATE INDEX IF NOT EXISTS idx_connected_bank_accounts_user_id ON connected_bank_accounts(user_id);
 CREATE INDEX IF NOT EXISTS idx_article_analysis_cache_key ON article_analysis_cache(cache_key);
 CREATE INDEX IF NOT EXISTS idx_watchlist_user_id ON watchlist(user_id);
 CREATE INDEX IF NOT EXISTS idx_alerts_user_id ON alerts(user_id);

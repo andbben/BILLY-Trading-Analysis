@@ -22,6 +22,7 @@ const db = {
   billyAccounts: [],
   billyAccountPositions: [],
   assetTransfers: [],
+  connectedBankAccounts: [],
 };
 
 const ids = {
@@ -34,6 +35,7 @@ const ids = {
   billyAccount: 1,
   billyAccountPosition: 1,
   assetTransfer: 1,
+  connectedBankAccount: 1,
 };
 
 function resetDb() {
@@ -46,6 +48,7 @@ function resetDb() {
   db.billyAccounts = [];
   db.billyAccountPositions = [];
   db.assetTransfers = [];
+  db.connectedBankAccounts = [];
   ids.user = 1;
   ids.portfolio = 1;
   ids.position = 1;
@@ -55,6 +58,7 @@ function resetDb() {
   ids.billyAccount = 1;
   ids.billyAccountPosition = 1;
   ids.assetTransfer = 1;
+  ids.connectedBankAccount = 1;
 }
 
 function rows(rowsValue = []) {
@@ -68,7 +72,7 @@ function runQuery(sql, params = []) {
     return rows();
   }
 
-  if (normalized.startsWith('create table if not exists') || normalized.startsWith('create index if not exists') || normalized.startsWith('alter table cash_transfers')) {
+  if (normalized.startsWith('create table if not exists') || normalized.startsWith('create index if not exists') || normalized.startsWith('alter table cash_transfers') || normalized.startsWith('alter table trades')) {
     return rows();
   }
 
@@ -190,12 +194,36 @@ function runQuery(sql, params = []) {
       shares: Number(params[3]),
       price: Number(params[4]),
       total: Number(params[5]),
+      account_id: params[6],
+      account_label: params[7],
+      created_at: new Date(),
     });
     return rows();
   }
 
   if (normalized.includes('select * from trades where portfolio_id')) {
     return rows(db.trades.filter((item) => item.portfolio_id === params[0]));
+  }
+
+  if (normalized.includes('select * from connected_bank_accounts where user_id')) {
+    return rows(db.connectedBankAccounts.filter((item) => item.user_id === params[0]));
+  }
+
+  if (normalized.includes('insert into connected_bank_accounts')) {
+    db.connectedBankAccounts.push({
+      id: ids.connectedBankAccount++,
+      user_id: params[0],
+      account_name: params[1],
+      institution_name: params[2],
+      account_type: params[3],
+      routing_last4: params[4],
+      account_last4: params[5],
+      demo_balance: Number(params[6]),
+      agreements: params[7],
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
+    return rows();
   }
 
   if (normalized.includes('select * from billy_accounts where user_id')) {

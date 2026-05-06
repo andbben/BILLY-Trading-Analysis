@@ -306,7 +306,7 @@ export default function Transfers({ marketData }) {
               {accounts.map((account) => (
                 <article className="account-card" key={account.id}>
                   <span>{account.label}</span>
-                  <strong>{fmtPrice(account.balance || 0)}</strong>
+                  <strong>{account.type === 'bank' ? 'Hidden' : fmtPrice(account.balance || 0)}</strong>
                   <em>{account.type === 'bank' ? 'Connected bank funding' : 'Liquid Billy cash'}</em>
                 </article>
               ))}
@@ -418,7 +418,6 @@ export default function Transfers({ marketData }) {
           )}
 
           <div className="modal-actions">
-            <button className="secondary-button" type="button" onClick={() => setStep('origin')}>Back</button>
             <button type="button" onClick={continueBillyDetails}>Continue</button>
           </div>
         </section>

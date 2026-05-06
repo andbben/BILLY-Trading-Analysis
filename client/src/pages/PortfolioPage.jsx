@@ -1,21 +1,20 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { PORTFOLIO_COLORS, STARTER_HOLDINGS, STOCKS_BASE } from '../data/market';
 import { api } from '../services/api';
-import { classifySentiment, computeRiskScore } from '../utils/indicators';
-import { fmt, fmtPct, fmtPrice, timeAgo } from '../utils/formatters';
+import { computeRiskScore } from '../utils/indicators';
+import { fmt, fmtPct, fmtPrice } from '../utils/formatters';
 import RiskGauge from '../components/charts/RiskGauge';
 import Sparkline from '../components/charts/Sparkline';
-import NewsArticleModal from '../components/modals/NewsArticleModal';
 import StockModal from '../components/modals/StockModal';
-import TradeModal from '../components/modals/TradeModal';
 
 const DIVERSITY_COLORS = {
-  domestic: '#2f8f25',
-  foreign: '#2457a7',
-  bonds: '#b7791f',
-  shortTerm: '#6b7280',
-  other: '#7c5cfc',
-  unknown: '#9ca3af',
+  domestic: '#00c2a8',
+  foreign: '#4f7cff',
+  bonds: '#ffb84d',
+  shortTerm: '#9be564',
+  other: '#ff6fb1',
+  unknown: '#b58cff',
 };
 
 const DIVERSITY_LABELS = {
@@ -75,29 +74,6 @@ function accountValue(account, quotes) {
   return Number(account?.balance || 0) + accountRows(account, quotes).reduce((sum, row) => sum + row.val, 0);
 }
 
-function accountSeries(account, quotes) {
-  const value = Math.max(1, accountValue(account, quotes));
-  return [0.97, 0.985, 0.992, 1.006, 1.001, 1.016, 1].map((factor) => value * factor);
-}
-
-function accountStats(account, quotes) {
-  const rows = accountRows(account, quotes);
-  const totalVal = rows.reduce((sum, row) => sum + row.val, 0);
-  const totalCost = rows.reduce((sum, row) => sum + row.costTotal, 0);
-  const totalGL = totalVal - totalCost;
-  const dayGL = rows.reduce((sum, row) => sum + row.dayGl, 0);
-  return {
-    rows,
-    cash: Number(account?.balance || 0),
-    accountTotal: Number(account?.balance || 0) + totalVal,
-    holdingsValue: totalVal,
-    totalGL,
-    totalPct: totalCost ? (totalGL / totalCost) * 100 : 0,
-    dayGL,
-    dayPct: totalVal ? (dayGL / totalVal) * 100 : 0,
-  };
-}
-
 function diversityBreakdown(accounts, quotes) {
   const totals = { domestic: 0, foreign: 0, bonds: 0, shortTerm: 0, other: 0, unknown: 0 };
   accounts.forEach((account) => {
@@ -141,24 +117,35 @@ function RangeIndicator({ low, high, current }) {
   );
 }
 
-function relatedTickers(article) {
-  return (article.related || '').split(',').map((ticker) => ticker.trim()).filter((ticker) => STOCKS_BASE[ticker]);
-}
-
 export default function PortfolioPage({ marketData }) {
+  const navigate = useNavigate();
   const [accounts, setAccounts] = useState([]);
   const [bankAccounts, setBankAccounts] = useState([]);
   const [showBanks, setShowBanks] = useState(false);
   const [showMoreHoldings, setShowMoreHoldings] = useState(false);
-  const [selectedAccountId, setSelectedAccountId] = useState('');
+  const [accountSetupMode, setAccountSetupMode] = useState(null);
+  const [newBillyLabel, setNewBillyLabel] = useState('');
+  const [bankDraft, setBankDraft] = useState({
+    accountName: '',
+    institutionName: '',
+    accountType: 'Checking',
+    routingNumber: '',
+    accountNumber: '',
+    agreements: {
+      ownership: false,
+      fdic: false,
+      ach: false,
+      privacy: false,
+    },
+  });
+  const [accountSetupStatus, setAccountSetupStatus] = useState('');
   const [error, setError] = useState('');
   const [selected, setSelected] = useState(null);
-  const [selectedArticle, setSelectedArticle] = useState(null);
-  const [trade, setTrade] = useState(null);
   const [orders, setOrders] = useState([]);
   const [transfers, setTransfers] = useState([]);
   const [assetTransfers, setAssetTransfers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchParams, setSearchParams] = useSearchParams();
   const { quotes, fetchStockCandles, fetchCompanyNews } = marketData;
 
   const loadPortfolio = async () => {
@@ -167,7 +154,6 @@ export default function PortfolioPage({ marketData }) {
       const billyAccounts = (data.billyAccounts || []).map(normalizeAccount);
       setAccounts(billyAccounts);
       setBankAccounts((data.accounts || []).filter((account) => account.type === 'bank'));
-      setSelectedAccountId((current) => current || billyAccounts[0]?.id || '');
       setOrders(data.orders || []);
       setTransfers(data.transfers || []);
       setAssetTransfers(data.assetTransfers || []);
@@ -183,7 +169,6 @@ export default function PortfolioPage({ marketData }) {
         positions: STARTER_HOLDINGS.map(normalizePosition),
       };
       setAccounts([fallback]);
-      setSelectedAccountId(fallback.id);
       setError(`${err.message || 'Failed to load portfolio.'} Showing starter demo holdings.`);
     } finally {
       setLoading(false);
@@ -194,6 +179,11 @@ export default function PortfolioPage({ marketData }) {
     loadPortfolio();
   }, []);
 
+  useEffect(() => {
+    const stock = searchParams.get('stock');
+    if (stock && STOCKS_BASE[stock]) setSelected(stock);
+  }, [searchParams]);
+
   const allRows = useMemo(() => accounts.flatMap((account) => accountRows(account, quotes).map((row) => ({ ...row, account }))), [accounts, quotes]);
   const totalVal = allRows.reduce((sum, row) => sum + row.val, 0);
   const cash = accounts.reduce((sum, account) => sum + Number(account.balance || 0), 0);
@@ -203,24 +193,55 @@ export default function PortfolioPage({ marketData }) {
   const totalDayGL = allRows.reduce((sum, row) => sum + row.dayGl, 0);
   const riskScore = computeRiskScore(allRows);
   const weightedBeta = allRows.reduce((sum, row) => sum + (STOCKS_BASE[row.ticker]?.beta || 1) * (row.val / (totalVal || 1)), 0);
-  const selectedAccount = accounts.find((account) => account.id === selectedAccountId);
-  const selectedStats = accountStats(selectedAccount, quotes);
-  const selectedAccountTickers = (selectedAccount?.positions || []).map((position) => position.ticker);
-  const accountNews = (marketData.news || [])
-    .map((item, index) => {
-      const sentiment = classifySentiment(item.headline || item.title || '', item.summary || '');
-      const tickers = relatedTickers(item);
-      return { ...item, ...sentiment, tickers, index };
-    })
-    .filter((item) => item.tickers.some((ticker) => selectedAccountTickers.includes(ticker)))
-    .slice(0, 6);
   const topActive = [...allRows].sort((a, b) => Math.abs(b.dayPct) - Math.abs(a.dayPct)).slice(0, showMoreHoldings ? 10 : 5);
   const diversity = diversityBreakdown(accounts, quotes);
 
-  const executeTrade = async ({ mode, ticker, shares, price }) => {
-    await api.executeTrade({ mode, ticker, shares, price, accountId: trade?.accountId || selectedAccount?.id });
+  const portfolioSeries = useMemo(() => {
+    const value = Math.max(1, totalVal + cash);
+    return [0.965, 0.979, 0.991, 1.002, 0.996, 1.011, 1].map((factor) => value * factor);
+  }, [cash, totalVal]);
+
+  const executeStockModalTrade = async ({ mode, ticker, shares, price, accountId, orderType }) => {
+    await api.executeTrade({ mode, ticker, shares, price, accountId, orderType });
     await loadPortfolio();
-    setTrade(null);
+  };
+
+  const openBillyAccount = async () => {
+    try {
+      await api.createBillyAccount({ label: newBillyLabel });
+      setNewBillyLabel('');
+      setAccountSetupMode(null);
+      setAccountSetupStatus('New Billy account opened.');
+      await loadPortfolio();
+    } catch (err) {
+      setError(err.message || 'Failed to open Billy account.');
+    }
+  };
+
+  const connectBankAccount = async () => {
+    try {
+      await api.connectBankAccount(bankDraft);
+      setBankDraft({
+        accountName: '',
+        institutionName: '',
+        accountType: 'Checking',
+        routingNumber: '',
+        accountNumber: '',
+        agreements: { ownership: false, fdic: false, ach: false, privacy: false },
+      });
+      setAccountSetupMode(null);
+      setAccountSetupStatus('Bank account connected for demo transfers.');
+      await loadPortfolio();
+    } catch (err) {
+      setError(err.message || 'Failed to connect bank account.');
+    }
+  };
+
+  const updateAgreement = (key, checked) => {
+    setBankDraft((draft) => ({
+      ...draft,
+      agreements: { ...draft.agreements, [key]: checked },
+    }));
   };
 
   if (loading) return <div className="page"><p className="status">Loading portfolio...</p></div>;
@@ -233,10 +254,20 @@ export default function PortfolioPage({ marketData }) {
           <h1>Portfolio & Risk Overview</h1>
           <p>{accounts.length} Billy accounts - combined account value, allocation, risk, and trading.</p>
         </div>
-        <button type="button" onClick={() => setTrade({ mode: 'buy', ticker: null, accountId: selectedAccount?.id })}>Buy Stock</button>
       </header>
 
       {error && <p className="status warning">{error}</p>}
+      {accountSetupStatus && <p className="status success">{accountSetupStatus}</p>}
+
+      <section className="panel portfolio-summary-chart">
+        <header className="panel-header">
+          <div>
+            <h2>Portfolio Summary</h2>
+            <p>Combined account value trend across Billy accounts.</p>
+          </div>
+        </header>
+        <Sparkline data={portfolioSeries} color="#2f8f25" height={130} />
+      </section>
 
       <section className="stat-grid">
         <article className="stat-card"><span>Total Value</span><strong>{fmtPrice(totalVal + cash)}</strong><em>cash plus holdings</em></article>
@@ -263,7 +294,7 @@ export default function PortfolioPage({ marketData }) {
 
       <section className="panel">
         <header className="panel-header">
-          <div><h2>Accounts</h2><p>Select an account to view all holdings and account-specific risk.</p></div>
+          <div><h2>Accounts</h2><p>Select a Billy account to view all holdings and account-specific risk.</p></div>
           <button className="secondary-button" type="button" onClick={() => setShowBanks((value) => !value)}>
             {showBanks ? 'Hide bank accounts' : 'View bank accounts'}
           </button>
@@ -271,14 +302,23 @@ export default function PortfolioPage({ marketData }) {
         <div className="data-table accounts-table">
           <div className="table-head"><span>Account</span><span>Type</span><span>Cash</span><span>Total Value</span><span>Positions</span></div>
           {[...accounts, ...(showBanks ? bankAccounts : [])].map((account) => (
-            <button className="table-row" type="button" key={account.id} onClick={() => account.type === 'billy' && setSelectedAccountId(account.id)}>
+            <button
+              className="table-row"
+              type="button"
+              key={account.id}
+              onClick={() => account.type === 'billy' && navigate(`/portfolio/accounts/${encodeURIComponent(account.id)}`)}
+            >
               <span><strong>{account.label}</strong><small>{account.accountNumber ? `Account ${account.accountNumber}` : 'Connected bank'}</small></span>
               <span>{account.type === 'bank' ? 'Bank' : account.source === 'portfolio' ? 'Primary Billy' : 'Billy'}</span>
-              <span className="mono">{fmtPrice(account.balance || 0)}</span>
-              <span className="mono">{account.type === 'bank' ? fmtPrice(account.balance || 0) : fmtPrice(accountValue(account, quotes))}</span>
+              <span className="mono">{account.type === 'bank' ? 'Hidden' : fmtPrice(account.balance || 0)}</span>
+              <span className="mono">{account.type === 'bank' ? 'Connected' : fmtPrice(accountValue(account, quotes))}</span>
               <span>{account.positions?.length || 0}</span>
             </button>
           ))}
+        </div>
+        <div className="account-setup-actions">
+          <button className="secondary-button" type="button" onClick={() => setAccountSetupMode('billy')}>Open new Billy account</button>
+          <button className="secondary-button" type="button" onClick={() => setAccountSetupMode('bank')}>Connect bank account</button>
         </div>
       </section>
 
@@ -290,7 +330,7 @@ export default function PortfolioPage({ marketData }) {
           </button>
         </header>
         <div className="data-table active-holdings-table">
-          <div className="table-head"><span>Holding</span><span>Account</span><span>Last</span><span>Day G/L</span><span>Value</span><span>Actions</span></div>
+          <div className="table-head"><span>Holding</span><span>Account</span><span>Last</span><span>Day G/L</span><span>Value</span><span>Day Range</span></div>
           {topActive.map((row) => (
             <button className="table-row" type="button" key={`${row.account.id}-${row.ticker}`} onClick={() => setSelected(row.ticker)}>
               <span className="ticker-cell"><span className="ticker-logo" style={{ background: row.color }}>{row.ticker.slice(0, 2)}</span><span><strong>{row.ticker}</strong><small>{STOCKS_BASE[row.ticker]?.name}</small></span></span>
@@ -298,102 +338,12 @@ export default function PortfolioPage({ marketData }) {
               <span className="mono">{fmtPrice(row.cur)} ({fmtPct(row.dayPct)})</span>
               <span className={row.dayGl >= 0 ? 'pos mono' : 'neg mono'}>{fmtPrice(row.dayGl)}</span>
               <span className="mono">{fmtPrice(row.val)}</span>
-              <span className="row-actions" onClick={(event) => event.stopPropagation()}>
-                <button className="buy-button" type="button" onClick={() => setTrade({ mode: 'buy', ticker: row.ticker, accountId: row.account.id })}>Buy</button>
-                <button className="sell-button" type="button" onClick={() => setTrade({ mode: 'sell', ticker: row.ticker, accountId: row.account.id })}>Sell</button>
-              </span>
+              <RangeIndicator low={row.low52} high={row.high52} current={row.cur} />
             </button>
           ))}
           {!topActive.length && <div className="empty-state">No active holdings yet.</div>}
         </div>
       </section>
-
-      {selectedAccount && (
-        <section className="panel account-workspace">
-          <header className="panel-header">
-            <div>
-              <span className="section-eyebrow">{selectedAccount.label}</span>
-              <h2>Account Summary</h2>
-              <p>Account {selectedAccount.accountNumber} - balance, risk, and all positions.</p>
-            </div>
-          </header>
-          <Sparkline data={accountSeries(selectedAccount, quotes)} color="#2f8f25" height={120} />
-          <section className="stat-grid">
-            <article className="stat-card"><span>Total Value</span><strong>{fmtPrice(selectedStats.accountTotal)}</strong><em>cash plus positions</em></article>
-            <article className="stat-card"><span>Cash Available</span><strong>{fmtPrice(selectedStats.cash)}</strong><em>buying power</em></article>
-            <article className="stat-card"><span>Total Gain / Loss</span><strong className={selectedStats.totalGL >= 0 ? 'pos' : 'neg'}>{fmtPrice(selectedStats.totalGL)}</strong><em>{fmtPct(selectedStats.totalPct)}</em></article>
-            <article className="stat-card"><span>Day G/L</span><strong className={selectedStats.dayGL >= 0 ? 'pos' : 'neg'}>{fmtPrice(selectedStats.dayGL)}</strong><em>{fmtPct(selectedStats.dayPct)}</em></article>
-          </section>
-          <div className="two-column">
-            <section className="account-inner-panel"><header className="panel-header"><h2>Account Diversity</h2></header><AllocationPie breakdown={diversityBreakdown([selectedAccount], quotes)} /></section>
-            <section className="account-inner-panel"><header className="panel-header"><h2>Account Risk Assessment</h2></header><RiskGauge score={computeRiskScore(selectedStats.rows)} /></section>
-          </div>
-          <section className="positions-list">
-            {selectedStats.rows.map((row) => {
-              const accountPct = selectedStats.accountTotal ? (row.val / selectedStats.accountTotal) * 100 : 0;
-              return (
-                <article className="position-entry" key={row.ticker}>
-                  <div className="position-entry-title">
-                    <span className="ticker-logo" style={{ background: row.color }}>{row.ticker.slice(0, 2)}</span>
-                    <span><strong>{row.ticker}</strong><small>{STOCKS_BASE[row.ticker]?.name}</small></span>
-                    <span className="row-actions" onClick={(event) => event.stopPropagation()}>
-                      <button className="buy-button" type="button" onClick={() => setTrade({ mode: 'buy', ticker: row.ticker, accountId: selectedAccount.id })}>Buy</button>
-                      <button className="sell-button" type="button" onClick={() => setTrade({ mode: 'sell', ticker: row.ticker, accountId: selectedAccount.id })}>Sell</button>
-                    </span>
-                  </div>
-                  <div className="position-metrics">
-                    <span>Last <strong>{fmtPrice(row.cur)}</strong></span>
-                    <span>Last change <strong className={row.dayPct >= 0 ? 'pos' : 'neg'}>{fmtPct(row.dayPct)}</strong></span>
-                    <span>Today $ <strong className={row.dayGl >= 0 ? 'pos' : 'neg'}>{fmtPrice(row.dayGl)}</strong></span>
-                    <span>Today % <strong className={row.dayPct >= 0 ? 'pos' : 'neg'}>{fmtPct(row.dayPct)}</strong></span>
-                    <span>Total $ <strong className={row.totalGL >= 0 ? 'pos' : 'neg'}>{fmtPrice(row.totalGL)}</strong></span>
-                    <span>Total % <strong className={row.totalPct >= 0 ? 'pos' : 'neg'}>{fmtPct(row.totalPct)}</strong></span>
-                    <span>Current value <strong>{fmtPrice(row.val)}</strong></span>
-                    <span>% of account <strong>{fmtPct(accountPct)}</strong></span>
-                    <span>Shares <strong>{fmt(row.shares, 4)}</strong></span>
-                    <span>Avg cost <strong>{fmtPrice(row.avgCost)}</strong></span>
-                    <span className="wide">52 week range <RangeIndicator low={row.low52} high={row.high52} current={row.cur} /></span>
-                  </div>
-                </article>
-              );
-            })}
-            <article className="position-entry totals-entry">
-              <strong>Account totals</strong>
-              <div className="position-metrics">
-                <span>Today $ <strong className={selectedStats.dayGL >= 0 ? 'pos' : 'neg'}>{fmtPrice(selectedStats.dayGL)}</strong></span>
-                <span>Today % <strong className={selectedStats.dayPct >= 0 ? 'pos' : 'neg'}>{fmtPct(selectedStats.dayPct)}</strong></span>
-                <span>Total $ <strong className={selectedStats.totalGL >= 0 ? 'pos' : 'neg'}>{fmtPrice(selectedStats.totalGL)}</strong></span>
-                <span>Total % <strong className={selectedStats.totalPct >= 0 ? 'pos' : 'neg'}>{fmtPct(selectedStats.totalPct)}</strong></span>
-                <span>Current value <strong>{fmtPrice(selectedStats.accountTotal)}</strong></span>
-              </div>
-            </article>
-          </section>
-          <section className="account-news">
-            <header className="panel-header">
-              <div>
-                <h2>Account News Sentiment</h2>
-                <p>Article analysis based only on stocks held in this account.</p>
-              </div>
-            </header>
-            <div className="news-list">
-              {accountNews.map((item) => (
-                <button className="news-item" type="button" key={`${item.index}-${item.headline || item.title}`} onClick={() => setSelectedArticle(item)}>
-                  <div className="news-meta">
-                    <span>{item.source || 'News'}</span>
-                    <span>{timeAgo(item.datetime)}</span>
-                    <span className={`sent-score ${item.sentiment}`}>{item.sentiment} {fmt(item.score, 1)}/10</span>
-                  </div>
-                  <strong>{item.headline || item.title}</strong>
-                  <div className="tag-row">
-                    {item.tickers.filter((ticker) => selectedAccountTickers.includes(ticker)).map((ticker) => <span key={ticker}>{ticker}</span>)}
-                  </div>
-                </button>
-              ))}
-              {!accountNews.length && <div className="empty-state">No news matched this account's current holdings.</div>}
-            </div>
-          </section>
-        </section>
-      )}
 
       <section className="panel">
         <header className="panel-header">
@@ -425,28 +375,85 @@ export default function PortfolioPage({ marketData }) {
         </div>
       </section>
 
-      {trade && (
-        <TradeModal
-          mode={trade.mode}
-          ticker={trade.ticker}
-          quotes={quotes}
-          holdings={(accounts.find((account) => account.id === trade.accountId)?.positions || selectedAccount?.positions || []).map(normalizePosition)}
-          balance={Number((accounts.find((account) => account.id === trade.accountId) || selectedAccount)?.balance || 0)}
-          onClose={() => setTrade(null)}
-          onConfirm={executeTrade}
-        />
-      )}
       {selected && (
         <StockModal
           ticker={selected}
           quotes={quotes}
           fetchStockCandles={fetchStockCandles}
           fetchCompanyNews={fetchCompanyNews}
-          onTrade={(mode, ticker) => { setSelected(null); setTrade({ mode, ticker, accountId: selectedAccount?.id }); }}
-          onClose={() => setSelected(null)}
+          tradeAccounts={accounts}
+          defaultAccountId={accounts[0]?.id}
+          onExecuteTrade={executeStockModalTrade}
+          onClose={() => { setSelected(null); setSearchParams({}); }}
         />
       )}
-      {selectedArticle && <NewsArticleModal article={selectedArticle} onClose={() => setSelectedArticle(null)} />}
+
+      {accountSetupMode === 'billy' && (
+        <div className="overlay" onClick={() => setAccountSetupMode(null)}>
+          <section className="modal" onClick={(event) => event.stopPropagation()}>
+            <header className="modal-header">
+              <div>
+                <span className="section-eyebrow">Billy account</span>
+                <h2>Open a new account</h2>
+              </div>
+              <button className="icon-btn" type="button" onClick={() => setAccountSetupMode(null)} aria-label="Close">x</button>
+            </header>
+            <label className="form-field">
+              <span>Account name</span>
+              <input type="text" value={newBillyLabel} onChange={(event) => setNewBillyLabel(event.target.value)} placeholder="Billy Income Account" />
+            </label>
+            <p className="form-hint">This opens an empty Billy account with no positions and zero cash until funded.</p>
+            <button type="button" onClick={openBillyAccount}>Open account</button>
+          </section>
+        </div>
+      )}
+
+      {accountSetupMode === 'bank' && (
+        <div className="overlay" onClick={() => setAccountSetupMode(null)}>
+          <section className="modal modal-bank-connect" onClick={(event) => event.stopPropagation()}>
+            <header className="modal-header">
+              <div>
+                <span className="section-eyebrow">Bank connection</span>
+                <h2>Connect a bank account</h2>
+              </div>
+              <button className="icon-btn" type="button" onClick={() => setAccountSetupMode(null)} aria-label="Close">x</button>
+            </header>
+            <div className="trade-controls-grid">
+              <label className="form-field">
+                <span>Account name</span>
+                <input type="text" value={bankDraft.accountName} onChange={(event) => setBankDraft({ ...bankDraft, accountName: event.target.value })} placeholder="Primary Checking" />
+              </label>
+              <label className="form-field">
+                <span>Bank or institution</span>
+                <input type="text" value={bankDraft.institutionName} onChange={(event) => setBankDraft({ ...bankDraft, institutionName: event.target.value })} placeholder="Example National Bank" />
+              </label>
+              <label className="form-field">
+                <span>Account type</span>
+                <select value={bankDraft.accountType} onChange={(event) => setBankDraft({ ...bankDraft, accountType: event.target.value })}>
+                  <option>Checking</option>
+                  <option>Savings</option>
+                  <option>Money Market</option>
+                </select>
+              </label>
+              <label className="form-field">
+                <span>Routing number</span>
+                <input type="text" inputMode="numeric" value={bankDraft.routingNumber} onChange={(event) => setBankDraft({ ...bankDraft, routingNumber: event.target.value })} placeholder="021000021" />
+              </label>
+              <label className="form-field">
+                <span>Account number</span>
+                <input type="text" inputMode="numeric" value={bankDraft.accountNumber} onChange={(event) => setBankDraft({ ...bankDraft, accountNumber: event.target.value })} placeholder="000123456789" />
+              </label>
+            </div>
+            <div className="agreement-list">
+              <label className="check-row"><input type="checkbox" checked={bankDraft.agreements.ownership} onChange={(event) => updateAgreement('ownership', event.target.checked)} /><span>I certify I own or am authorized to use this bank account.</span></label>
+              <label className="check-row"><input type="checkbox" checked={bankDraft.agreements.fdic} onChange={(event) => updateAgreement('fdic', event.target.checked)} /><span>I acknowledge FDIC coverage depends on the receiving banking institution and account registration.</span></label>
+              <label className="check-row"><input type="checkbox" checked={bankDraft.agreements.ach} onChange={(event) => updateAgreement('ach', event.target.checked)} /><span>I authorize simulated ACH/EFT verification and transfer instructions for this demo app.</span></label>
+              <label className="check-row"><input type="checkbox" checked={bankDraft.agreements.privacy} onChange={(event) => updateAgreement('privacy', event.target.checked)} /><span>I consent to storing masked banking details for demonstration purposes.</span></label>
+            </div>
+            <button type="button" onClick={connectBankAccount}>Connect bank</button>
+          </section>
+        </div>
+      )}
     </div>
   );
 }

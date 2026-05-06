@@ -73,7 +73,7 @@ export default function Navigation({ isAuth, user, onLogout, marketData, theme, 
           {results.length > 0 && (
             <div className="search-menu">
               {results.map(([ticker, info]) => (
-                <button type="button" key={ticker} onClick={() => { setSearch(''); navigate('/dashboard'); }}>
+                <button type="button" key={ticker} onClick={() => { setSearch(''); navigate(isAuth ? `/portfolio?stock=${ticker}` : '/dashboard'); }}>
                   <span className="ticker-logo" style={{ background: info.color }}>{ticker.slice(0, 2)}</span>
                   <span><strong>{ticker}</strong><small>{info.name}</small></span>
                   <em>{fmtPrice(marketData.quotes[ticker]?.c)}</em>

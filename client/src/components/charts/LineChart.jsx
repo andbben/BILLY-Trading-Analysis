@@ -1,9 +1,10 @@
-import { useRef, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import { fmtPrice } from '../../utils/formatters';
 
 export default function LineChart({ data, dates, color = '#00d4ff', height = 170 }) {
   const [tooltip, setTooltip] = useState(null);
   const svgRef = useRef(null);
+  const gradientId = `chartFill-${useId().replace(/:/g, '')}`;
 
   if (!Array.isArray(data) || data.length < 2) {
     return (
@@ -35,7 +36,7 @@ export default function LineChart({ data, dates, color = '#00d4ff', height = 170
   };
 
   return (
-    <div className="line-chart" onMouseLeave={() => setTooltip(null)}>
+    <div className="line-chart" style={{ height }} onMouseLeave={() => setTooltip(null)}>
       {tooltip && (
         <div className="chart-tooltip" style={{ left: `${tooltip.x}%` }}>
           <strong>{fmtPrice(tooltip.price)}</strong>
@@ -51,13 +52,20 @@ export default function LineChart({ data, dates, color = '#00d4ff', height = 170
         aria-label="Price history chart"
       >
         <defs>
-          <linearGradient id="chartFill" x1="0" x2="0" y1="0" y2="1">
+          <linearGradient id={gradientId} x1="0" x2="0" y1="0" y2="1">
             <stop offset="0%" stopColor={color} stopOpacity="0.28" />
             <stop offset="100%" stopColor={color} stopOpacity="0" />
           </linearGradient>
         </defs>
-        <polygon points={`0,${height} ${points} ${width},${height}`} fill="url(#chartFill)" />
+        {[0.2, 0.4, 0.6, 0.8].map((line) => (
+          <line key={line} x1="0" x2={width} y1={height * line} y2={height * line} className="chart-grid-line" />
+        ))}
+        {[0.25, 0.5, 0.75].map((line) => (
+          <line key={line} y1="0" y2={height} x1={width * line} x2={width * line} className="chart-grid-line chart-grid-line-vertical" />
+        ))}
+        <polygon points={`0,${height} ${points} ${width},${height}`} fill={`url(#${gradientId})`} />
         <polyline points={points} fill="none" stroke={color} strokeWidth="3" strokeLinecap="round" />
+        <circle cx={width} cy={py(data[data.length - 1])} r="4" fill={color} />
         {tooltip && <circle cx={(tooltip.x / 100) * width} cy={tooltip.y} r="5" fill={color} />}
       </svg>
     </div>

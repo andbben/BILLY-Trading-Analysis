@@ -5,6 +5,8 @@ import Login from '../pages/Login';
 import Register from '../pages/Register';
 import Dashboard from '../pages/Dashboard';
 import PortfolioPage from '../pages/PortfolioPage';
+import AccountPage from '../pages/AccountPage';
+import AccountOrdersPage from '../pages/AccountOrdersPage';
 import Watchlist from '../pages/Watchlist';
 import Alerts from '../pages/Alerts';
 import News from '../pages/News';
@@ -119,6 +121,22 @@ export default function App() {
               element={
                 <ProtectedRoute isAuth={isAuth}>
                   <PortfolioPage marketData={marketData} />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/portfolio/accounts/:accountId"
+              element={
+                <ProtectedRoute isAuth={isAuth}>
+                  <AccountPage marketData={marketData} />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/portfolio/accounts/:accountId/orders"
+              element={
+                <ProtectedRoute isAuth={isAuth}>
+                  <AccountOrdersPage />
                 </ProtectedRoute>
               }
             />
