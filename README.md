@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Billy Bronco Market Analyst
 
 Billy Bronco is a React + Express stock market analysis app for portfolio tracking, watchlists, alerts, market news, technical indicators, and demo subscription plans.
@@ -160,7 +159,3 @@ A future Stripe implementation can add checkout sessions, webhooks, billing stat
 - Article analysis is deterministic by default, not generative.
 - Payments are demo-only.
 - Market cache is in memory, so it resets when the server restarts.
-=======
-# BILLY-Trading-Analysis
-Semester project within CS 4800 to demonstrate Software Engineering etiquitte and pricniples to devise, create, and implement a software solution at the student's discretion; Here, BILLY Trading &amp; Analysis serves as a stock market trading and analysis platform.
->>>>>>> 868622f0f91aa8a872bb4c6804700c595028aa16
