@@ -5,14 +5,22 @@ import { api } from '../services/api';
 
 function PaymentModal({ plan, onClose, onComplete }) {
   const [step, setStep] = useState('summary');
-  const [form, setForm] = useState({ name: '', card: '', expiry: '', cvv: '' });
+  const [accounts, setAccounts] = useState([]);
+  const [accountId, setAccountId] = useState('');
   const [error, setError] = useState('');
 
+  useEffect(() => {
+    api.getPortfolio()
+      .then((data) => {
+        const rows = data.accounts || [];
+        setAccounts(rows);
+        setAccountId(rows[0]?.id || '');
+      })
+      .catch(() => setAccounts([]));
+  }, []);
+
   const submit = () => {
-    if (!form.name.trim()) return setError('Enter the cardholder name.');
-    if (form.card.replace(/\D/g, '').length < 16) return setError('Enter a 16-digit card number.');
-    if (form.expiry.length < 5) return setError('Enter an expiry date.');
-    if (form.cvv.length < 3) return setError('Enter a CVV.');
+    if (!accountId) return setError('Select an account for subscription billing.');
     setStep('processing');
     window.setTimeout(() => {
       onComplete(plan.id);
@@ -37,18 +45,14 @@ function PaymentModal({ plan, onClose, onComplete }) {
               {plan.features.map((feature) => <p key={feature}>{feature}</p>)}
             </div>
             <p className="form-hint">Demo checkout only. No real charge will be made.</p>
-            <button type="button" onClick={() => setStep('payment')}>Continue to Payment</button>
+            <button type="button" onClick={() => setStep('payment')}>Continue To Payment</button>
           </>
         ) : (
           <>
-            <label className="form-field"><span>Cardholder Name</span><input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} /></label>
-            <label className="form-field"><span>Card Number</span><input value={form.card} maxLength={19} onChange={(event) => setForm({ ...form, card: event.target.value.replace(/\D/g, '').slice(0, 16).replace(/(.{4})/g, '$1 ').trim() })} /></label>
-            <div className="two-column compact">
-              <label className="form-field"><span>Expiry</span><input value={form.expiry} maxLength={5} onChange={(event) => setForm({ ...form, expiry: event.target.value.replace(/\D/g, '').slice(0, 4).replace(/^(\d{2})(\d)/, '$1/$2') })} /></label>
-              <label className="form-field"><span>CVV</span><input value={form.cvv} maxLength={4} onChange={(event) => setForm({ ...form, cvv: event.target.value.replace(/\D/g, '').slice(0, 4) })} /></label>
-            </div>
+            <label className="form-field"><span>Billing Account</span><select value={accountId} onChange={(event) => setAccountId(event.target.value)}>{accounts.map((account) => <option key={account.id} value={account.id}>{account.label} {account.type === 'bank' ? '(Bank)' : '(Billy)'}</option>)}</select></label>
+            {accounts.find((account) => account.id === accountId)?.type === 'billy' && <p className="form-hint">If this Billy account balance drops below the subscription cost, the next available EFT bank account will be charged.</p>}
             {error && <p className="status error">{error}</p>}
-            <button type="button" onClick={submit}>Pay {fmtPrice(plan.price)}</button>
+            <button type="button" onClick={submit}>Subscribe For {fmtPrice(plan.price)}</button>
           </>
         )}
       </section>
@@ -97,13 +101,13 @@ export default function Plans() {
       <header className="page-header">
         <div>
           <span className="section-eyebrow">Plans</span>
-          <h1>Subscription plans</h1>
+          <h1>Subscription Plans</h1>
           <p>Demo plan selection migrated from the standalone checkout flow.</p>
           {status && <p className="form-hint">{status}</p>}
         </div>
       </header>
 
-      <section className="plan-grid">
+      <section className="plan-grid fidelity-plan-grid">
         {PLANS.map((item) => (
           <article className={`plan-card ${item.id === 'pro' ? 'featured' : ''}`} key={item.id}>
             <span>{plan === item.id ? 'Current Plan' : item.id === 'pro' ? 'Most Popular' : 'Plan'}</span>

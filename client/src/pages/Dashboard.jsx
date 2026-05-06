@@ -1,8 +1,26 @@
-import { useMemo, useState } from 'react';
-import { INDEX_SYMS, STOCKS_BASE } from '../data/market';
+import { useEffect, useMemo, useState } from 'react';
+import { INDEX_SYMS, PORTFOLIO_COLORS, STOCKS_BASE } from '../data/market';
+import { api } from '../services/api';
 import { fmt, fmtPct, fmtPrice } from '../utils/formatters';
 import Sparkline from '../components/charts/Sparkline';
 import StockModal from '../components/modals/StockModal';
+
+function normalizePosition(position) {
+  return {
+    ...position,
+    shares: Number(position.shares ?? position.quantity ?? 0),
+    avgCost: Number(position.avg_cost ?? position.avgCost ?? position.purchase_price ?? 0),
+  };
+}
+
+function normalizeAccount(account, index = 0) {
+  return {
+    ...account,
+    balance: Number(account.balance || 0),
+    positions: (account.positions || []).map(normalizePosition),
+    color: PORTFOLIO_COLORS[index % PORTFOLIO_COLORS.length],
+  };
+}
 
 function MarketMoverList({ title, items, quotes, onSelect }) {
   return (
@@ -31,48 +49,32 @@ function MarketMoverList({ title, items, quotes, onSelect }) {
   );
 }
 
-function HotStocks({ quotes, onSelect }) {
-  const scored = useMemo(() => Object.keys(STOCKS_BASE)
-    .map((ticker) => {
-      const quote = quotes[ticker] || {};
-      const absMove = Math.abs(quote.dp || 0);
-      const beta = STOCKS_BASE[ticker].beta || 1;
-      return { ticker, score: absMove * 12 + beta * 8, quote };
-    })
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 5), [quotes]);
-
-  return (
-    <section className="panel">
-      <header className="panel-header">
-        <div>
-          <h2>Hot Stocks</h2>
-          <p>Ranked by movement and volatility profile.</p>
-        </div>
-      </header>
-      <div className="hot-grid">
-        {scored.map(({ ticker, score, quote }, index) => {
-          const info = STOCKS_BASE[ticker];
-          return (
-            <button className="hot-card" type="button" key={ticker} onClick={() => onSelect(ticker)}>
-              <span className="rank">#{index + 1}</span>
-              <span className="ticker-logo" style={{ background: info.color }}>{ticker.slice(0, 2)}</span>
-              <strong>{ticker}</strong>
-              <small>{info.sector}</small>
-              <span className="mono">{fmtPrice(quote.c)}</span>
-              <em className={(quote.dp || 0) >= 0 ? 'pos' : 'neg'}>{fmtPct(quote.dp || 0)}</em>
-              <span className="score-bar"><i style={{ width: `${Math.min(100, score)}%` }} /></span>
-            </button>
-          );
-        })}
-      </div>
-    </section>
-  );
-}
-
 export default function Dashboard({ marketData }) {
   const [selected, setSelected] = useState(null);
+  const [accounts, setAccounts] = useState([]);
+  const [watchlistTickers, setWatchlistTickers] = useState([]);
   const { quotes, mktStatus, lastUpdate, fetchStockCandles, fetchCompanyNews } = marketData;
+
+  const loadPortfolioAccounts = async () => {
+    try {
+      const data = await api.getPortfolio();
+      setAccounts((data.billyAccounts || []).map(normalizeAccount));
+    } catch {
+      setAccounts([]);
+    }
+  };
+
+  useEffect(() => {
+    loadPortfolioAccounts();
+    api.getWatchlist()
+      .then((data) => setWatchlistTickers((data.watchlist || []).map((item) => (typeof item === 'string' ? item : item.ticker)).filter(Boolean)))
+      .catch(() => setWatchlistTickers([]));
+  }, []);
+
+  const executeStockModalTrade = async ({ mode, ticker, shares, price, accountId, orderType }) => {
+    await api.executeTrade({ mode, ticker, shares, price, accountId, orderType });
+    await loadPortfolioAccounts();
+  };
 
   const sortedByChange = useMemo(() => Object.keys(STOCKS_BASE)
     .map((ticker) => ({ ticker, dp: quotes[ticker]?.dp || 0 }))
@@ -80,6 +82,10 @@ export default function Dashboard({ marketData }) {
 
   const gainers = sortedByChange.slice(0, 3);
   const losers = [...sortedByChange].reverse().slice(0, 3);
+  const recommended = useMemo(() => {
+    const source = watchlistTickers.length ? watchlistTickers : ['NVDA', 'MSFT', 'AAPL', 'AMZN', 'GOOGL', 'META', 'AVGO', 'JPM'];
+    return source.filter((ticker) => STOCKS_BASE[ticker]).slice(0, 8);
+  }, [watchlistTickers]);
 
   const insights = useMemo(() => sortedByChange
     .filter(({ ticker }) => quotes[ticker]?.c)
@@ -100,7 +106,7 @@ export default function Dashboard({ marketData }) {
       <header className="page-header">
         <div>
           <span className="section-eyebrow">Market Overview</span>
-          <h1>Live market intelligence</h1>
+          <h1>Live Market Intelligence</h1>
           <p>{mktStatus?.label} - REST polling through the server proxy{lastUpdate ? ` - updated ${lastUpdate.toLocaleTimeString()}` : ''}</p>
         </div>
       </header>
@@ -130,9 +136,35 @@ export default function Dashboard({ marketData }) {
         <MarketMoverList title="Top Losers" items={losers} quotes={quotes} onSelect={setSelected} />
       </div>
 
-      <HotStocks quotes={quotes} onSelect={setSelected} />
+      <section className="panel hot-stocks-panel">
+        <header className="panel-header">
+          <div>
+            <h2>{watchlistTickers.length ? 'Watchlist Focus' : 'Analyst Recommended Stocks'}</h2>
+            <p>{watchlistTickers.length ? 'Primary movers from your watchlist.' : 'Eight daily demo recommendations ranked by quality and activity.'}</p>
+          </div>
+          <button className="secondary-button" type="button" onClick={() => window.location.assign('/movers')}>View Movers</button>
+        </header>
+        <div className="hot-grid">
+          {recommended.map((ticker, index) => {
+            const quote = quotes[ticker] || {};
+            const info = STOCKS_BASE[ticker];
+            const score = Math.abs(quote.dp || 0) * 12 + (info.beta || 1) * 8;
+            return (
+              <button className="hot-card kelly-bordered" type="button" key={ticker} onClick={() => setSelected(ticker)}>
+                <span className="rank">#{index + 1}</span>
+                <span className="ticker-logo" style={{ background: info.color }}>{ticker.slice(0, 2)}</span>
+                <strong>{ticker}</strong>
+                <small>{info.sector}</small>
+                <span className="mono">{fmtPrice(quote.c)}</span>
+                <em className={(quote.dp || 0) >= 0 ? 'pos' : 'neg'}>{fmtPct(quote.dp || 0)}</em>
+                <span className="score-bar"><i style={{ width: `${Math.min(100, score)}%` }} /></span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
 
-      <section className="panel signal-panel">
+      <section className="panel signal-panel kelly-panel">
         <header className="panel-header">
           <div>
             <h2>Signal Intelligence</h2>
@@ -189,6 +221,9 @@ export default function Dashboard({ marketData }) {
           quotes={quotes}
           fetchStockCandles={fetchStockCandles}
           fetchCompanyNews={fetchCompanyNews}
+          tradeAccounts={accounts}
+          defaultAccountId={accounts[0]?.id}
+          onExecuteTrade={executeStockModalTrade}
           onClose={() => setSelected(null)}
         />
       )}

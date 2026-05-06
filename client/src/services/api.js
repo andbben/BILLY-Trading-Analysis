@@ -34,6 +34,7 @@ export const api = {
   executeTrade:   (data)                      => request('POST',   '/api/portfolio/trades', data),
   createBillyAccount: (data)                  => request('POST',   '/api/portfolio/accounts/billy', data),
   connectBankAccount: (data)                  => request('POST',   '/api/portfolio/accounts/bank', data),
+  renameAccount: (accountId, data)            => request('PATCH',  `/api/portfolio/accounts/${encodeURIComponent(accountId)}`, data),
   getTransfers:   ()                          => request('GET',    '/api/portfolio/transfers'),
   createTransfer: (data)                      => request('POST',   '/api/portfolio/transfers', data),
   createShareTransfer: (data)                 => request('POST',   '/api/portfolio/transfers/shares', data),

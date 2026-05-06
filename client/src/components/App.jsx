@@ -4,15 +4,19 @@ import Navigation from './Navigation';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
 import Dashboard from '../pages/Dashboard';
+import MoversPage from '../pages/MoversPage';
 import PortfolioPage from '../pages/PortfolioPage';
 import AccountPage from '../pages/AccountPage';
 import AccountOrdersPage from '../pages/AccountOrdersPage';
+import PortfolioTransactionsPage from '../pages/PortfolioTransactionsPage';
 import Watchlist from '../pages/Watchlist';
 import Alerts from '../pages/Alerts';
 import News from '../pages/News';
 import Learn from '../pages/Learn';
 import Plans from '../pages/Plans';
+import Profile from '../pages/Profile';
 import Transfers from '../pages/Transfers';
+import TransferHistoryPage from '../pages/TransferHistoryPage';
 import ProtectedRoute from './ProtectedRoute';
 import TickerBanner from './layout/TickerBanner';
 import { useMarketData } from '../hooks/useMarketData';
@@ -117,6 +121,14 @@ export default function App() {
               }
             />
             <Route
+              path="/movers"
+              element={
+                <ProtectedRoute isAuth={isAuth}>
+                  <MoversPage marketData={marketData} />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/portfolio"
               element={
                 <ProtectedRoute isAuth={isAuth}>
@@ -133,6 +145,14 @@ export default function App() {
               }
             />
             <Route
+              path="/portfolio/transactions"
+              element={
+                <ProtectedRoute isAuth={isAuth}>
+                  <PortfolioTransactionsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/portfolio/accounts/:accountId/orders"
               element={
                 <ProtectedRoute isAuth={isAuth}>
@@ -145,6 +165,14 @@ export default function App() {
               element={
                 <ProtectedRoute isAuth={isAuth}>
                   <Transfers marketData={marketData} />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/transfers/history"
+              element={
+                <ProtectedRoute isAuth={isAuth}>
+                  <TransferHistoryPage />
                 </ProtectedRoute>
               }
             />
@@ -185,6 +213,14 @@ export default function App() {
               element={
                 <ProtectedRoute isAuth={isAuth}>
                   <Plans />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute isAuth={isAuth}>
+                  <Profile />
                 </ProtectedRoute>
               }
             />

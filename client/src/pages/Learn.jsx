@@ -9,12 +9,19 @@ export default function Learn() {
       <header className="page-header">
         <div>
           <span className="section-eyebrow">Learn</span>
-          <h1>Financial indicators and analytics</h1>
+          <h1>Financial Indicators and Analytics</h1>
           <p>Reference cards for the indicators used in stock detail analysis.</p>
         </div>
       </header>
 
-      <section className="learn-list">
+      <section className="learn-hero-panel">
+        <div>
+          <h2>Core Analysis Toolkit</h2>
+          <p>Open a topic to see the definition, formula, and practical interpretation.</p>
+        </div>
+      </section>
+
+      <section className="learn-list learn-grid-modern">
         {LEARN_ITEMS_FULL.map((item, index) => (
           <article className="learn-card" key={item.term}>
             <button type="button" onClick={() => setOpen(open === index ? null : index)}>

@@ -11,6 +11,7 @@ router.post('/positions', portfolioController.addPosition);
 router.post('/trades', portfolioController.executeTrade);
 router.post('/accounts/billy', portfolioController.createBillyAccount);
 router.post('/accounts/bank', portfolioController.connectBankAccount);
+router.patch('/accounts/:accountId', portfolioController.renameAccount);
 router.post('/transfers', portfolioController.createTransfer);
 router.post('/transfers/shares', portfolioController.createShareTransfer);
 router.delete('/positions/:ticker', portfolioController.deletePosition);

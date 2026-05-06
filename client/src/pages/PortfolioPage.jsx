@@ -122,6 +122,7 @@ export default function PortfolioPage({ marketData }) {
   const [accounts, setAccounts] = useState([]);
   const [bankAccounts, setBankAccounts] = useState([]);
   const [showBanks, setShowBanks] = useState(false);
+  const [accountOrder, setAccountOrder] = useState(() => JSON.parse(localStorage.getItem('bb_account_list_order') || '[]'));
   const [showMoreHoldings, setShowMoreHoldings] = useState(false);
   const [accountSetupMode, setAccountSetupMode] = useState(null);
   const [newBillyLabel, setNewBillyLabel] = useState('');
@@ -139,6 +140,8 @@ export default function PortfolioPage({ marketData }) {
     },
   });
   const [accountSetupStatus, setAccountSetupStatus] = useState('');
+  const [renameTarget, setRenameTarget] = useState(null);
+  const [renameLabel, setRenameLabel] = useState('');
   const [error, setError] = useState('');
   const [selected, setSelected] = useState(null);
   const [orders, setOrders] = useState([]);
@@ -201,6 +204,25 @@ export default function PortfolioPage({ marketData }) {
     return [0.965, 0.979, 0.991, 1.002, 0.996, 1.011, 1].map((factor) => value * factor);
   }, [cash, totalVal]);
 
+  const displayedAccounts = useMemo(() => {
+    const rows = [...accounts, ...(showBanks ? bankAccounts : [])];
+    return rows.sort((a, b) => {
+      const ai = accountOrder.indexOf(a.id);
+      const bi = accountOrder.indexOf(b.id);
+      return (ai < 0 ? 999 : ai) - (bi < 0 ? 999 : bi);
+    });
+  }, [accountOrder, accounts, bankAccounts, showBanks]);
+
+  const moveAccount = (id, direction) => {
+    const base = accountOrder.length ? [...accountOrder] : displayedAccounts.map((account) => account.id);
+    const index = base.indexOf(id);
+    const nextIndex = index + direction;
+    if (index < 0 || nextIndex < 0 || nextIndex >= base.length) return;
+    [base[index], base[nextIndex]] = [base[nextIndex], base[index]];
+    setAccountOrder(base);
+    localStorage.setItem('bb_account_list_order', JSON.stringify(base));
+  };
+
   const executeStockModalTrade = async ({ mode, ticker, shares, price, accountId, orderType }) => {
     await api.executeTrade({ mode, ticker, shares, price, accountId, orderType });
     await loadPortfolio();
@@ -242,6 +264,28 @@ export default function PortfolioPage({ marketData }) {
       ...draft,
       agreements: { ...draft.agreements, [key]: checked },
     }));
+  };
+
+  const openRename = (account) => {
+    setRenameTarget(account);
+    setRenameLabel(account.label || '');
+  };
+
+  const renameAccount = async () => {
+    if (!renameTarget || !renameLabel.trim()) {
+      setError('Enter a new account name.');
+      return;
+    }
+
+    try {
+      await api.renameAccount(renameTarget.id, { label: renameLabel.trim() });
+      setRenameTarget(null);
+      setRenameLabel('');
+      setAccountSetupStatus('Account renamed.');
+      await loadPortfolio();
+    } catch (err) {
+      setError(err.message || 'Failed to rename account.');
+    }
   };
 
   if (loading) return <div className="page"><p className="status">Loading portfolio...</p></div>;
@@ -300,20 +344,25 @@ export default function PortfolioPage({ marketData }) {
           </button>
         </header>
         <div className="data-table accounts-table">
-          <div className="table-head"><span>Account</span><span>Type</span><span>Cash</span><span>Total Value</span><span>Positions</span></div>
-          {[...accounts, ...(showBanks ? bankAccounts : [])].map((account) => (
-            <button
-              className="table-row"
-              type="button"
-              key={account.id}
-              onClick={() => account.type === 'billy' && navigate(`/portfolio/accounts/${encodeURIComponent(account.id)}`)}
-            >
-              <span><strong>{account.label}</strong><small>{account.accountNumber ? `Account ${account.accountNumber}` : 'Connected bank'}</small></span>
+          <div className="table-head"><span>Account</span><span>Type</span><span>Cash</span><span>Total Value</span><span>Positions</span><span>Actions</span></div>
+          {displayedAccounts.map((account) => (
+            <article className="table-row account-table-row" key={account.id}>
+              <button className="account-name-button" type="button" onClick={() => account.type === 'billy' && navigate(`/portfolio/accounts/${encodeURIComponent(account.id)}`)}>
+                <strong>{account.label}</strong>
+                <small>{account.accountNumber ? `Account ${account.accountNumber}` : 'Connected bank'}</small>
+              </button>
               <span>{account.type === 'bank' ? 'Bank' : account.source === 'portfolio' ? 'Primary Billy' : 'Billy'}</span>
               <span className="mono">{account.type === 'bank' ? 'Hidden' : fmtPrice(account.balance || 0)}</span>
               <span className="mono">{account.type === 'bank' ? 'Connected' : fmtPrice(accountValue(account, quotes))}</span>
-              <span>{account.positions?.length || 0}</span>
-            </button>
+              <span>{account.type === 'bank' ? '-' : account.positions?.length || 0}</span>
+              <span>
+                {(account.type !== 'bank' || account.id.startsWith('bank:')) && (
+                  <button className="secondary-button" type="button" onClick={() => openRename(account)}>Rename</button>
+                )}
+                <button className="icon-btn" type="button" onClick={() => moveAccount(account.id, -1)}>^</button>
+                <button className="icon-btn" type="button" onClick={() => moveAccount(account.id, 1)}>v</button>
+              </span>
+            </article>
           ))}
         </div>
         <div className="account-setup-actions">
@@ -347,12 +396,13 @@ export default function PortfolioPage({ marketData }) {
 
       <section className="panel">
         <header className="panel-header">
-          <div><h2>Portfolio Notifications</h2><p>Stock order activity and cash/share transfer status for this portfolio.</p></div>
+          <div><h2>Portfolio Notifications</h2><p>The five most recent stock orders and cash/share transfers.</p></div>
+          <button className="secondary-button" type="button" onClick={() => navigate('/portfolio/transactions')}>View All Transactions</button>
         </header>
         <div className="two-column">
           <div className="activity-list">
             <h3>Stock Orders</h3>
-            {orders.map((order) => (
+            {orders.slice(0, 5).map((order) => (
               <article className="transfer-row" key={order.id}>
                 <span><strong>{String(order.trade_type || '').toUpperCase()} {order.ticker}</strong><small>{order.created_at ? new Date(order.created_at).toLocaleString() : 'Current session'}</small></span>
                 <span className="mono">{fmt(order.shares, 4)} @ {fmtPrice(order.price)}</span>
@@ -363,7 +413,7 @@ export default function PortfolioPage({ marketData }) {
           </div>
           <div className="activity-list">
             <h3>Cash and Share Transfers</h3>
-            {[...transfers, ...assetTransfers].map((item) => (
+            {[...transfers, ...assetTransfers].slice(0, 5).map((item) => (
               <article className="transfer-row" key={`${item.ticker || item.transfer_type}-${item.id}`}>
                 <span><strong>{item.from_label || item.from_account}</strong><small>to {item.to_label || item.to_account}</small></span>
                 <span className="mono">{item.ticker ? `${item.ticker} ${fmt(item.shares, 4)}` : fmtPrice(item.amount)}</span>
@@ -404,6 +454,25 @@ export default function PortfolioPage({ marketData }) {
             </label>
             <p className="form-hint">This opens an empty Billy account with no positions and zero cash until funded.</p>
             <button type="button" onClick={openBillyAccount}>Open account</button>
+          </section>
+        </div>
+      )}
+
+      {renameTarget && (
+        <div className="overlay" onClick={() => setRenameTarget(null)}>
+          <section className="modal" onClick={(event) => event.stopPropagation()}>
+            <header className="modal-header">
+              <div>
+                <span className="section-eyebrow">Account settings</span>
+                <h2>Rename account</h2>
+              </div>
+              <button className="icon-btn" type="button" onClick={() => setRenameTarget(null)} aria-label="Close">x</button>
+            </header>
+            <label className="form-field">
+              <span>Account name</span>
+              <input type="text" value={renameLabel} onChange={(event) => setRenameLabel(event.target.value)} />
+            </label>
+            <button type="button" onClick={renameAccount}>Save name</button>
           </section>
         </div>
       )}

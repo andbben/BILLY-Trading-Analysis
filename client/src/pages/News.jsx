@@ -7,6 +7,7 @@ import NewsArticleModal from '../components/modals/NewsArticleModal';
 
 export default function News({ marketData }) {
   const [filter, setFilter] = useState('all');
+  const [tickerQuery, setTickerQuery] = useState('');
   const [selected, setSelected] = useState(null);
   const [watchlistTickers, setWatchlistTickers] = useState([]);
   const [heldTickers, setHeldTickers] = useState([]);
@@ -57,26 +58,31 @@ export default function News({ marketData }) {
   const heldSet = useMemo(() => new Set(heldTickers), [heldTickers]);
 
   const filtered = useMemo(() => {
-    if (filter === 'all') return processed;
-    if (filter === 'watchlist') return processed.filter((item) => item.tickers.some((ticker) => watchlistSet.has(ticker)));
-    if (filter === 'held') return processed.filter((item) => item.tickers.some((ticker) => heldSet.has(ticker)));
-    return processed.filter((item) => item.sentiment === filter);
-  }, [filter, heldSet, processed, watchlistSet]);
+    const searched = tickerQuery.trim().toUpperCase();
+    const base = searched ? processed.filter((item) => item.tickers.includes(searched)) : processed;
+    if (filter === 'all') return base;
+    if (filter === 'watchlist') return base.filter((item) => item.tickers.some((ticker) => watchlistSet.has(ticker)));
+    if (filter === 'held') return base.filter((item) => item.tickers.some((ticker) => heldSet.has(ticker)));
+    return base.filter((item) => item.sentiment === filter);
+  }, [filter, heldSet, processed, tickerQuery, watchlistSet]);
 
   return (
     <div className="page">
       <header className="page-header">
         <div>
           <span className="section-eyebrow">News Feed</span>
-          <h1>News sentiment and article analysis</h1>
+          <h1>News Sentiment and Article Analysis</h1>
           <p>{processed.length} articles - keyword sentiment with optional server-side AI summaries.</p>
         </div>
       </header>
 
-      <div className="filter-row">
-        {[['all', 'All News'], ['watchlist', 'Watchlist'], ['held', 'Held Stocks'], ['bull', 'Bullish'], ['bear', 'Bearish'], ['neu', 'Neutral']].map(([key, label]) => (
-          <button key={key} className={filter === key ? 'active' : ''} type="button" onClick={() => setFilter(key)}>{label}</button>
-        ))}
+      <div className="filter-row news-filter-row">
+        <div>
+          {[['all', 'All News'], ['watchlist', 'Watchlist'], ['held', 'Held Stocks'], ['bull', 'Bullish'], ['bear', 'Bearish'], ['neu', 'Neutral']].map(([key, label]) => (
+            <button key={key} className={filter === key ? 'active' : ''} type="button" onClick={() => setFilter(key)}>{label}</button>
+          ))}
+        </div>
+        <input value={tickerQuery} onChange={(event) => setTickerQuery(event.target.value)} placeholder="Search ticker news" />
       </div>
 
       <section className="panel">

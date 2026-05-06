@@ -156,6 +156,9 @@ export default function AccountPage({ marketData }) {
   const [positionSort, setPositionSort] = useState('dayPct');
   const [positionSortDir, setPositionSortDir] = useState('desc');
   const [sectorFilter, setSectorFilter] = useState('all');
+  const [customOrder, setCustomOrder] = useState([]);
+  const [showRename, setShowRename] = useState(false);
+  const [renameLabel, setRenameLabel] = useState('');
   const [loading, setLoading] = useState(true);
   const { quotes, fetchStockCandles, fetchCompanyNews } = marketData;
 
@@ -192,7 +195,18 @@ export default function AccountPage({ marketData }) {
   const filteredRows = sectorFilter === 'all'
     ? stats.rows
     : stats.rows.filter((row) => (STOCKS_BASE[row.ticker]?.sector || 'Unknown') === sectorFilter);
+  useEffect(() => {
+    if (!selectedAccount) return;
+    const stored = JSON.parse(localStorage.getItem(`bb_account_order_${selectedAccount.id}`) || '[]');
+    setCustomOrder(Array.isArray(stored) ? stored : []);
+  }, [selectedAccount]);
+
   const sortedRows = [...filteredRows].sort((a, b) => {
+    if (positionSort === 'custom') {
+      const ai = customOrder.indexOf(a.ticker);
+      const bi = customOrder.indexOf(b.ticker);
+      return (ai < 0 ? 999 : ai) - (bi < 0 ? 999 : bi);
+    }
     const av = Number(a[positionSort] ?? 0);
     const bv = Number(b[positionSort] ?? 0);
     return positionSortDir === 'asc' ? av - bv : bv - av;
@@ -212,6 +226,31 @@ export default function AccountPage({ marketData }) {
   const executeStockModalTrade = async ({ mode, ticker, shares, price, accountId: tradeAccountId, orderType }) => {
     await api.executeTrade({ mode, ticker, shares, price, accountId: tradeAccountId, orderType });
     await loadPortfolio();
+  };
+
+  const saveRename = async () => {
+    if (!selectedAccount || !renameLabel.trim()) {
+      setError('Enter a new account name.');
+      return;
+    }
+    try {
+      await api.renameAccount(selectedAccount.id, { label: renameLabel.trim() });
+      setShowRename(false);
+      await loadPortfolio();
+    } catch (err) {
+      setError(err.message || 'Failed to rename account.');
+    }
+  };
+
+  const movePosition = (ticker, direction) => {
+    const base = customOrder.length ? [...customOrder] : stats.rows.map((row) => row.ticker);
+    const index = base.indexOf(ticker);
+    const nextIndex = index + direction;
+    if (index < 0 || nextIndex < 0 || nextIndex >= base.length) return;
+    [base[index], base[nextIndex]] = [base[nextIndex], base[index]];
+    setCustomOrder(base);
+    setPositionSort('custom');
+    localStorage.setItem(`bb_account_order_${selectedAccount.id}`, JSON.stringify(base));
   };
 
   if (loading) return <div className="page"><p className="status">Loading account summary...</p></div>;
@@ -239,7 +278,10 @@ export default function AccountPage({ marketData }) {
           <h1>Account Summary</h1>
           <p>Account {selectedAccount.accountNumber} - balance, buying power, risk, positions, and related news.</p>
         </div>
-        <button className="secondary-button" type="button" onClick={() => navigate('/portfolio')}>Back to Portfolio</button>
+        <div className="header-actions">
+          <button className="secondary-button" type="button" onClick={() => { setRenameLabel(selectedAccount.label || ''); setShowRename(true); }}>Rename</button>
+          <button className="secondary-button" type="button" onClick={() => navigate('/portfolio')}>Back to Portfolio</button>
+        </div>
       </header>
 
       {error && <p className="status warning">{error}</p>}
@@ -282,8 +324,9 @@ export default function AccountPage({ marketData }) {
         <div className="inline-controls position-sort-controls">
           <label className="form-field">
             <span>Sort holdings by</span>
-            <select value={positionSort} onChange={(event) => setPositionSort(event.target.value)}>
-              <option value="dayPct">Day % change</option>
+                <select value={positionSort} onChange={(event) => setPositionSort(event.target.value)}>
+                  <option value="custom">Custom order</option>
+                  <option value="dayPct">Day % change</option>
               <option value="dayGl">Day $ change</option>
               <option value="totalPct">Total % gain/loss</option>
               <option value="totalGL">Total $ gain/loss</option>
@@ -324,6 +367,8 @@ export default function AccountPage({ marketData }) {
                 <span className="row-actions">
                   <button className="secondary-button" type="button" onClick={() => openTrade('buy')}>Buy</button>
                   <button className="secondary-button" type="button" onClick={() => openTrade('sell')}>Sell</button>
+                  <button className="icon-btn" type="button" onClick={() => movePosition(row.ticker, -1)}>^</button>
+                  <button className="icon-btn" type="button" onClick={() => movePosition(row.ticker, 1)}>v</button>
                 </span>
               </div>
               <div className="position-compact-metrics">
@@ -397,6 +442,24 @@ export default function AccountPage({ marketData }) {
         />
       )}
       {selectedArticle && <NewsArticleModal article={selectedArticle} onClose={() => setSelectedArticle(null)} />}
+      {showRename && (
+        <div className="overlay" onClick={() => setShowRename(false)}>
+          <section className="modal" onClick={(event) => event.stopPropagation()}>
+            <header className="modal-header">
+              <div>
+                <span className="section-eyebrow">Account settings</span>
+                <h2>Rename account</h2>
+              </div>
+              <button className="icon-btn" type="button" onClick={() => setShowRename(false)} aria-label="Close">x</button>
+            </header>
+            <label className="form-field">
+              <span>Account name</span>
+              <input type="text" value={renameLabel} onChange={(event) => setRenameLabel(event.target.value)} />
+            </label>
+            <button type="button" onClick={saveRename}>Save name</button>
+          </section>
+        </div>
+      )}
     </div>
   );
 }

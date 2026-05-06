@@ -86,7 +86,7 @@ export default function Navigation({ isAuth, user, onLogout, marketData, theme, 
         <button type="button" className="nav-button theme-button" onClick={onToggleTheme}>
           {theme === 'dark' ? 'Light' : 'Dark'}
         </button>
-        {isAuth && user && <span className="user-pill">{user.name?.charAt(0)?.toUpperCase() || 'U'}</span>}
+        {isAuth && user && <button type="button" className="user-pill" onClick={() => navigate('/profile')}>{user.name?.charAt(0)?.toUpperCase() || 'U'}</button>}
         {isAuth && (
           <button type="button" className="nav-button danger" onClick={handleLogout}>
             Logout

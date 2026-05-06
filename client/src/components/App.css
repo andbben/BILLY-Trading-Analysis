@@ -74,7 +74,7 @@
   --blue: #8fb1e8;
   --cyan: #8fb1e8;
   --green: #69b25f;
-  --green-dark: #8fd185;
+  --green-dark: #21d15f;
   --red: #ff8b7f;
   --amber: #e7b65d;
   --purple: #afa8ff;
@@ -85,6 +85,12 @@
   --menu-bg: #1b221b;
   --modal-bg: #253628;
   --shadow: 0 12px 34px rgba(0, 0, 0, 0.26);
+}
+
+.theme-dark {
+  --green: #21d15f;
+  --cyan: #7dff9f;
+  --border: #4f6f4f;
 }
 
 * {
@@ -581,6 +587,14 @@ h2 {
   align-items: flex-start;
 }
 
+.header-actions {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .feature-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
@@ -634,6 +648,14 @@ h2 {
   display: grid;
   gap: 8px;
   padding: 14px;
+}
+
+.kelly-bordered,
+.kelly-panel,
+.hot-stocks-panel,
+.news-item {
+  border-color: rgba(33, 209, 95, 0.52) !important;
+  box-shadow: 0 10px 28px rgba(33, 209, 95, 0.08);
 }
 
 .rank {
@@ -716,7 +738,18 @@ h2 {
 
 .accounts-table .table-head,
 .accounts-table .table-row {
-  grid-template-columns: 2fr 0.9fr 1fr 1fr 0.7fr;
+  grid-template-columns: 2fr 0.9fr 1fr 1fr 0.7fr 0.8fr;
+}
+
+.account-name-button {
+  display: grid;
+  gap: 3px;
+  color: var(--text);
+  text-align: left;
+}
+
+.account-name-button small {
+  color: var(--muted);
 }
 
 .account-orders-table .table-head,
@@ -846,6 +879,29 @@ h2 {
   text-transform: capitalize;
 }
 
+.news-filter-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+}
+
+.news-filter-row > div {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.news-filter-row input {
+  min-width: min(280px, 100%);
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+}
+
 .alert-item {
   display: grid;
   grid-template-columns: auto 1fr auto auto auto;
@@ -904,6 +960,29 @@ h2 {
 .learn-card {
   padding: 0;
   overflow: hidden;
+}
+
+.learn-hero-panel {
+  display: grid;
+  gap: 8px;
+  padding: 20px;
+  border: 1px solid rgba(33, 209, 95, 0.42);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.learn-grid-modern {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.learn-grid-modern .learn-card {
+  border-color: rgba(33, 209, 95, 0.26);
+  box-shadow: 0 10px 30px rgba(33, 209, 95, 0.06);
+}
+
+.fidelity-plan-grid .plan-card {
+  border-color: rgba(33, 209, 95, 0.32);
+  box-shadow: 0 12px 34px rgba(20, 20, 20, 0.08);
 }
 
 .learn-card > button {
@@ -1018,6 +1097,40 @@ pre {
   cursor: pointer;
 }
 
+.alert-icon-btn {
+  position: relative;
+  color: #17371f;
+  background: #9be564;
+  border-color: rgba(155, 229, 100, 0.72);
+  font-weight: 900;
+}
+
+.alert-icon-btn::before {
+  content: "";
+  position: absolute;
+  top: 7px;
+  width: 12px;
+  height: 10px;
+  border: 2px solid currentColor;
+  border-bottom: 0;
+  border-radius: 10px 10px 3px 3px;
+}
+
+.alert-icon-btn::after {
+  content: "";
+  position: absolute;
+  bottom: 7px;
+  width: 14px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.alert-icon-btn {
+  padding-top: 14px;
+  font-size: 0.7rem;
+}
+
 .stock-modal-summary,
 .chart-header,
 .trade-quote,
@@ -1099,6 +1212,21 @@ pre {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.stock-signal-row {
+  grid-template-columns: repeat(4, minmax(110px, 0.55fr)) minmax(260px, 1.8fr);
+  align-items: stretch;
+}
+
+.compact-signal-factors {
+  align-content: center;
+}
+
+.compact-signal-factors p {
+  margin: 0;
+  color: var(--text);
+  line-height: 1.35;
+}
+
 .metric-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
@@ -1151,6 +1279,93 @@ pre {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
+}
+
+.alert-create-button {
+  min-height: 42px;
+  border-radius: 10px;
+  padding: 9px 16px;
+  box-shadow: 0 10px 24px rgba(47, 143, 37, 0.12);
+}
+
+.alert-composer {
+  width: min(980px, calc(100vw - 28px));
+  gap: 18px;
+}
+
+.alert-search-shell {
+  position: relative;
+}
+
+.alert-search-shell input {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.alert-search-results {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--modal-bg);
+  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.22);
+}
+
+.alert-search-results button {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  padding: 12px 14px;
+  color: var(--text);
+  text-align: left;
+}
+
+.alert-search-results button:hover {
+  background: rgba(47, 143, 37, 0.1);
+}
+
+.alert-asset-overview {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.alert-mini-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.alert-mini-metrics span {
+  display: grid;
+  gap: 3px;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.045);
+  color: var(--muted);
+}
+
+.alert-mini-metrics strong {
+  color: var(--text);
+}
+
+.alert-options-panel > button {
+  justify-self: start;
 }
 
 .trade-controls-grid {
@@ -1637,6 +1852,21 @@ pre {
   color: #F6F8F4;
 }
 
+.theme-dark .ticker-banner em {
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: #ffffff;
+  font-weight: 900;
+}
+
+.theme-dark .ticker-banner em.pos {
+  color: #008f39;
+}
+
+.theme-dark .ticker-banner em.neg {
+  color: #b91c1c;
+}
+
 .theme-dark .mover-row,
 .theme-dark .hot-card,
 .theme-dark .insight-card,
@@ -1662,7 +1892,9 @@ pre {
 .theme-dark .stock-trade-panel,
 .theme-dark .quote-panel,
 .theme-dark .agreement-list,
-.theme-dark .quote-market-strip {
+.theme-dark .quote-market-strip,
+.theme-dark .alert-asset-overview,
+.theme-dark .alert-mini-metrics span {
   background: #253628;
 }
 
@@ -2107,7 +2339,8 @@ pre {
   .account-grid,
   .stock-detail-layout,
   .quote-info-grid,
-  .position-compact-metrics {
+  .position-compact-metrics,
+  .alert-mini-metrics {
     grid-template-columns: 1fr;
   }
 
@@ -2149,6 +2382,7 @@ pre {
   .position-metrics,
   .allocation-pie-wrap,
   .trade-controls-grid,
+  .stock-signal-row,
   .quote-market-strip,
   .quote-market-strip > div {
     grid-template-columns: 1fr;

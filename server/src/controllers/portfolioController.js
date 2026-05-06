@@ -504,6 +504,46 @@ exports.connectBankAccount = async (req, res) => {
   }
 };
 
+exports.renameAccount = async (req, res) => {
+  const accountId = String(req.params.accountId || '');
+  const label = String(req.body.label || '').trim();
+
+  if (!accountId || !label) {
+    return res.status(400).json({ error: 'Account and a new name are required.' });
+  }
+
+  try {
+    await ensureTransfersTable(pool);
+    const portfolio = await getOrCreatePortfolio(req.userId);
+
+    if (accountId === `portfolio:${portfolio.id}`) {
+      await pool.query(
+        'UPDATE portfolios SET name = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 AND user_id = $3',
+        [label, portfolio.id, req.userId]
+      );
+    } else if (accountId.startsWith('billy:')) {
+      await pool.query(
+        'UPDATE billy_accounts SET label = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 AND user_id = $3',
+        [label, Number(accountId.split(':')[1]), req.userId]
+      );
+    } else if (accountId.startsWith('bank:')) {
+      await pool.query(
+        'UPDATE connected_bank_accounts SET account_name = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 AND user_id = $3',
+        [label, Number(accountId.split(':')[1]), req.userId]
+      );
+    } else {
+      return res.status(400).json({ error: 'Static demo bank accounts cannot be renamed.' });
+    }
+
+    const updatedPortfolio = await getOrCreatePortfolio(req.userId);
+    const workspace = await getTransferWorkspace(req.userId, pool, updatedPortfolio);
+    res.json(workspace);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to rename account.' });
+  }
+};
+
 async function getAccountPosition(account, ticker, queryable = pool) {
   if (account.source === 'portfolio') {
     const result = await queryable.query(

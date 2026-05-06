@@ -3,7 +3,9 @@ import { STOCKS_BASE } from '../../data/market';
 import { fmt, fmtPct, fmtPrice, timeAgo } from '../../utils/formatters';
 import { classifySentiment, generateSignal, genSyntheticCandles } from '../../utils/indicators';
 import LineChart from '../charts/LineChart';
+import AlertComposer from './AlertComposer';
 import NewsArticleModal from './NewsArticleModal';
+import WatchlistComposer from './WatchlistComposer';
 
 function compactNumber(value) {
   const number = Number(value || 0);
@@ -46,6 +48,8 @@ export default function StockModal({
   const [dailyCloses, setDailyCloses] = useState(null);
   const [stockNews, setStockNews] = useState([]);
   const [selectedArticle, setSelectedArticle] = useState(null);
+  const [showAlertComposer, setShowAlertComposer] = useState(false);
+  const [showWatchlistComposer, setShowWatchlistComposer] = useState(false);
   const [tradeMode, setTradeMode] = useState(defaultTradeMode);
   const [accountId, setAccountId] = useState(defaultAccountId || tradeAccounts[0]?.id || '');
   const [orderType, setOrderType] = useState('market');
@@ -186,6 +190,8 @@ export default function StockModal({
             </div>
             <div className="modal-actions">
               {onTrade && <button className="secondary-button" type="button" onClick={() => onTrade('buy', ticker)}>Trade</button>}
+              <button className="icon-btn watchlist-icon-btn" type="button" onClick={() => setShowWatchlistComposer(true)} aria-label="Add stock to watchlist">+</button>
+              <button className="icon-btn alert-icon-btn" type="button" onClick={() => setShowAlertComposer(true)} aria-label="Create stock alert">!</button>
               <button className="icon-btn" type="button" onClick={onClose} aria-label="Close">x</button>
             </div>
           </header>
@@ -278,16 +284,15 @@ export default function StockModal({
             </section>
           </div>
 
-          <div className="indicator-grid">
+          <div className="indicator-grid stock-signal-row">
             <div><span>RSI 14</span><strong>{signal.rsi == null ? '-' : fmt(signal.rsi, 1)}</strong></div>
             <div><span>MACD</span><strong>{signal.macd == null ? '-' : fmt(signal.macd.macd, 2)}</strong></div>
             <div><span>SMA 20</span><strong>{signal.sma20 == null ? '-' : fmtPrice(signal.sma20)}</strong></div>
             <div><span>SMA 50</span><strong>{signal.sma50 == null ? '-' : fmtPrice(signal.sma50)}</strong></div>
-          </div>
-
-          <div className="signal-factors">
-            <span className="section-eyebrow">Signal Factors</span>
-            {signal.factors.map((factor) => <p key={factor}>{factor}</p>)}
+            <div className="signal-factors compact-signal-factors">
+              <span className="section-eyebrow">Signal Factors</span>
+              <p>{signal.factors.join(' ')}</p>
+            </div>
           </div>
 
           {onExecuteTrade && tradeAccounts.length > 0 && (
@@ -335,6 +340,20 @@ export default function StockModal({
           </section>
         </section>
       </div>
+      {showAlertComposer && (
+        <AlertComposer
+          marketData={{ quotes, fetchStockCandles, fetchCompanyNews }}
+          initialTicker={ticker}
+          onClose={() => setShowAlertComposer(false)}
+        />
+      )}
+      {showWatchlistComposer && (
+        <WatchlistComposer
+          quotes={quotes}
+          initialTicker={ticker}
+          onClose={() => setShowWatchlistComposer(false)}
+        />
+      )}
       {selectedArticle && <NewsArticleModal article={selectedArticle} onClose={() => setSelectedArticle(null)} />}
     </>
   );

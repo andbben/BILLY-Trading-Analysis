@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Sparkline from '../components/charts/Sparkline';
 import { STOCKS_BASE } from '../data/market';
 import { api } from '../services/api';
@@ -60,6 +61,7 @@ function Segmented({ label, value, options, onChange }) {
 }
 
 export default function Transfers({ marketData }) {
+  const navigate = useNavigate();
   const [summary, setSummary] = useState(null);
   const [mode, setMode] = useState('eft');
   const [step, setStep] = useState('details');
@@ -248,7 +250,7 @@ export default function Transfers({ marketData }) {
       <header className="page-header">
         <div>
           <span className="section-eyebrow">Transfers</span>
-          <h1>Move assets securely</h1>
+          <h1>Move Assets Securely</h1>
           <p>Move bank cash, Billy cash, or eligible shares between established Billy accounts.</p>
         </div>
       </header>
@@ -268,8 +270,7 @@ export default function Transfers({ marketData }) {
       </section>
 
       {mode === 'eft' && (
-        <div className="two-column">
-          <section className="panel transfer-panel">
+        <section className="panel transfer-panel transfer-narrow">
             <header className="panel-header">
               <div>
                 <h2>Secure EFT</h2>
@@ -299,20 +300,7 @@ export default function Transfers({ marketData }) {
               </label>
               <button type="submit" disabled={submitting}>{submitting ? 'Submitting...' : 'Submit transfer'}</button>
             </form>
-          </section>
-          <section className="panel">
-            <header className="panel-header"><h2>Available Accounts</h2></header>
-            <div className="account-grid">
-              {accounts.map((account) => (
-                <article className="account-card" key={account.id}>
-                  <span>{account.label}</span>
-                  <strong>{account.type === 'bank' ? 'Hidden' : fmtPrice(account.balance || 0)}</strong>
-                  <em>{account.type === 'bank' ? 'Connected bank funding' : 'Liquid Billy cash'}</em>
-                </article>
-              ))}
-            </div>
-          </section>
-        </div>
+        </section>
       )}
 
       {mode === 'billy' && step === 'origin' && (
@@ -400,7 +388,7 @@ export default function Transfers({ marketData }) {
               <label className="form-field">
                 <span>Frequency</span>
                 <select value={frequency} onChange={(event) => setFrequency(event.target.value)}>
-                  {['Weekly', 'Biweekly', 'Monthly', 'Quarterly'].map((item) => <option key={item}>{item}</option>)}
+                  {['Business day', 'Weekly', 'Biweekly', 'Monthly', 'Quarterly'].map((item) => <option key={item}>{item}</option>)}
                 </select>
               </label>
               <div className="two-column">
@@ -498,10 +486,16 @@ export default function Transfers({ marketData }) {
         </section>
       )}
 
-      <section className="panel">
-        <header className="panel-header"><h2>Recent Transfer Notifications</h2></header>
+      <section className="panel transfer-history-preview">
+        <header className="panel-header">
+          <div>
+            <h2>Recent Transfer Notifications</h2>
+            <p>The latest five transfers are shown here.</p>
+          </div>
+          <button className="secondary-button" type="button" onClick={() => navigate('/transfers/history')}>View Transfer History</button>
+        </header>
         <div className="transfer-list">
-          {[...transfers, ...assetTransfers].map((transfer) => (
+          {[...transfers, ...assetTransfers].slice(0, 5).map((transfer) => (
             <article className="transfer-row" key={`${transfer.ticker || transfer.transfer_type}-${transfer.id}`}>
               <span>
                 <strong>{transfer.from_label || transfer.from_account}</strong>

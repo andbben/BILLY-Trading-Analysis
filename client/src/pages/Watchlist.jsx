@@ -4,23 +4,39 @@ import { api } from '../services/api';
 import { fmtPct, fmtPrice } from '../utils/formatters';
 import Sparkline from '../components/charts/Sparkline';
 import StockModal from '../components/modals/StockModal';
+import WatchlistComposer from '../components/modals/WatchlistComposer';
+import { getLocalWatchlists } from '../utils/watchlists';
+
+function normalizeLocalLists(apiTickers) {
+  const store = getLocalWatchlists();
+  const lists = store.lists.map((list) => (
+    list.id === 'default' && !list.tickers.length ? { ...list, tickers: apiTickers } : list
+  ));
+  return { activeId: store.activeId || lists[0]?.id || 'default', lists };
+}
 
 export default function Watchlist({ marketData }) {
-  const [watchlist, setWatchlist] = useState([]);
-  const [input, setInput] = useState('');
+  const [store, setStore] = useState(() => normalizeLocalLists([]));
   const [selected, setSelected] = useState(null);
+  const [showComposer, setShowComposer] = useState(false);
+  const [sortBy, setSortBy] = useState('custom');
   const [error, setError] = useState('');
   const { quotes, fetchStockCandles, fetchCompanyNews } = marketData;
+  const activeList = store.lists.find((list) => list.id === store.activeId) || store.lists[0];
 
-  const tickers = useMemo(
-    () => watchlist.map((item) => (typeof item === 'string' ? item : item.ticker)).filter(Boolean),
-    [watchlist],
-  );
+  const syncStore = (next) => {
+    setStore(next);
+    localStorage.setItem('bb_watchlists', JSON.stringify(next));
+    window.dispatchEvent(new Event('bb-watchlists-local-updated'));
+  };
 
   const loadWatchlist = async () => {
     try {
       const data = await api.getWatchlist();
-      setWatchlist(data.watchlist || []);
+      const apiTickers = (data.watchlist || []).map((item) => (typeof item === 'string' ? item : item.ticker)).filter(Boolean);
+      const next = normalizeLocalLists(apiTickers);
+      setStore(next);
+      localStorage.setItem('bb_watchlists', JSON.stringify(next));
       setError('');
     } catch (err) {
       setError(err.message || 'Failed to load watchlist.');
@@ -29,63 +45,94 @@ export default function Watchlist({ marketData }) {
 
   useEffect(() => {
     loadWatchlist();
+    const update = () => setStore(getLocalWatchlists());
+    window.addEventListener('bb-watchlists-local-updated', update);
+    return () => window.removeEventListener('bb-watchlists-local-updated', update);
   }, []);
 
-  const addTicker = async () => {
-    const ticker = input.trim().toUpperCase();
-    if (!ticker) return;
-    if (!STOCKS_BASE[ticker]) {
-      setError('That ticker is not in the current demo universe.');
-      return;
-    }
-    try {
+  const addTicker = async (ticker, list) => {
+    if (list?.id === 'default') {
       await api.addToWatchlist(ticker);
-      setInput('');
-      await loadWatchlist();
       window.dispatchEvent(new Event('bb-watchlist-updated'));
-    } catch (err) {
-      setError(err.message || 'Failed to add ticker.');
     }
   };
 
   const removeTicker = async (ticker) => {
-    try {
+    const next = {
+      ...store,
+      lists: store.lists.map((list) => (
+        list.id === activeList.id ? { ...list, tickers: list.tickers.filter((item) => item !== ticker) } : list
+      )),
+    };
+    syncStore(next);
+    if (activeList.id === 'default') {
       await api.removeFromWatchlist(ticker);
-      await loadWatchlist();
       window.dispatchEvent(new Event('bb-watchlist-updated'));
-    } catch (err) {
-      setError(err.message || 'Failed to remove ticker.');
     }
   };
+
+  const moveTicker = (ticker, direction) => {
+    const tickers = [...(activeList?.tickers || [])];
+    const index = tickers.indexOf(ticker);
+    const nextIndex = index + direction;
+    if (index < 0 || nextIndex < 0 || nextIndex >= tickers.length) return;
+    [tickers[index], tickers[nextIndex]] = [tickers[nextIndex], tickers[index]];
+    syncStore({
+      ...store,
+      lists: store.lists.map((list) => (list.id === activeList.id ? { ...list, tickers } : list)),
+    });
+    setSortBy('custom');
+  };
+
+  const tickers = useMemo(() => {
+    const rows = [...(activeList?.tickers || [])].filter((ticker) => STOCKS_BASE[ticker]);
+    if (sortBy === 'custom') return rows;
+    return rows.sort((a, b) => {
+      const qa = quotes[a] || {};
+      const qb = quotes[b] || {};
+      if (sortBy === 'price') return Number(qb.c || 0) - Number(qa.c || 0);
+      if (sortBy === 'change') return Number(qb.dp || 0) - Number(qa.dp || 0);
+      if (sortBy === 'name') return STOCKS_BASE[a].name.localeCompare(STOCKS_BASE[b].name);
+      return 0;
+    });
+  }, [activeList, quotes, sortBy]);
 
   return (
     <div className="page">
       <header className="page-header">
         <div>
           <span className="section-eyebrow">Watchlist</span>
-          <h1>Track stocks you care about</h1>
-          <p>{tickers.length} symbols - click any row for chart and indicators.</p>
+          <h1>Track Stocks You Care About</h1>
+          <p>{tickers.length} symbols in {activeList?.name || 'Primary Watchlist'}.</p>
         </div>
+        <button className="secondary-button alert-create-button" type="button" onClick={() => setShowComposer(true)}>Add To Watchlist</button>
       </header>
 
       <section className="panel">
-        <div className="inline-controls">
-          <input
-            value={input}
-            onChange={(event) => setInput(event.target.value)}
-            onKeyDown={(event) => event.key === 'Enter' && addTicker()}
-            placeholder="Enter ticker, e.g. AAPL"
-          />
-          <button type="button" onClick={addTicker}>Add</button>
+        <div className="inline-controls watchlist-controls">
+          <label className="form-field">
+            <span>Watchlist</span>
+            <select value={store.activeId} onChange={(event) => syncStore({ ...store, activeId: event.target.value })}>
+              {store.lists.map((list) => <option key={list.id} value={list.id}>{list.name}</option>)}
+            </select>
+          </label>
+          <label className="form-field">
+            <span>Organize by</span>
+            <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
+              <option value="custom">Custom order</option>
+              <option value="change">Daily change</option>
+              <option value="price">Price</option>
+              <option value="name">Company name</option>
+            </select>
+          </label>
         </div>
-        <p className="form-hint">Available: {Object.keys(STOCKS_BASE).join(', ')}</p>
         {error && <p className="status error">{error}</p>}
       </section>
 
       <section className="panel">
         <div className="data-table watch-table">
           <div className="table-head">
-            <span>Symbol</span><span>Price</span><span>Change</span><span>Signal</span><span>Chart</span><span></span>
+            <span>Symbol</span><span>Price</span><span>Change</span><span>Signal</span><span>Chart</span><span>Order</span>
           </div>
           {tickers.map((ticker) => {
             const info = STOCKS_BASE[ticker];
@@ -93,25 +140,28 @@ export default function Watchlist({ marketData }) {
             const up = (quote.dp || 0) >= 0;
             const signal = (quote.dp || 0) > 2 ? 'BUY' : (quote.dp || 0) < -2 ? 'SELL' : 'HOLD';
             return (
-              <button className="table-row" type="button" key={ticker} onClick={() => setSelected(ticker)}>
-                <span className="ticker-cell">
+              <article className="table-row" key={ticker}>
+                <button className="ticker-cell account-name-button" type="button" onClick={() => setSelected(ticker)}>
                   <span className="ticker-logo" style={{ background: info?.color }}>{ticker.slice(0, 2)}</span>
                   <span><strong>{ticker}</strong><small>{info?.name}</small></span>
-                </span>
+                </button>
                 <span className="mono">{fmtPrice(quote.c)}</span>
                 <span className={up ? 'pos mono' : 'neg mono'}>{fmtPct(quote.dp || 0)}</span>
                 <span><i className={`badge badge-${signal.toLowerCase()}`}>{signal}</i></span>
-                <Sparkline data={[quote.l || quote.c * 0.99, quote.o || quote.c, quote.h || quote.c * 1.01, quote.c].filter(Boolean)} color={up ? '#00e676' : '#ff3d71'} height={34} />
+                <Sparkline data={[quote.o || quote.c * 0.99, quote.l || quote.c * 0.98, quote.h || quote.c * 1.01, quote.c].filter(Boolean)} color={up ? '#00c2a8' : '#ff4f7b'} height={34} />
                 <span className="row-actions">
-                  <button className="icon-btn" type="button" onClick={(event) => { event.stopPropagation(); removeTicker(ticker); }}>x</button>
+                  <button className="icon-btn" type="button" onClick={() => moveTicker(ticker, -1)}>^</button>
+                  <button className="icon-btn" type="button" onClick={() => moveTicker(ticker, 1)}>v</button>
+                  <button className="icon-btn" type="button" onClick={() => removeTicker(ticker)}>x</button>
                 </span>
-              </button>
+              </article>
             );
           })}
-          {!tickers.length && <div className="empty-state">Add stocks using the input above.</div>}
+          {!tickers.length && <div className="empty-state">Add stocks with the button above.</div>}
         </div>
       </section>
 
+      {showComposer && <WatchlistComposer quotes={quotes} onAdd={addTicker} onClose={() => { setShowComposer(false); setStore(getLocalWatchlists()); }} />}
       {selected && (
         <StockModal
           ticker={selected}
