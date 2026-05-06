@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { STOCKS_BASE } from '../data/market';
 import { api } from '../services/api';
 import { classifySentiment } from '../utils/indicators';
@@ -6,8 +7,10 @@ import { fmt, timeAgo } from '../utils/formatters';
 import NewsArticleModal from '../components/modals/NewsArticleModal';
 
 export default function News({ marketData }) {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [filter, setFilter] = useState('all');
   const [outletQuery, setOutletQuery] = useState('');
+  const [tickerQuery, setTickerQuery] = useState(searchParams.get('ticker') || '');
   const [selected, setSelected] = useState(null);
   const [watchlistTickers, setWatchlistTickers] = useState([]);
   const [heldTickers, setHeldTickers] = useState([]);
@@ -59,12 +62,14 @@ export default function News({ marketData }) {
 
   const filtered = useMemo(() => {
     const searchedOutlet = outletQuery.trim().toLowerCase();
-    const base = searchedOutlet ? processed.filter((item) => String(item.source || 'News').toLowerCase().includes(searchedOutlet)) : processed;
+    const searchedTicker = tickerQuery.trim().toUpperCase();
+    const outletBase = searchedOutlet ? processed.filter((item) => String(item.source || 'News').toLowerCase().includes(searchedOutlet)) : processed;
+    const base = searchedTicker ? outletBase.filter((item) => item.tickers.includes(searchedTicker)) : outletBase;
     if (filter === 'all') return base;
     if (filter === 'watchlist') return base.filter((item) => item.tickers.some((ticker) => watchlistSet.has(ticker)));
     if (filter === 'held') return base.filter((item) => item.tickers.some((ticker) => heldSet.has(ticker)));
     return base.filter((item) => item.sentiment === filter);
-  }, [filter, heldSet, outletQuery, processed, watchlistSet]);
+  }, [filter, heldSet, outletQuery, processed, tickerQuery, watchlistSet]);
 
   return (
     <div className="page">
@@ -83,6 +88,7 @@ export default function News({ marketData }) {
           ))}
         </div>
         <input value={outletQuery} onChange={(event) => setOutletQuery(event.target.value)} placeholder="Filter by news outlet" />
+        <input value={tickerQuery} onChange={(event) => { setTickerQuery(event.target.value); setSearchParams(event.target.value ? { ticker: event.target.value.toUpperCase() } : {}); }} placeholder="Filter by ticker" />
       </div>
 
       <section className="panel">

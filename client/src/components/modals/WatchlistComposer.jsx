@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { STOCKS_BASE } from '../../data/market';
 import { fmtPrice } from '../../utils/formatters';
+import { getPlanRules } from '../../utils/plans';
 import { getLocalWatchlists, saveLocalWatchlists } from '../../utils/watchlists';
 
 export default function WatchlistComposer({ quotes, initialTicker = '', onAdd, onClose }) {
@@ -8,6 +9,8 @@ export default function WatchlistComposer({ quotes, initialTicker = '', onAdd, o
   const [query, setQuery] = useState('');
   const [ticker, setTicker] = useState(initialTicker);
   const [newName, setNewName] = useState('');
+  const planRules = getPlanRules();
+  const canCreateLists = planRules.watchlistLimit > 1;
   const activeId = store.activeId || store.lists[0]?.id || 'default';
   const selectedList = store.lists.find((list) => list.id === activeId) || store.lists[0];
 
@@ -25,6 +28,7 @@ export default function WatchlistComposer({ quotes, initialTicker = '', onAdd, o
   };
 
   const createList = () => {
+    if (!canCreateLists) return;
     const name = newName.trim();
     if (!name) return;
     const id = `wl-${Date.now().toString(36)}`;
@@ -88,10 +92,11 @@ export default function WatchlistComposer({ quotes, initialTicker = '', onAdd, o
               </label>
               <label className="form-field">
                 <span>New watchlist</span>
-                <input value={newName} onChange={(event) => setNewName(event.target.value)} placeholder="Dividend Ideas" />
+                <input value={newName} onChange={(event) => setNewName(event.target.value)} placeholder={canCreateLists ? 'Dividend Ideas' : 'Upgrade for multiple lists'} disabled={!canCreateLists} />
               </label>
-              <button className="secondary-button" type="button" onClick={createList}>Create List</button>
+              <button className="secondary-button" type="button" onClick={createList} disabled={!canCreateLists}>Create List</button>
             </div>
+            {!canCreateLists && <p className="form-hint">Starter includes one encompassing watchlist. Bronco Plus and Pro unlock multiple custom lists.</p>}
             <button type="button" onClick={addTicker}>Add To Watchlist</button>
           </section>
         )}

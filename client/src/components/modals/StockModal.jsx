@@ -3,6 +3,7 @@ import { STOCKS_BASE } from '../../data/market';
 import { fmt, fmtPct, fmtPrice, timeAgo } from '../../utils/formatters';
 import { classifySentiment, generateSignal, genSyntheticCandles } from '../../utils/indicators';
 import { api } from '../../services/api';
+import { getPlanRules } from '../../utils/plans';
 import LineChart from '../charts/LineChart';
 import AlertComposer from './AlertComposer';
 import NewsArticleModal from './NewsArticleModal';
@@ -48,17 +49,18 @@ function FactorText({ text }) {
   );
 }
 
-function getSavedPlan() {
-  try {
-    const storedUser = JSON.parse(localStorage.getItem('bb_user') || '{}');
-    return localStorage.getItem('bb_plan') || storedUser.plan || 'free';
-  } catch {
-    return localStorage.getItem('bb_plan') || 'free';
-  }
-}
-
 function clampScore(value) {
   return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+function BillyScoreGauge({ score }) {
+  return (
+    <div className="billy-gauge" style={{ '--score-deg': `${score * 1.8}deg` }}>
+      <div className="billy-gauge-arc" />
+      <strong>{score}</strong>
+      <span>Composite</span>
+    </div>
+  );
 }
 
 function buildBillyAnalysis({ ticker, quote, signal, newsSentiment, stockNews, info }) {
@@ -100,6 +102,7 @@ export default function StockModal({
 }) {
   const info = STOCKS_BASE[ticker];
   const quote = useMemo(() => quotes[ticker] || {}, [quotes, ticker]);
+  const planRules = useMemo(() => getPlanRules(), []);
   const [timeframe, setTimeframe] = useState('3M');
   const [chartData, setChartData] = useState(null);
   const [chartDates, setChartDates] = useState(null);
@@ -191,7 +194,7 @@ export default function StockModal({
   const executionPrice = orderType === 'limit' ? Number(limitPrice) : Number(quote.c || 0);
   const shareCount = Number(shares || 0);
   const estimatedTotal = shareCount * executionPrice;
-  const isPro = getSavedPlan() === 'pro';
+  const isPro = planRules.billyAnalyst;
   const isBillyMode = tradeMode === 'billy_analyst';
   const billyInitialFund = Number(billyConfig.initialFund || 0);
   const billyRiskLimitReady = Number(billyConfig.maxLossDollars || 0) > 0 || Number(billyConfig.maxLossPercent || 0) > 0;
@@ -297,6 +300,19 @@ export default function StockModal({
     const base = dailyCloses?.[Math.max(0, dailyCloses.length - Number(lookback))] || quote.pc || quote.c || 1;
     return { label, pct: ((Number(quote.c || base) - base) / base) * 100 };
   });
+  const billyLeftRows = [
+    ['Confidence', `${signal.conf}%`, signal.conf >= 70 ? 'pos' : signal.conf >= 45 ? 'neu' : 'neg'],
+    ['Momentum', signal.signal, signal.signal === 'BUY' ? 'pos' : signal.signal === 'SELL' ? 'neg' : 'neu'],
+    ['RSI 14', signal.rsi == null ? '-' : fmt(signal.rsi, 1), signal.rsi < 30 ? 'pos' : signal.rsi > 70 ? 'neg' : 'neu'],
+    ['MACD', signal.macd == null ? '-' : fmt(signal.macd.macd, 2), Number(signal.macd?.macd || 0) >= 0 ? 'pos' : 'neg'],
+  ];
+  const billyRightRows = [
+    ['Last price', fmtPrice(currentPrice), (quote.dp || 0) >= 0 ? 'pos' : 'neg'],
+    ['Day move', fmtPct(quote.dp || 0), (quote.dp || 0) >= 0 ? 'pos' : 'neg'],
+    ['Bid / Ask', `${fmtPrice(bidPrice)} / ${fmtPrice(askPrice)}`, ''],
+    ['Volume', compactNumber(volume), ''],
+    ['Beta', fmt(info.beta), info.beta > 1.35 ? 'neg' : 'neu'],
+  ];
 
   return (
     <>
@@ -411,12 +427,19 @@ export default function StockModal({
             <div><span>MACD</span><strong>{signal.macd == null ? '-' : fmt(signal.macd.macd, 2)}</strong></div>
             <div><span>SMA 20</span><strong>{signal.sma20 == null ? '-' : fmtPrice(signal.sma20)}</strong></div>
             <div><span>SMA 50</span><strong>{signal.sma50 == null ? '-' : fmtPrice(signal.sma50)}</strong></div>
-            <div className="signal-factors compact-signal-factors">
-              <span className="vertical-signal-label">Signal Factors</span>
-              <ul>
-                {signal.factors.slice(0, 3).map((factor) => <li key={factor}><FactorText text={factor} /></li>)}
-              </ul>
-            </div>
+            {planRules.showSignalFactors ? (
+              <div className="signal-factors compact-signal-factors">
+                <span className="vertical-signal-label">Signal Factors</span>
+                <ul>
+                  {signal.factors.slice(0, 3).map((factor) => <li key={factor}><FactorText text={factor} /></li>)}
+                </ul>
+              </div>
+            ) : (
+              <div className="signal-factors compact-signal-factors locked-signal-factors">
+                <span className="vertical-signal-label">Pro</span>
+                <p>Signal factors unlock with Bronco Pro.</p>
+              </div>
+            )}
           </div>
 
           {onExecuteTrade && tradeAccounts.length > 0 && (
@@ -428,7 +451,7 @@ export default function StockModal({
                   <p>Select an account, order type, and share quantity. Orders affect only the chosen account.</p>
                 </div>
               </header>
-              <div className="trade-controls-grid">
+              <div className={`trade-controls-grid ${isBillyMode ? 'billy-trade-controls' : ''}`}>
                 <label className="form-field"><span>Action</span><select value={tradeMode} onChange={(event) => setTradeMode(event.target.value)}><option value="buy">Buy</option><option value="sell">Sell</option>{isPro && <option value="billy_analyst">Trade with Billy Analyst</option>}</select></label>
                 <label className="form-field"><span>Account</span><select value={accountId} onChange={(event) => setAccountId(event.target.value)}>{tradeAccounts.map((account) => <option key={account.id} value={account.id}>{account.label} - {account.accountNumber}</option>)}</select></label>
                 {!isBillyMode && (
@@ -438,17 +461,30 @@ export default function StockModal({
                     <label className="form-field"><span>Stock amount</span><input type="number" min="0.001" step="0.001" value={shares} onChange={(event) => setShares(event.target.value)} placeholder="0.000" /></label>
                   </>
                 )}
+                {isBillyMode && <BillyScoreGauge score={billyAnalysis.score} />}
               </div>
               {isBillyMode ? (
                 <div className="billy-analyst-panel">
-                  <div className="billy-score-card">
+                  <div className="billy-intelligence-table">
                     <div>
-                      <span>Billy Composite</span>
-                      <strong>{billyAnalysis.score}/100</strong>
+                      <h3>Confidence and Momentum</h3>
+                      {billyLeftRows.map(([label, value, tone]) => (
+                        <p key={label}><span>{label}</span><strong className={tone ? `factor-word ${tone}` : ''}>{value}</strong></p>
+                      ))}
                     </div>
-                    <span className={`billy-recommendation ${billyAnalysis.recommendation}`}>{billyAnalysis.recommendation}</span>
+                    <div>
+                      <h3>Quote Data</h3>
+                      {billyRightRows.map(([label, value, tone]) => (
+                        <p key={label}><span>{label}</span><strong className={tone ? `factor-word ${tone}` : ''}>{value}</strong></p>
+                      ))}
+                    </div>
+                    <footer>
+                      <span>News sentiment score</span>
+                      <strong className={newsSentiment === 'Bullish' ? 'factor-word pos' : newsSentiment === 'Bearish' ? 'factor-word neg' : 'factor-word neu'}>{newsSentiment || 'Neutral'} - {stockNews.length ? `${stockNews.length} related articles` : 'no recent articles'}</strong>
+                      <a href={`/news?ticker=${ticker}`}>Open related news</a>
+                    </footer>
                   </div>
-                  <p>{billyAnalysis.rationale}</p>
+                  <p className="billy-rationale"><FactorText text={billyAnalysis.rationale} /></p>
                   <div className="billy-analyst-grid">
                     <label className="form-field"><span>Initial bot fund</span><input type="number" min="1" step="1" value={billyConfig.initialFund} onChange={(event) => setBillyConfig((prev) => ({ ...prev, initialFund: event.target.value }))} placeholder="$" /></label>
                     <label className="form-field"><span>Max investment $</span><input type="number" min="0" step="1" value={billyConfig.maxInvestmentDollars} onChange={(event) => setBillyConfig((prev) => ({ ...prev, maxInvestmentDollars: event.target.value }))} placeholder="Optional" /></label>
@@ -457,7 +493,7 @@ export default function StockModal({
                     <label className="form-field"><span>Max loss %</span><input type="number" min="0" max="100" step="0.1" value={billyConfig.maxLossPercent} onChange={(event) => setBillyConfig((prev) => ({ ...prev, maxLossPercent: event.target.value }))} placeholder="Required if no $" /></label>
                     <label className="check-row billy-toggle"><input type="checkbox" checked={billyConfig.reinvestGains} onChange={(event) => setBillyConfig((prev) => ({ ...prev, reinvestGains: event.target.checked }))} /><span>Reinvest capital gains into this Billy action</span></label>
                   </div>
-                  <div className="trade-summary">
+                  <div className="trade-summary trade-summary-compact">
                     <div><span>Last price</span><strong>{fmtPrice(quote.c)}</strong></div>
                     <div><span>Deployable now</span><strong>{fmtPrice(billyDeployablePreview)}</strong></div>
                     <div><span>Account cash</span><strong>{fmtPrice(selectedAccount?.balance || 0)}</strong></div>
@@ -471,7 +507,7 @@ export default function StockModal({
                 </div>
               ) : (
                 <>
-                  <div className="trade-summary">
+                  <div className="trade-summary trade-summary-table">
                     <div><span>Last price</span><strong>{fmtPrice(quote.c)}</strong></div>
                     <div><span>Execution price</span><strong>{fmtPrice(executionPrice)}</strong></div>
                     <div><span>Estimated total</span><strong>{fmtPrice(estimatedTotal)}</strong></div>

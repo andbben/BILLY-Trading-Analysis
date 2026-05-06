@@ -45,14 +45,14 @@ function PaymentModal({ plan, onClose, onComplete }) {
               {plan.features.map((feature) => <p key={feature}>{feature}</p>)}
             </div>
             <p className="form-hint">Demo checkout only. No real charge will be made.</p>
-            <button type="button" onClick={() => setStep('payment')}>Continue To Payment</button>
+            <button className="secondary-button alert-create-button plan-action-button" type="button" onClick={() => setStep('payment')}>Continue To Payment</button>
           </>
         ) : (
           <>
             <label className="form-field"><span>Billing Account</span><select value={accountId} onChange={(event) => setAccountId(event.target.value)}>{accounts.map((account) => <option key={account.id} value={account.id}>{account.label} {account.type === 'bank' ? '(Bank)' : '(Billy)'}</option>)}</select></label>
             {accounts.find((account) => account.id === accountId)?.type === 'billy' && <p className="form-hint">If this Billy account balance drops below the subscription cost, the next available EFT bank account will be charged.</p>}
             {error && <p className="status error">{error}</p>}
-            <button type="button" onClick={submit}>Subscribe For {fmtPrice(plan.price)}</button>
+            <button className="secondary-button alert-create-button plan-action-button" type="button" onClick={submit}>Subscribe For {fmtPrice(plan.price)}</button>
           </>
         )}
       </section>
@@ -64,6 +64,7 @@ export default function Plans() {
   const [plan, setPlan] = useState(() => localStorage.getItem('bb_plan') || 'free');
   const [target, setTarget] = useState(null);
   const [status, setStatus] = useState('');
+  const [showBillyInfo, setShowBillyInfo] = useState(false);
   const targetPlan = PLANS.find((item) => item.id === target);
 
   useEffect(() => {
@@ -118,7 +119,12 @@ export default function Plans() {
               {item.features.map((feature) => <li key={feature}>{feature}</li>)}
               {(item.locked || []).map((feature) => <li className="locked" key={feature}>{feature}</li>)}
             </ul>
-            <button className="secondary-button alert-create-button" type="button" disabled={plan === item.id} onClick={() => setTarget(item.id)}>
+            {item.id === 'pro' && (
+              <button className="plan-info-button" type="button" onClick={() => setShowBillyInfo(true)}>
+                <span>i</span> Billy Analyst
+              </button>
+            )}
+            <button className="secondary-button alert-create-button plan-action-button" type="button" disabled={plan === item.id} onClick={() => setTarget(item.id)}>
               {plan === item.id ? 'Current Plan' : item.price === 0 ? 'Choose Starter' : `Upgrade to ${item.name}`}
             </button>
           </article>
@@ -126,6 +132,17 @@ export default function Plans() {
       </section>
 
       {targetPlan && <PaymentModal plan={targetPlan} onClose={() => setTarget(null)} onComplete={complete} />}
+      {showBillyInfo && (
+        <div className="overlay" onClick={() => setShowBillyInfo(false)}>
+          <section className="modal" onClick={(event) => event.stopPropagation()}>
+            <header className="modal-header">
+              <h2>Billy Analyst</h2>
+              <button className="icon-btn" type="button" onClick={() => setShowBillyInfo(false)}>x</button>
+            </header>
+            <p className="form-hint">Billy Analyst is a Pro-only simulated trading assistant that combines quote data, market movement, news sentiment, technical signals, and user-defined risk limits. It is rules-based, can lose money, and is not financial advice.</p>
+          </section>
+        </div>
+      )}
     </div>
   );
 }

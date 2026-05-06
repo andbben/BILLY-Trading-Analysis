@@ -26,7 +26,7 @@ export default function Learn() {
             </header>
             <div>
               <p>{item.def}</p>
-              <pre>{item.formula}</pre>
+              <pre className="learn-formula-code">{item.formula}</pre>
               <ul>
                 {item.tips.map((tip) => <li key={tip}>{tip}</li>)}
               </ul>

@@ -3,6 +3,7 @@ import { STOCKS_BASE } from '../../data/market';
 import { api } from '../../services/api';
 import { fmt, fmtPct, fmtPrice, timeAgo } from '../../utils/formatters';
 import { genSyntheticCandles } from '../../utils/indicators';
+import { getPlanRules } from '../../utils/plans';
 import LineChart from '../charts/LineChart';
 
 const emptyForm = {
@@ -27,6 +28,7 @@ export default function AlertComposer({
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const { quotes, fetchStockCandles, fetchCompanyNews } = marketData;
+  const planRules = useMemo(() => getPlanRules(), []);
   const info = ticker ? STOCKS_BASE[ticker] : null;
   const quote = ticker ? quotes[ticker] || {} : {};
   const profileSeed = ticker ? ticker.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0) : 0;
@@ -68,6 +70,10 @@ export default function AlertComposer({
     }
     if (form.kind === 'price' && !form.target) {
       setError('Price alerts need a target price.');
+      return;
+    }
+    if (!planRules.alertKinds.includes(form.kind)) {
+      setError(form.kind === 'technical' ? 'Technical alerts are available on Bronco Pro.' : 'News sentiment alerts are available on Bronco Plus and Pro.');
       return;
     }
 
@@ -146,8 +152,8 @@ export default function AlertComposer({
                   <span>Alert type</span>
                   <select value={form.kind} onChange={(event) => setForm({ ...form, kind: event.target.value })}>
                     <option value="price">Price</option>
-                    <option value="technical">Technical</option>
-                    <option value="news">News sentiment</option>
+                    <option value="news" disabled={!planRules.alertKinds.includes('news')}>News sentiment{!planRules.alertKinds.includes('news') ? ' - Plus' : ''}</option>
+                    <option value="technical" disabled={!planRules.alertKinds.includes('technical')}>Technical{!planRules.alertKinds.includes('technical') ? ' - Pro' : ''}</option>
                   </select>
                 </label>
                 {form.kind === 'price' && (

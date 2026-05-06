@@ -6,6 +6,7 @@ import Sparkline from '../components/charts/Sparkline';
 import StockModal from '../components/modals/StockModal';
 import WatchlistComposer from '../components/modals/WatchlistComposer';
 import { getLocalWatchlists } from '../utils/watchlists';
+import { getPlanRules } from '../utils/plans';
 
 function normalizeLocalLists(apiTickers) {
   const store = getLocalWatchlists();
@@ -22,6 +23,8 @@ export default function Watchlist({ marketData }) {
   const [sortBy, setSortBy] = useState('custom');
   const [error, setError] = useState('');
   const { quotes, fetchStockCandles, fetchCompanyNews } = marketData;
+  const planRules = getPlanRules();
+  const visibleLists = planRules.watchlistLimit === 1 ? store.lists.slice(0, 1) : store.lists;
   const activeList = store.lists.find((list) => list.id === store.activeId) || store.lists[0];
 
   const syncStore = (next) => {
@@ -49,6 +52,14 @@ export default function Watchlist({ marketData }) {
     window.addEventListener('bb-watchlists-local-updated', update);
     return () => window.removeEventListener('bb-watchlists-local-updated', update);
   }, []);
+
+  useEffect(() => {
+    if (planRules.watchlistLimit === 1 && store.activeId !== 'default') {
+      const next = { ...store, activeId: 'default' };
+      setStore(next);
+      localStorage.setItem('bb_watchlists', JSON.stringify(next));
+    }
+  }, [planRules.watchlistLimit, store]);
 
   const addTicker = async (ticker, list) => {
     if (list?.id === 'default') {
@@ -113,7 +124,7 @@ export default function Watchlist({ marketData }) {
           <label className="form-field">
             <span>Watchlist</span>
             <select value={store.activeId} onChange={(event) => syncStore({ ...store, activeId: event.target.value })}>
-              {store.lists.map((list) => <option key={list.id} value={list.id}>{list.name}</option>)}
+              {visibleLists.map((list) => <option key={list.id} value={list.id}>{list.name}</option>)}
             </select>
           </label>
           <label className="form-field">
@@ -126,6 +137,7 @@ export default function Watchlist({ marketData }) {
             </select>
           </label>
         </div>
+        {planRules.watchlistLimit === 1 && <p className="form-hint">Starter includes one encompassing watchlist. Upgrade to Bronco Plus or Pro to create multiple lists.</p>}
         {error && <p className="status error">{error}</p>}
       </section>
 

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api } from '../services/api';
 import { fmtPrice } from '../utils/formatters';
+import { getPlanRules } from '../utils/plans';
 import AlertComposer from '../components/modals/AlertComposer';
 
 function normalizeAlert(alert, quotes) {
@@ -23,6 +24,8 @@ export default function Alerts({ marketData }) {
   const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState('');
   const { quotes } = marketData;
+  const planRules = getPlanRules();
+  const alertFilters = ['all', 'active', 'triggered', ...planRules.alertKinds];
 
   const loadAlerts = async () => {
     try {
@@ -64,14 +67,14 @@ export default function Alerts({ marketData }) {
       <header className="page-header">
         <div>
           <span className="section-eyebrow">Alerts</span>
-          <h1>Price, Technical, and News Alerts</h1>
+          <h1>{planRules.plan === 'free' ? 'Price Alerts' : planRules.plan === 'plus' ? 'Price and News Alerts' : 'Price, Technical, and News Alerts'}</h1>
           <p>{processed.filter((alert) => alert.status === 'active').length} active - {processed.filter((alert) => alert.status === 'triggered').length} triggered.</p>
         </div>
         <button className="secondary-button alert-create-button" type="button" onClick={() => setShowModal(true)}>Create Alert</button>
       </header>
 
       <div className="filter-row">
-        {['all', 'active', 'triggered', 'price', 'technical', 'news'].map((item) => (
+        {alertFilters.map((item) => (
           <button type="button" key={item} className={filter === item ? 'active' : ''} onClick={() => setFilter(item)}>{item}</button>
         ))}
       </div>

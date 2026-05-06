@@ -2,11 +2,13 @@ import { useEffect, useMemo, useState } from 'react';
 import { api } from '../../services/api';
 import { classifySentiment } from '../../utils/indicators';
 import { fmt, timeAgo } from '../../utils/formatters';
+import { getPlanRules } from '../../utils/plans';
 
 export default function NewsArticleModal({ article, onClose }) {
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(true);
   const headline = article.headline || article.title || '';
+  const planRules = useMemo(() => getPlanRules(), []);
 
   const sentiment = useMemo(
     () => classifySentiment(headline, article.summary || ''),
@@ -50,19 +52,23 @@ export default function NewsArticleModal({ article, onClose }) {
           <button className="icon-btn" type="button" onClick={onClose} aria-label="Close">x</button>
         </header>
 
-        <div className={`sentiment-bar ${sentiment.sentiment}`}>
-          <span>{sentiment.sentiment === 'bull' ? 'Bullish' : sentiment.sentiment === 'bear' ? 'Bearish' : 'Neutral'}</span>
-          <strong>{fmt(sentiment.score, 1)}/10</strong>
-        </div>
+        {planRules.showNewsSentiment && (
+          <div className={`sentiment-bar ${sentiment.sentiment}`}>
+            <span>{sentiment.sentiment === 'bull' ? 'Bullish' : sentiment.sentiment === 'bear' ? 'Bearish' : 'Neutral'}</span>
+            <strong>{fmt(sentiment.score, 1)}/10</strong>
+          </div>
+        )}
 
         {loading ? (
           <div className="status">Generating analysis...</div>
         ) : (
           <div className="analysis-grid">
-            <article>
-              <span className="section-eyebrow">Summary</span>
-              <p>{analysis?.abstract}</p>
-            </article>
+            {planRules.newsAnalysis !== 'basic' && (
+              <article>
+                <span className="section-eyebrow">Summary</span>
+                <p>{analysis?.abstract}</p>
+              </article>
+            )}
             <article>
               <span className="section-eyebrow">Market Impact</span>
               <p>{analysis?.marketImpact}</p>
@@ -73,10 +79,12 @@ export default function NewsArticleModal({ article, onClose }) {
                 {(analysis?.keyPoints || []).map((point) => <li key={point}>{point}</li>)}
               </ul>
             </article>
-            <article>
-              <span className="section-eyebrow">Watch For</span>
-              <p>{analysis?.watchFor}</p>
-            </article>
+            {planRules.newsAnalysis === 'full' && (
+              <article>
+                <span className="section-eyebrow">Watch For</span>
+                <p>{analysis?.watchFor}</p>
+              </article>
+            )}
           </div>
         )}
 

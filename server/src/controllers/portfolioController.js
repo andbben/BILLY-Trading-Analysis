@@ -165,6 +165,12 @@ function makeBankDemoBalance() {
   return Math.floor(444444 + Math.random() * (7777777 - 444444 + 1));
 }
 
+function eftDailyLimitForPlan(plan) {
+  if (plan === 'pro') return 250000;
+  if (plan === 'plus') return 75000;
+  return 10000;
+}
+
 function normalizePosition(position) {
   return {
     id: position.id,
@@ -406,6 +412,15 @@ exports.createTransfer = async (req, res) => {
     if (from.type !== 'billy' && to.type !== 'billy') {
       await client.query('ROLLBACK');
       return res.status(400).json({ error: 'Transfers must move cash to or from a Billy account.' });
+    }
+
+    if (from.type === 'bank' && to.type === 'billy') {
+      const userResult = await client.query('SELECT plan FROM users WHERE id = $1', [req.userId]);
+      const limit = eftDailyLimitForPlan(userResult.rows[0]?.plan);
+      if (transferAmount > limit) {
+        await client.query('ROLLBACK');
+        return res.status(400).json({ error: `Your plan supports EFT deposits up to $${limit.toLocaleString()} per day.` });
+      }
     }
 
     if (from.type === 'bank' && transferAmount > Number(from.balance || 0)) {

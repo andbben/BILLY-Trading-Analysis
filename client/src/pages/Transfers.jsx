@@ -4,6 +4,7 @@ import Sparkline from '../components/charts/Sparkline';
 import { STOCKS_BASE } from '../data/market';
 import { api } from '../services/api';
 import { fmt, fmtPrice } from '../utils/formatters';
+import { getPlanRules } from '../utils/plans';
 
 const todayIso = () => new Date().toISOString().slice(0, 10);
 
@@ -83,6 +84,7 @@ export default function Transfers({ marketData }) {
   const [submitting, setSubmitting] = useState(false);
 
   const quotes = marketData?.quotes || {};
+  const planRules = getPlanRules();
   const accounts = useMemo(() => summary?.accounts || [], [summary]);
   const billyAccounts = useMemo(() => summary?.billyAccounts || accounts.filter((account) => account.type === 'billy'), [summary, accounts]);
   const bankAccounts = useMemo(() => accounts.filter((account) => account.type === 'bank'), [accounts]);
@@ -132,6 +134,11 @@ export default function Transfers({ marketData }) {
   }, [mode, accounts, bankAccounts, billyAccounts]);
 
   const submitCashTransfer = async () => {
+    const from = accounts.find((account) => account.id === fromAccount);
+    const to = accounts.find((account) => account.id === toAccount);
+    if (mode === 'eft' && from?.type === 'bank' && to?.type === 'billy' && cashAmount > planRules.eftDailyLimit) {
+      throw new Error(`Your ${planRules.plan === 'free' ? 'Starter' : planRules.plan === 'plus' ? 'Bronco Plus' : 'Bronco Pro'} plan supports EFT deposits up to ${fmtPrice(planRules.eftDailyLimit)} per day.`);
+    }
     const payload = {
       fromAccount,
       toAccount,
@@ -274,7 +281,7 @@ export default function Transfers({ marketData }) {
             <header className="panel-header">
               <div>
                 <h2>Secure EFT</h2>
-                <p>Connected bank accounts are assumed to have up to $1,000,000 available for demo funding.</p>
+                <p>Connected bank accounts are assumed to have up to $1,000,000 available for demo funding. Your current plan supports EFT deposits up to {fmtPrice(planRules.eftDailyLimit)} per day.</p>
               </div>
             </header>
             <form className="auth-form" onSubmit={(event) => { event.preventDefault(); handleConfirm(); }}>
