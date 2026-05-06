@@ -1,0 +1,317 @@
+Error: CORS blocked origin: http://127.0.0.1:4173
+    at origin (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\src\app.js:23:21)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:204:7)
+    at Layer.handleRequest (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:342:13)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:297:9
+    at processParams (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:582:12)
+    at next (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:291:5)
+    at internalNext (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\helmet\index.cjs:531:6)
+Error: CORS blocked origin: http://127.0.0.1:4173
+    at origin (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\src\app.js:23:21)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:204:7)
+    at Layer.handleRequest (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:342:13)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:297:9
+    at processParams (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:582:12)
+    at next (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:291:5)
+    at internalNext (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\helmet\index.cjs:531:6)
+Error: CORS blocked origin: http://127.0.0.1:4173
+    at origin (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\src\app.js:23:21)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:204:7)
+    at Layer.handleRequest (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:342:13)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:297:9
+    at processParams (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:582:12)
+    at next (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:291:5)
+    at internalNext (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\helmet\index.cjs:531:6)
+Error: CORS blocked origin: http://127.0.0.1:4173
+    at origin (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\src\app.js:23:21)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:204:7)
+    at Layer.handleRequest (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:342:13)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:297:9
+    at processParams (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:582:12)
+    at next (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:291:5)
+    at internalNext (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\helmet\index.cjs:531:6)
+Error: CORS blocked origin: http://127.0.0.1:4173
+    at origin (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\src\app.js:23:21)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:204:7)
+    at Layer.handleRequest (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:342:13)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:297:9
+    at processParams (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:582:12)
+    at next (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:291:5)
+    at internalNext (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\helmet\index.cjs:531:6)
+Error: CORS blocked origin: http://127.0.0.1:4173
+    at origin (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\src\app.js:23:21)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:204:7)
+    at Layer.handleRequest (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:342:13)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:297:9
+    at processParams (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:582:12)
+    at next (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:291:5)
+    at internalNext (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\helmet\index.cjs:531:6)
+Error: CORS blocked origin: http://127.0.0.1:4173
+    at origin (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\src\app.js:23:21)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:204:7)
+    at Layer.handleRequest (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:342:13)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:297:9
+    at processParams (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:582:12)
+    at next (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:291:5)
+    at internalNext (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\helmet\index.cjs:531:6)
+Error: CORS blocked origin: http://127.0.0.1:4173
+    at origin (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\src\app.js:23:21)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:204:7)
+    at Layer.handleRequest (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:342:13)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:297:9
+    at processParams (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:582:12)
+    at next (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:291:5)
+    at internalNext (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\helmet\index.cjs:531:6)
+Error: CORS blocked origin: http://127.0.0.1:4173
+    at origin (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\src\app.js:23:21)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:204:7)
+    at Layer.handleRequest (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:342:13)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:297:9
+    at processParams (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:582:12)
+    at next (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:291:5)
+    at internalNext (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\helmet\index.cjs:531:6)
+Error: CORS blocked origin: http://127.0.0.1:4173
+    at origin (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\src\app.js:23:21)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:204:7)
+    at Layer.handleRequest (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:342:13)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:297:9
+    at processParams (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:582:12)
+    at next (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:291:5)
+    at internalNext (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\helmet\index.cjs:531:6)
+Error: CORS blocked origin: http://127.0.0.1:4173
+    at origin (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\src\app.js:23:21)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:204:7)
+    at Layer.handleRequest (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:342:13)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:297:9
+    at processParams (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:582:12)
+    at next (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:291:5)
+    at internalNext (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\helmet\index.cjs:531:6)
+Error: CORS blocked origin: http://127.0.0.1:4173
+    at origin (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\src\app.js:23:21)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:204:7)
+    at Layer.handleRequest (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:342:13)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:297:9
+    at processParams (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:582:12)
+    at next (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:291:5)
+    at internalNext (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\helmet\index.cjs:531:6)
+Error: CORS blocked origin: http://127.0.0.1:4173
+    at origin (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\src\app.js:23:21)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:204:7)
+    at Layer.handleRequest (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:342:13)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:297:9
+    at processParams (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:582:12)
+    at next (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:291:5)
+    at internalNext (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\helmet\index.cjs:531:6)
+Error: CORS blocked origin: http://127.0.0.1:4173
+    at origin (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\src\app.js:23:21)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:204:7)
+    at Layer.handleRequest (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:342:13)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:297:9
+    at processParams (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:582:12)
+    at next (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:291:5)
+    at internalNext (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\helmet\index.cjs:531:6)
+Error: CORS blocked origin: http://127.0.0.1:4173
+    at origin (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\src\app.js:23:21)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:204:7)
+    at Layer.handleRequest (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:342:13)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:297:9
+    at processParams (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:582:12)
+    at next (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:291:5)
+    at internalNext (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\helmet\index.cjs:531:6)
+Error: CORS blocked origin: http://127.0.0.1:4173
+    at origin (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\src\app.js:23:21)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:204:7)
+    at Layer.handleRequest (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:342:13)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:297:9
+    at processParams (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:582:12)
+    at next (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:291:5)
+    at internalNext (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\helmet\index.cjs:531:6)
+Error: CORS blocked origin: http://127.0.0.1:4173
+    at origin (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\src\app.js:23:21)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:204:7)
+    at Layer.handleRequest (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:342:13)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:297:9
+    at processParams (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:582:12)
+    at next (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:291:5)
+    at internalNext (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\helmet\index.cjs:531:6)
+Error: CORS blocked origin: http://127.0.0.1:4173
+    at origin (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\src\app.js:23:21)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:204:7)
+    at Layer.handleRequest (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:342:13)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:297:9
+    at processParams (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:582:12)
+    at next (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:291:5)
+    at internalNext (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\helmet\index.cjs:531:6)
+Error: CORS blocked origin: http://127.0.0.1:4173
+    at origin (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\src\app.js:23:21)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:204:7)
+    at Layer.handleRequest (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:342:13)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:297:9
+    at processParams (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:582:12)
+    at next (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:291:5)
+    at internalNext (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\helmet\index.cjs:531:6)
+Error: CORS blocked origin: http://127.0.0.1:4173
+    at origin (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\src\app.js:23:21)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:204:7)
+    at Layer.handleRequest (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:342:13)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:297:9
+    at processParams (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:582:12)
+    at next (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:291:5)
+    at internalNext (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\helmet\index.cjs:531:6)
+Error: CORS blocked origin: http://127.0.0.1:4173
+    at origin (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\src\app.js:23:21)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:204:7)
+    at Layer.handleRequest (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:342:13)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:297:9
+    at processParams (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:582:12)
+    at next (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:291:5)
+    at internalNext (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\helmet\index.cjs:531:6)
+Error: CORS blocked origin: http://127.0.0.1:4173
+    at origin (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\src\app.js:23:21)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:204:7)
+    at Layer.handleRequest (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:342:13)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:297:9
+    at processParams (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:582:12)
+    at next (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:291:5)
+    at internalNext (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\helmet\index.cjs:531:6)
+Error: CORS blocked origin: http://127.0.0.1:4173
+    at origin (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\src\app.js:23:21)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:204:7)
+    at Layer.handleRequest (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:342:13)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:297:9
+    at processParams (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:582:12)
+    at next (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:291:5)
+    at internalNext (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\helmet\index.cjs:531:6)
+Error: CORS blocked origin: http://127.0.0.1:4173
+    at origin (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\src\app.js:23:21)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:219:13
+    at optionsCallback (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:199:9)
+    at corsMiddleware (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\cors\lib\index.js:204:7)
+    at Layer.handleRequest (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:342:13)
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:297:9
+    at processParams (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:582:12)
+    at next (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\router\index.js:291:5)
+    at internalNext (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\helmet\index.cjs:531:6)
+(node:19348) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+(Use `node --trace-warnings ...` to show where the warning was created)
+error: relation "users" does not exist
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\pg-pool\index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async exports.register (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\src\controllers\authController.js:17:22) {
+  length: 104,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '16',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+error: relation "users" does not exist
+    at D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\node_modules\pg-pool\index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async exports.register (D:\Classes Archives\Classes By Semester\S26\CS 4800 Software Engineering Zaidi\BIlly Market Analyst\billy-trading-analyst-full\BILLY-Trading-Analysis-deployment-prep\server\src\controllers\authController.js:17:22) {
+  length: 104,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '16',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}

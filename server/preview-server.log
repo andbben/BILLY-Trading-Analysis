@@ -1,0 +1,4 @@
+◇ injected env (10) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+Server running on port 3001
+◇ injected env (10) from .env // tip: ⌘ enable debugging { debug: true }
+Server running on port 3001
