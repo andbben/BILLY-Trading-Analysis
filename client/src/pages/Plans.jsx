@@ -3,6 +3,10 @@ import { PLANS } from '../data/market';
 import { fmtPrice } from '../utils/formatters';
 import { api } from '../services/api';
 
+function PlanName({ name }) {
+  return <>{name === 'Bronco+' ? <>Bronco<sup>+</sup></> : name === 'Bronco+ Pro' ? <>Bronco<sup>+</sup> Pro</> : name}</>;
+}
+
 function PaymentModal({ plan, onClose, onComplete }) {
   const [step, setStep] = useState('summary');
   const [accounts, setAccounts] = useState([]);
@@ -32,7 +36,7 @@ function PaymentModal({ plan, onClose, onComplete }) {
     <div className="overlay" onClick={onClose}>
       <section className="modal" onClick={(event) => event.stopPropagation()}>
         <header className="modal-header">
-          <h2>Upgrade to {plan.name}</h2>
+          <h2>Upgrade to <PlanName name={plan.name} /></h2>
           <button className="icon-btn" type="button" onClick={onClose}>x</button>
         </header>
         {step === 'processing' ? (
@@ -40,7 +44,7 @@ function PaymentModal({ plan, onClose, onComplete }) {
         ) : step === 'summary' ? (
           <>
             <div className="plan-summary">
-              <strong>{plan.name}</strong>
+              <strong><PlanName name={plan.name} /></strong>
               <span>{fmtPrice(plan.price)} / month</span>
               {plan.features.map((feature) => <p key={feature}>{feature}</p>)}
             </div>
@@ -112,7 +116,7 @@ export default function Plans() {
         {PLANS.map((item) => (
           <article className={`plan-card ${item.id === 'pro' ? 'featured' : ''}`} key={item.id}>
             <span>{plan === item.id ? 'Current Plan' : item.id === 'pro' ? 'Most Popular' : 'Plan'}</span>
-            <h2 style={{ color: item.color }}>{item.name}</h2>
+            <h2 style={{ color: item.color }}><PlanName name={item.name} /></h2>
             <strong>{item.price === 0 ? 'Free' : fmtPrice(item.price)}</strong>
             <p>{item.price === 0 ? 'forever' : 'per month'}</p>
             <ul>
@@ -125,7 +129,7 @@ export default function Plans() {
               </button>
             )}
             <button className="secondary-button alert-create-button plan-action-button" type="button" disabled={plan === item.id} onClick={() => setTarget(item.id)}>
-              {plan === item.id ? 'Current Plan' : item.price === 0 ? 'Choose Starter' : `Upgrade to ${item.name}`}
+              {plan === item.id ? 'Current Plan' : item.price === 0 ? 'Choose Bronco Basic' : <>Upgrade to <PlanName name={item.name} /></>}
             </button>
           </article>
         ))}

@@ -41,16 +41,23 @@ export default function TickerBanner({ quotes, watchlist = [] }) {
 
   if (!items.length) return null;
 
+  const repeatCount = Math.max(3, Math.ceil(16 / items.length));
+  const segmentItems = Array.from({ length: repeatCount }, () => items).flat();
+
   return (
     <div className="ticker-banner" aria-label="Live market prices">
       <div className="ticker-label">{watchlistItems.length ? 'WATCHLIST' : 'MOVERS'}</div>
       <div className="ticker-window">
         <div className="ticker-track">
-          {[...items, ...items].map((item, index) => (
-            <div className="ticker-item" title={item.name} key={`${item.symbol}-${index}`}>
-              <span>{item.symbol}</span>
-              <strong>${fmt(item.price)}</strong>
-              <em className={item.change >= 0 ? 'pos' : 'neg'}>{fmtPct(item.change)}</em>
+          {[0, 1].map((segment) => (
+            <div className="ticker-segment" aria-hidden={segment === 1} key={segment}>
+              {segmentItems.map((item, index) => (
+                <div className="ticker-item" title={item.name} key={`${segment}-${item.symbol}-${index}`}>
+                  <span>{item.symbol}</span>
+                  <strong>${fmt(item.price)}</strong>
+                  <em className={item.change >= 0 ? 'pos' : 'neg'}>{fmtPct(item.change)}</em>
+                </div>
+              ))}
             </div>
           ))}
         </div>

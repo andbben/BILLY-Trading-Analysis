@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api } from '../services/api';
 import { fmt, fmtPrice } from '../utils/formatters';
+import TransactionReceiptModal from '../components/modals/TransactionReceiptModal';
 
 export default function PortfolioTransactionsPage() {
   const [orders, setOrders] = useState([]);
@@ -9,6 +10,7 @@ export default function PortfolioTransactionsPage() {
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [order, setOrder] = useState('newest');
+  const [receiptItem, setReceiptItem] = useState(null);
 
   useEffect(() => {
     api.getPortfolio().then((data) => {
@@ -50,11 +52,13 @@ export default function PortfolioTransactionsPage() {
               <span><strong>{item.label}</strong><small>{item.created_at ? new Date(item.created_at).toLocaleString() : 'Current session'}</small></span>
               <span className="mono">{item.kind === 'order' ? `${fmt(item.shares, 4)} @ ${fmtPrice(item.price)}` : item.ticker ? `${item.ticker} ${fmt(item.shares, 4)}` : fmtPrice(item.amount)}</span>
               <span className="status-pill active">{item.status || 'completed'}</span>
+              <button className="secondary-button alert-create-button plan-action-button" type="button" onClick={() => setReceiptItem(item)}>Receipt</button>
             </article>
           ))}
           {!rows.length && <div className="empty-state">No transactions match these filters.</div>}
         </div>
       </section>
+      <TransactionReceiptModal item={receiptItem} onClose={() => setReceiptItem(null)} />
     </div>
   );
 }

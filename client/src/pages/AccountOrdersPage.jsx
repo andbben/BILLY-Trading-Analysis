@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../services/api';
 import { fmt, fmtPrice } from '../utils/formatters';
+import TransactionReceiptModal from '../components/modals/TransactionReceiptModal';
 
 function normalizeAccount(account) {
   return {
@@ -18,6 +19,7 @@ export default function AccountOrdersPage() {
   const [orders, setOrders] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [receiptItem, setReceiptItem] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -70,7 +72,7 @@ export default function AccountOrdersPage() {
           </div>
         </header>
         <div className="data-table account-orders-table">
-          <div className="table-head"><span>Date</span><span>Action</span><span>Symbol</span><span>Shares</span><span>Price</span><span>Total</span></div>
+          <div className="table-head"><span>Date</span><span>Action</span><span>Symbol</span><span>Shares</span><span>Price</span><span>Total</span><span>Receipt</span></div>
           {orders.map((order) => (
             <article className="table-row" key={order.id}>
               <span>{order.created_at ? new Date(order.created_at).toLocaleString() : 'Current session'}</span>
@@ -79,11 +81,13 @@ export default function AccountOrdersPage() {
               <span className="mono">{fmt(order.shares, 4)}</span>
               <span className="mono">{fmtPrice(order.price)}</span>
               <span className="mono">{fmtPrice(order.total)}</span>
+              <button className="secondary-button alert-create-button plan-action-button" type="button" onClick={() => setReceiptItem({ ...order, kind: 'order' })}>Receipt</button>
             </article>
           ))}
           {!orders.length && <div className="empty-state">No orders have been recorded for this account yet.</div>}
         </div>
       </section>
+      <TransactionReceiptModal item={receiptItem} onClose={() => setReceiptItem(null)} />
     </div>
   );
 }

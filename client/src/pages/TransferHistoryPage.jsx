@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api } from '../services/api';
 import { fmt, fmtPrice } from '../utils/formatters';
+import TransactionReceiptModal from '../components/modals/TransactionReceiptModal';
 
 export default function TransferHistoryPage() {
   const [items, setItems] = useState([]);
@@ -9,6 +10,7 @@ export default function TransferHistoryPage() {
   const [toDate, setToDate] = useState('');
   const [order, setOrder] = useState('newest');
   const [error, setError] = useState('');
+  const [receiptItem, setReceiptItem] = useState(null);
 
   useEffect(() => {
     api.getTransfers()
@@ -56,11 +58,13 @@ export default function TransferHistoryPage() {
               <span><strong>{transfer.from_label || transfer.from_account}</strong><small>to {transfer.to_label || transfer.to_account}</small></span>
               <span className="mono">{transfer.ticker ? `${transfer.ticker} ${fmt(transfer.shares, 4)}` : fmtPrice(transfer.amount)}</span>
               <span className="status-pill active">{transfer.status}</span>
+              <button className="secondary-button alert-create-button plan-action-button" type="button" onClick={() => setReceiptItem(transfer)}>Receipt</button>
             </article>
           ))}
           {!filtered.length && <div className="empty-state">No transfers match these filters.</div>}
         </div>
       </section>
+      <TransactionReceiptModal item={receiptItem} onClose={() => setReceiptItem(null)} />
     </div>
   );
 }

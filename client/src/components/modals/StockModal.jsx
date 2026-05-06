@@ -422,22 +422,24 @@ export default function StockModal({
             </section>
           </div>
 
-          <div className="indicator-grid stock-signal-row">
-            <div><span>RSI 14</span><strong>{signal.rsi == null ? '-' : fmt(signal.rsi, 1)}</strong></div>
-            <div><span>MACD</span><strong>{signal.macd == null ? '-' : fmt(signal.macd.macd, 2)}</strong></div>
-            <div><span>SMA 20</span><strong>{signal.sma20 == null ? '-' : fmtPrice(signal.sma20)}</strong></div>
-            <div><span>SMA 50</span><strong>{signal.sma50 == null ? '-' : fmtPrice(signal.sma50)}</strong></div>
+          <div className={`indicator-grid stock-signal-row ${!planRules.showSignalFactors ? 'stock-signal-row-locked' : ''}`}>
             {planRules.showSignalFactors ? (
+              <>
+                <div><span>RSI 14</span><strong>{signal.rsi == null ? '-' : fmt(signal.rsi, 1)}</strong></div>
+                <div><span>MACD</span><strong>{signal.macd == null ? '-' : fmt(signal.macd.macd, 2)}</strong></div>
+                <div><span>SMA 20</span><strong>{signal.sma20 == null ? '-' : fmtPrice(signal.sma20)}</strong></div>
+                <div><span>SMA 50</span><strong>{signal.sma50 == null ? '-' : fmtPrice(signal.sma50)}</strong></div>
               <div className="signal-factors compact-signal-factors">
                 <span className="vertical-signal-label">Signal Factors</span>
                 <ul>
                   {signal.factors.slice(0, 3).map((factor) => <li key={factor}><FactorText text={factor} /></li>)}
                 </ul>
               </div>
+              </>
             ) : (
               <div className="signal-factors compact-signal-factors locked-signal-factors">
                 <span className="vertical-signal-label">Pro</span>
-                <p>Signal factors unlock with Bronco Pro.</p>
+                <p>Bronco+ Pro is required to view RSI, MACD, SMA 20, SMA 50, and signal factors.</p>
               </div>
             )}
           </div>

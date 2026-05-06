@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sparkline from '../components/charts/Sparkline';
+import TransactionReceiptModal from '../components/modals/TransactionReceiptModal';
 import { STOCKS_BASE } from '../data/market';
 import { api } from '../services/api';
 import { fmt, fmtPrice } from '../utils/formatters';
@@ -82,6 +83,7 @@ export default function Transfers({ marketData }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [receiptItem, setReceiptItem] = useState(null);
 
   const quotes = marketData?.quotes || {};
   const planRules = getPlanRules();
@@ -137,7 +139,10 @@ export default function Transfers({ marketData }) {
     const from = accounts.find((account) => account.id === fromAccount);
     const to = accounts.find((account) => account.id === toAccount);
     if (mode === 'eft' && from?.type === 'bank' && to?.type === 'billy' && cashAmount > planRules.eftDailyLimit) {
-      throw new Error(`Your ${planRules.plan === 'free' ? 'Starter' : planRules.plan === 'plus' ? 'Bronco Plus' : 'Bronco Pro'} plan supports EFT deposits up to ${fmtPrice(planRules.eftDailyLimit)} per day.`);
+      throw new Error(`Your ${planRules.plan === 'free' ? 'Bronco Basic' : planRules.plan === 'plus' ? 'Bronco+' : 'Bronco+ Pro'} plan supports EFT deposits up to ${fmtPrice(planRules.eftDailyLimit)} per day.`);
+    }
+    if (mode === 'billy' && from?.type === 'billy' && to?.type === 'billy' && planRules.billyTransferLimit !== null && cashAmount > planRules.billyTransferLimit) {
+      throw new Error(`Your plan supports Billy to Billy transfers up to ${fmtPrice(planRules.billyTransferLimit)} per transaction.`);
     }
     const payload = {
       fromAccount,
@@ -305,7 +310,7 @@ export default function Transfers({ marketData }) {
                 <span>Memo</span>
                 <input type="text" placeholder="Optional note" value={memo} onChange={(event) => setMemo(event.target.value)} />
               </label>
-              <button type="submit" disabled={submitting}>{submitting ? 'Submitting...' : 'Submit transfer'}</button>
+              <button className="secondary-button alert-create-button plan-action-button" type="submit" disabled={submitting}>{submitting ? 'Submitting...' : 'Submit transfer'}</button>
             </form>
         </section>
       )}
@@ -325,7 +330,7 @@ export default function Transfers({ marketData }) {
               {billyAccounts.map((account) => <option key={account.id} value={account.id}>{account.label} - {account.accountNumber}</option>)}
             </select>
           </label>
-          <button type="button" onClick={() => fromAccount ? setStep('details') : setError('Select an origin account before continuing.')}>Continue</button>
+          <button className="secondary-button alert-create-button plan-action-button" type="button" onClick={() => fromAccount ? setStep('details') : setError('Select an origin account before continuing.')}>Continue</button>
         </section>
       )}
 
@@ -375,11 +380,11 @@ export default function Transfers({ marketData }) {
                     <input type="number" min="1" step="0.01" placeholder="$" value={amount} onChange={(event) => setAmount(event.target.value)} />
                   </label>
                   <p className="form-hint warning-text">If you transfer more money than your current cash available, you may be able to sell investments to free up additional cash.</p>
-                  <div className="limit-row"><span>Transaction limit</span><strong>$99,999,999.99</strong></div>
+                  <div className="limit-row"><span>Transaction limit</span><strong>{planRules.billyTransferLimit === null ? 'No Bronco+ Pro limit' : fmtPrice(planRules.billyTransferLimit)}</strong></div>
                 </>
               )}
               {transferOption === 'shares' && (
-                <button className="secondary-button" type="button" onClick={() => setStep('shares')}>Continue to eligible investments</button>
+                <button className="secondary-button alert-create-button plan-action-button" type="button" onClick={() => setStep('shares')}>Continue to eligible investments</button>
               )}
             </>
           ) : (
@@ -408,12 +413,12 @@ export default function Transfers({ marketData }) {
                   <input type="number" min="1" step="0.01" placeholder="$" value={amount} onChange={(event) => setAmount(event.target.value)} />
                 </label>
               )}
-              <div className="limit-row"><span>Transaction limit</span><strong>$99,999.99</strong></div>
+              <div className="limit-row"><span>Transaction limit</span><strong>{planRules.billyTransferLimit === null ? 'No Bronco+ Pro limit' : fmtPrice(planRules.billyTransferLimit)}</strong></div>
             </div>
           )}
 
           <div className="modal-actions">
-            <button type="button" onClick={continueBillyDetails}>Continue</button>
+            <button className="secondary-button alert-create-button plan-action-button" type="button" onClick={continueBillyDetails}>Continue</button>
           </div>
         </section>
       )}
@@ -436,8 +441,8 @@ export default function Transfers({ marketData }) {
             ))}
           </div>
           <div className="modal-actions">
-            <button className="secondary-button" type="button" onClick={() => setStep('details')}>Back</button>
-            <button type="button" disabled={submitting} onClick={sellToCover}>{submitting ? 'Selling...' : 'Sell selected assets'}</button>
+            <button className="secondary-button alert-create-button plan-action-button" type="button" onClick={() => setStep('details')}>Back</button>
+            <button className="secondary-button alert-create-button plan-action-button" type="button" disabled={submitting} onClick={sellToCover}>{submitting ? 'Selling...' : 'Sell selected assets'}</button>
           </div>
         </section>
       )}
@@ -457,7 +462,7 @@ export default function Transfers({ marketData }) {
                 <span><strong>{position.ticker}</strong><small>{STOCKS_BASE[position.ticker]?.name}</small></span>
                 <span className="mono">{fmt(position.shares, 4)}</span>
                 <span className="share-entry">
-                  <button type="button" className="secondary-button" onClick={() => setShareDrafts({ ...shareDrafts, [position.ticker]: position.shares })}>All</button>
+                  <button type="button" className="secondary-button alert-create-button plan-action-button" onClick={() => setShareDrafts({ ...shareDrafts, [position.ticker]: position.shares })}>All</button>
                   <input type="number" min="0" max={position.shares} step="0.0001" placeholder="0.0000" value={shareDrafts[position.ticker] || ''} onChange={(event) => setShareDrafts({ ...shareDrafts, [position.ticker]: event.target.value })} />
                 </span>
               </article>
@@ -465,8 +470,8 @@ export default function Transfers({ marketData }) {
             {!selectedFrom?.positions?.length && <div className="empty-state">No eligible investments in this account.</div>}
           </div>
           <div className="modal-actions">
-            <button className="secondary-button" type="button" onClick={() => setStep('details')}>Back</button>
-            <button type="button" onClick={() => shareSelections.length ? setStep('confirm') : setError('Enter shares to transfer before continuing.')}>Continue</button>
+            <button className="secondary-button alert-create-button plan-action-button" type="button" onClick={() => setStep('details')}>Back</button>
+            <button className="secondary-button alert-create-button plan-action-button" type="button" onClick={() => shareSelections.length ? setStep('confirm') : setError('Enter shares to transfer before continuing.')}>Continue</button>
           </div>
         </section>
       )}
@@ -487,8 +492,8 @@ export default function Transfers({ marketData }) {
             <span>Transaction ID</span><strong>Pending assignment</strong>
           </div>
           <div className="modal-actions">
-            <button className="secondary-button" type="button" onClick={() => setStep(transferOption === 'shares' ? 'shares' : 'details')}>Back</button>
-            <button type="button" disabled={submitting} onClick={handleConfirm}>{submitting ? 'Submitting...' : 'Confirm transfer'}</button>
+            <button className="secondary-button alert-create-button plan-action-button" type="button" onClick={() => setStep(transferOption === 'shares' ? 'shares' : 'details')}>Back</button>
+            <button className="secondary-button alert-create-button plan-action-button" type="button" disabled={submitting} onClick={handleConfirm}>{submitting ? 'Submitting...' : 'Confirm transfer'}</button>
           </div>
         </section>
       )}
@@ -499,7 +504,7 @@ export default function Transfers({ marketData }) {
             <h2>Recent Transfer Notifications</h2>
             <p>The latest five transfers are shown here.</p>
           </div>
-          <button className="secondary-button" type="button" onClick={() => navigate('/transfers/history')}>View Transfer History</button>
+          <button className="secondary-button alert-create-button plan-action-button" type="button" onClick={() => navigate('/transfers/history')}>View Transfer History</button>
         </header>
         <div className="transfer-list">
           {[...transfers, ...assetTransfers].slice(0, 5).map((transfer) => (
@@ -510,11 +515,13 @@ export default function Transfers({ marketData }) {
               </span>
               <span className="mono">{transfer.ticker ? `${transfer.ticker} ${fmt(transfer.shares, 4)}` : fmtPrice(transfer.amount)}</span>
               <span className="status-pill active">{transfer.status}</span>
+              <button className="secondary-button alert-create-button plan-action-button" type="button" onClick={() => setReceiptItem(transfer)}>Receipt</button>
             </article>
           ))}
           {!transfers.length && !assetTransfers.length && <div className="empty-state">No cash or share transfers yet.</div>}
         </div>
       </section>
+      <TransactionReceiptModal item={receiptItem} onClose={() => setReceiptItem(null)} />
     </div>
   );
 }

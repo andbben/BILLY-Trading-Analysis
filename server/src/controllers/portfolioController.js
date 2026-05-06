@@ -171,6 +171,12 @@ function eftDailyLimitForPlan(plan) {
   return 10000;
 }
 
+function billyTransferLimitForPlan(plan) {
+  if (plan === 'pro') return null;
+  if (plan === 'plus') return 1000000;
+  return 100000;
+}
+
 function normalizePosition(position) {
   return {
     id: position.id,
@@ -414,12 +420,22 @@ exports.createTransfer = async (req, res) => {
       return res.status(400).json({ error: 'Transfers must move cash to or from a Billy account.' });
     }
 
+    const userResult = await client.query('SELECT plan FROM users WHERE id = $1', [req.userId]);
+    const userPlan = userResult.rows[0]?.plan;
+
     if (from.type === 'bank' && to.type === 'billy') {
-      const userResult = await client.query('SELECT plan FROM users WHERE id = $1', [req.userId]);
       const limit = eftDailyLimitForPlan(userResult.rows[0]?.plan);
       if (transferAmount > limit) {
         await client.query('ROLLBACK');
         return res.status(400).json({ error: `Your plan supports EFT deposits up to $${limit.toLocaleString()} per day.` });
+      }
+    }
+
+    if (from.type === 'billy' && to.type === 'billy') {
+      const limit = billyTransferLimitForPlan(userPlan);
+      if (limit !== null && transferAmount > limit) {
+        await client.query('ROLLBACK');
+        return res.status(400).json({ error: `Your plan supports Billy to Billy transfers up to $${limit.toLocaleString()} per transaction.` });
       }
     }
 

@@ -7,6 +7,7 @@ import { fmt, fmtPct, fmtPrice } from '../utils/formatters';
 import RiskGauge from '../components/charts/RiskGauge';
 import Sparkline from '../components/charts/Sparkline';
 import StockModal from '../components/modals/StockModal';
+import TransactionReceiptModal from '../components/modals/TransactionReceiptModal';
 
 const DIVERSITY_COLORS = {
   domestic: '#00c2a8',
@@ -150,6 +151,7 @@ export default function PortfolioPage({ marketData }) {
   const [transfers, setTransfers] = useState([]);
   const [assetTransfers, setAssetTransfers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [receiptItem, setReceiptItem] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const { quotes, fetchStockCandles, fetchCompanyNews } = marketData;
 
@@ -402,8 +404,8 @@ export default function PortfolioPage({ marketData }) {
           ))}
         </div>
         <div className="account-setup-actions">
-          <button className="secondary-button" type="button" onClick={() => setAccountSetupMode('billy')}>Open new Billy account</button>
-          <button className="secondary-button" type="button" onClick={() => setAccountSetupMode('bank')}>Connect bank account</button>
+          <button className="secondary-button alert-create-button plan-action-button" type="button" onClick={() => setAccountSetupMode('billy')}>Open new Billy account</button>
+          <button className="secondary-button alert-create-button plan-action-button" type="button" onClick={() => setAccountSetupMode('bank')}>Connect bank account</button>
           {reorganizingAccounts ? (
             <>
               <button className="secondary-button" type="button" onClick={cancelReorganizing}>Cancel</button>
@@ -451,6 +453,7 @@ export default function PortfolioPage({ marketData }) {
                 <span><strong>{String(order.trade_type || '').toUpperCase()} {order.ticker}</strong><small>{order.created_at ? new Date(order.created_at).toLocaleString() : 'Current session'}</small></span>
                 <span className="mono">{fmt(order.shares, 4)} @ {fmtPrice(order.price)}</span>
                 <span className="status-pill active">completed</span>
+                <button className="secondary-button alert-create-button plan-action-button" type="button" onClick={() => setReceiptItem({ ...order, kind: 'order' })}>Receipt</button>
               </article>
             ))}
             {!orders.length && <div className="empty-state">No stock order notifications yet.</div>}
@@ -462,6 +465,7 @@ export default function PortfolioPage({ marketData }) {
                 <span><strong>{item.from_label || item.from_account}</strong><small>to {item.to_label || item.to_account}</small></span>
                 <span className="mono">{item.ticker ? `${item.ticker} ${fmt(item.shares, 4)}` : fmtPrice(item.amount)}</span>
                 <span className={`status-pill ${item.status === 'completed' || item.status === 'active' ? 'active' : 'inactive'}`}>{item.status}</span>
+                <button className="secondary-button alert-create-button plan-action-button" type="button" onClick={() => setReceiptItem(item)}>Receipt</button>
               </article>
             ))}
             {!transfers.length && !assetTransfers.length && <div className="empty-state">No transfer notifications yet.</div>}
@@ -498,7 +502,7 @@ export default function PortfolioPage({ marketData }) {
               <input type="text" value={newBillyLabel} onChange={(event) => setNewBillyLabel(event.target.value)} placeholder="Billy Income Account" />
             </label>
             <p className="form-hint">This opens an empty Billy account with no positions and zero cash until funded.</p>
-            <button type="button" onClick={openBillyAccount}>Open account</button>
+            <button className="secondary-button alert-create-button plan-action-button" type="button" onClick={openBillyAccount}>Open account</button>
           </section>
         </div>
       )}
@@ -517,7 +521,7 @@ export default function PortfolioPage({ marketData }) {
               <span>Account name</span>
               <input type="text" value={renameLabel} onChange={(event) => setRenameLabel(event.target.value)} />
             </label>
-            <button type="button" onClick={renameAccount}>Save name</button>
+            <button className="secondary-button alert-create-button plan-action-button" type="button" onClick={renameAccount}>Save name</button>
           </section>
         </div>
       )}
@@ -564,10 +568,11 @@ export default function PortfolioPage({ marketData }) {
               <label className="check-row"><input type="checkbox" checked={bankDraft.agreements.ach} onChange={(event) => updateAgreement('ach', event.target.checked)} /><span>I authorize simulated ACH/EFT verification and transfer instructions for this demo app.</span></label>
               <label className="check-row"><input type="checkbox" checked={bankDraft.agreements.privacy} onChange={(event) => updateAgreement('privacy', event.target.checked)} /><span>I consent to storing masked banking details for demonstration purposes.</span></label>
             </div>
-            <button type="button" onClick={connectBankAccount}>Connect bank</button>
+            <button className="secondary-button alert-create-button plan-action-button" type="button" onClick={connectBankAccount}>Connect bank</button>
           </section>
         </div>
       )}
+      <TransactionReceiptModal item={receiptItem} onClose={() => setReceiptItem(null)} />
     </div>
   );
 }

@@ -17,6 +17,7 @@ export function getPlanRules(plan = getSavedPlan()) {
       showNewsSentiment: true,
       showSignalFactors: true,
       eftDailyLimit: 250000,
+      billyTransferLimit: null,
       billyAnalyst: true,
     };
   }
@@ -30,6 +31,7 @@ export function getPlanRules(plan = getSavedPlan()) {
       showNewsSentiment: true,
       showSignalFactors: false,
       eftDailyLimit: 75000,
+      billyTransferLimit: 1000000,
       billyAnalyst: false,
     };
   }
@@ -42,6 +44,7 @@ export function getPlanRules(plan = getSavedPlan()) {
     showNewsSentiment: false,
     showSignalFactors: false,
     eftDailyLimit: 10000,
+    billyTransferLimit: 100000,
     billyAnalyst: false,
   };
 }
