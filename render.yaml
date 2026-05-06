@@ -32,6 +32,7 @@ services:
       - key: ENABLE_AI_ANALYSIS
         value: "false"
 
+
 databases:
   - name: billy-trading-analysis-db
     databaseName: billy_bronco
